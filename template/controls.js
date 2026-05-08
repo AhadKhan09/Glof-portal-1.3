@@ -442,10 +442,9 @@ function refreshActiveLayersLegend() {
                 settingsPanel.style.display = 'none';
 
                 if(!window.layerCustomizations[layer.layerId]) {
-                    window.layerCustomizations[layer.layerId] = { color: getDefaultColorForLayer(layer.layerId), size: 1, opacity: 1 };
+                    window.layerCustomizations[layer.layerId] = { color: getDefaultColorForLayer(layer.layerId), opacity: 1 };
                 }
                 const currentOpt = window.layerCustomizations[layer.layerId];
-                currentOpt.size = currentOpt.size ?? 1;
 
                 const colorInput = document.createElement('input');
                 colorInput.type = 'color';
@@ -479,9 +478,8 @@ function refreshActiveLayersLegend() {
                 
                 item.appendChild(controlsWrap);
 
-                const appliedSize = currentOpt.size;
-                if (currentOpt.color !== getDefaultColorForLayer(layer.layerId) || appliedSize !== 1 || currentOpt.opacity !== 1) {
-                    applyCustomization(layer.layerId, currentOpt.color, appliedSize, currentOpt.opacity, icon);
+                if (currentOpt.color !== getDefaultColorForLayer(layer.layerId) || currentOpt.opacity !== 1) {
+                    applyCustomization(layer.layerId, currentOpt.color, 1, currentOpt.opacity, icon);
                 }
 
                 settingsBtn.addEventListener('click', (e) => {
@@ -492,7 +490,7 @@ function refreshActiveLayersLegend() {
                 const onUpdate = () => {
                     currentOpt.color = colorInput.value;
                     currentOpt.opacity = opacityInput.value;
-                    applyCustomization(layer.layerId, currentOpt.color, currentOpt.size, currentOpt.opacity, icon);
+                    applyCustomization(layer.layerId, currentOpt.color, 1, currentOpt.opacity, icon);
                 };
 
                 colorInput.addEventListener('input', onUpdate);
