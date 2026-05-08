@@ -143,6 +143,25 @@ function recreatePinIcon(imageName, baseColor) {
 
 window.originalLayerSizes = window.originalLayerSizes || {};
 
+function normalizeScaleValue(rawValue, fallbackValue = 1) {
+    const parsedValue = parseFloat(rawValue);
+    return Number.isFinite(parsedValue) ? parsedValue : fallbackValue;
+}
+
+function buildScaledIconSize(layerId, scaleValue) {
+    const baseSize = window.originalLayerSizes[layerId];
+
+    if (Array.isArray(baseSize)) {
+        return ['*', baseSize, scaleValue];
+    }
+
+    if (Number.isFinite(baseSize)) {
+        return baseSize * scaleValue;
+    }
+
+    return scaleValue;
+}
+
 function applyCustomization(layerId, color, size, opacity, iconElement) {
     if (!map1 || !map1.getLayer(layerId)) return;
     
@@ -156,12 +175,15 @@ function applyCustomization(layerId, color, size, opacity, iconElement) {
     }
     
     if (!window.originalLayerSizes[layerId]) {
-        window.originalLayerSizes[layerId] = map1.getLayoutProperty(layerId, 'icon-size') || 1;
+        const currentSize = map1.getLayoutProperty(layerId, 'icon-size');
+        window.originalLayerSizes[layerId] = currentSize || 1;
     }
     
     // In MapBox GL JS, multiplying by an interpolation expression requires careful syntax.
     // Wrap it safely.
-    map1.setLayoutProperty(layerId, 'icon-size', ['*', parseFloat(size), window.originalLayerSizes[layerId]]);
+    const scaleValue = normalizeScaleValue(size, 1);
+    const scaledIconSize = buildScaledIconSize(layerId, scaleValue);
+    map1.setLayoutProperty(layerId, 'icon-size', scaledIconSize);
 
     if (opacity !== undefined) {
         map1.setPaintProperty(layerId, 'icon-opacity', parseFloat(opacity));
@@ -294,12 +316,16 @@ function refreshActiveLayersLegend() {
                 sizeIcon.title = 'Scale Icon';
 
                 const sizeInput = document.createElement('input');
-                sizeInput.type = 'number';
+                sizeInput.type = 'range';
                 sizeInput.min = '0.5';
                 sizeInput.max = '5.0';
                 sizeInput.step = '0.1';
                 sizeInput.value = currentOpt.size;
-                sizeInput.className = 'legend-number-input';
+                sizeInput.className = 'legend-range-input';
+
+                const sizeValue = document.createElement('span');
+                sizeValue.className = 'legend-range-value';
+                sizeValue.textContent = `${normalizeScaleValue(currentOpt.size, 1).toFixed(1)}x`;
                 
                 const opacityIcon = document.createElement('i');
                 opacityIcon.className = 'fas fa-adjust';
@@ -319,6 +345,7 @@ function refreshActiveLayersLegend() {
                 settingsPanel.appendChild(colorInput);
                 settingsPanel.appendChild(sizeIcon);
                 settingsPanel.appendChild(sizeInput);
+                settingsPanel.appendChild(sizeValue);
                 settingsPanel.appendChild(opacityIcon);
                 settingsPanel.appendChild(opacityInput);
 
@@ -344,11 +371,12 @@ function refreshActiveLayersLegend() {
                     currentOpt.color = colorInput.value;
                     currentOpt.size = sizeInput.value;
                     currentOpt.opacity = opacityInput.value;
+                    sizeValue.textContent = `${normalizeScaleValue(currentOpt.size, 1).toFixed(1)}x`;
                     applyCustomization(layer.layerId, currentOpt.color, currentOpt.size, currentOpt.opacity, icon);
                 };
 
                 colorInput.addEventListener('input', onUpdate);
-                sizeInput.addEventListener('change', onUpdate);
+                sizeInput.addEventListener('input', onUpdate);
                 opacityInput.addEventListener('change', onUpdate);
             }
         }
