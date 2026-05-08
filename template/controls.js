@@ -65,6 +65,130 @@ function setLayerVisibility(layerId, isVisible) {
     refreshActiveLayersLegend();
 }
 
+// Store for point customizations
+window.layerCustomizations = window.layerCustomizations || {};
+
+function shadeColor(color, percent) {
+    let R = parseInt(color.substring(1,3), 16);
+    let G = parseInt(color.substring(3,5), 16);
+    let B = parseInt(color.substring(5,7), 16);
+
+    R = parseInt(R * (100 + percent) / 100);
+    G = parseInt(G * (100 + percent) / 100);
+    B = parseInt(B * (100 + percent) / 100);
+
+    R = (R<255)?R:255;  
+    G = (G<255)?G:255;  
+    B = (B<255)?B:255;  
+
+    R = Math.max(0, R);
+    G = Math.max(0, G);
+    B = Math.max(0, B);
+
+    let RR = ((R.toString(16).length==1)?"0"+R.toString(16):R.toString(16));
+    let GG = ((G.toString(16).length==1)?"0"+G.toString(16):G.toString(16));
+    let BB = ((B.toString(16).length==1)?"0"+B.toString(16):B.toString(16));
+
+    return "#"+RR+GG+BB;
+}
+
+function recreatePinIcon(imageName, baseColor) {
+    const size = 50;
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const context = canvas.getContext('2d');
+
+    const centerX = size / 2;
+    const centerY = 20;
+
+    context.beginPath();
+    context.moveTo(centerX, size - 4);
+    context.bezierCurveTo(centerX - 13, 33, 11, 19, centerX, 7);
+    context.bezierCurveTo(size - 11, 19, centerX + 13, 33, centerX, size - 4);
+    context.closePath();
+    context.fillStyle = baseColor;
+    context.fill();
+
+    context.beginPath();
+    context.arc(centerX, centerY, 15.5, 0, Math.PI * 2);
+    context.fillStyle = '#3f3f46';
+    context.fill();
+
+    context.beginPath();
+    context.arc(centerX, centerY, 12, 0, Math.PI * 2);
+    context.fillStyle = baseColor;
+    context.fill();
+
+    context.beginPath();
+    context.arc(centerX, centerY, 6.2, 0, Math.PI * 2);
+    context.fillStyle = '#f8fafc';
+    context.fill();
+
+    context.beginPath();
+    context.arc(centerX, centerY, 3.1, 0, Math.PI * 2);
+    context.fillStyle = shadeColor(baseColor, -20);
+    context.fill();
+
+    const imageData = {
+        width: size,
+        height: size,
+        data: new Uint8Array(context.getImageData(0, 0, size, size).data)
+    };
+
+    if (map1 && map1.hasImage(imageName)) {
+        map1.updateImage(imageName, imageData);
+    }
+}
+
+window.originalLayerSizes = window.originalLayerSizes || {};
+
+function applyCustomization(layerId, color, size, opacity, iconElement) {
+    if (!map1 || !map1.getLayer(layerId)) return;
+    
+    const layoutIconImg = map1.getLayoutProperty(layerId, 'icon-image');
+    if (!layoutIconImg) return; 
+
+    const imageName = Array.isArray(layoutIconImg) ? null : layoutIconImg;
+    
+    if (imageName) {
+        recreatePinIcon(imageName, color);
+    }
+    
+    if (!window.originalLayerSizes[layerId]) {
+        window.originalLayerSizes[layerId] = map1.getLayoutProperty(layerId, 'icon-size') || 1;
+    }
+    
+    // In MapBox GL JS, multiplying by an interpolation expression requires careful syntax.
+    // Wrap it safely.
+    map1.setLayoutProperty(layerId, 'icon-size', ['*', parseFloat(size), window.originalLayerSizes[layerId]]);
+
+    if (opacity !== undefined) {
+        map1.setPaintProperty(layerId, 'icon-opacity', parseFloat(opacity));
+        if (map1.getLayoutProperty(layerId, 'text-field')) {
+            map1.setPaintProperty(layerId, 'text-opacity', parseFloat(opacity));
+        }
+    }
+
+    if (iconElement) {
+        iconElement.style.background = `radial-gradient(circle at center, #f8fafc 0 28%, ${color} 30% 72%, ${shadeColor(color, -20)} 74% 100%)`;
+        iconElement.style.border = `1px solid ${shadeColor(color, -40)}`;
+        if (opacity !== undefined) {
+            iconElement.style.opacity = opacity;
+        }
+    }
+}
+
+function getDefaultColorForLayer(layerId) {
+    const id = layerId.toLowerCase();
+    if (id.includes('glof-ii')) return '#facc15';
+    if (id.includes('akah')) return '#22c55e';
+    if (id.includes('undp')) return '#fb923c';
+    if (id.includes('bri-ff')) return '#f87171';
+    if (id.includes('gmrc')) return '#0ea5e9';
+    return '#facc15'; // Default fallback yellow
+}
+
 function refreshActiveLayersLegend() {
     const legendItemsContainer = document.getElementById('active-layers-legend-items');
     const legendPanel = document.getElementById('active-layers-legend');
@@ -139,6 +263,94 @@ function refreshActiveLayersLegend() {
             countSpan.textContent = String(count);
             countSpan.className = 'active-layers-legend-count';
             item.appendChild(countSpan);
+        }
+
+        if (layer.layerId && map1 && map1.getLayer(layer.layerId)) {
+            const layoutIconImg = map1.getLayoutProperty(layer.layerId, 'icon-image');
+            if (layoutIconImg && !Array.isArray(layoutIconImg)) {
+                const settingsBtn = document.createElement('button');
+                settingsBtn.innerHTML = '&#9881;';
+                settingsBtn.className = 'legend-settings-btn';
+                settingsBtn.title = 'Customize styling';
+                
+                const settingsPanel = document.createElement('div');
+                settingsPanel.className = 'legend-settings-panel';
+                settingsPanel.style.display = 'none';
+
+                if(!window.layerCustomizations[layer.layerId]) {
+                    window.layerCustomizations[layer.layerId] = { color: getDefaultColorForLayer(layer.layerId), size: 1, opacity: 1 };
+                }
+                const currentOpt = window.layerCustomizations[layer.layerId];
+
+                const colorInput = document.createElement('input');
+                colorInput.type = 'color';
+                colorInput.value = currentOpt.color;
+                
+                const sizeIcon = document.createElement('i');
+                sizeIcon.className = 'fas fa-expand-arrows-alt';
+                sizeIcon.style.color = '#94a3b8';
+                sizeIcon.style.marginLeft = '4px';
+                sizeIcon.style.fontSize = '12px';
+                sizeIcon.title = 'Scale Icon';
+
+                const sizeInput = document.createElement('input');
+                sizeInput.type = 'number';
+                sizeInput.min = '0.5';
+                sizeInput.max = '5.0';
+                sizeInput.step = '0.1';
+                sizeInput.value = currentOpt.size;
+                sizeInput.className = 'legend-number-input';
+                
+                const opacityIcon = document.createElement('i');
+                opacityIcon.className = 'fas fa-adjust';
+                opacityIcon.style.color = '#94a3b8';
+                opacityIcon.style.marginLeft = '4px';
+                opacityIcon.style.fontSize = '12px';
+                opacityIcon.title = 'Opacity';
+
+                const opacityInput = document.createElement('input');
+                opacityInput.type = 'number';
+                opacityInput.min = '0.0';
+                opacityInput.max = '1.0';
+                opacityInput.step = '0.1';
+                opacityInput.value = currentOpt.opacity !== undefined ? currentOpt.opacity : 1;
+                opacityInput.className = 'legend-number-input';
+
+                settingsPanel.appendChild(colorInput);
+                settingsPanel.appendChild(sizeIcon);
+                settingsPanel.appendChild(sizeInput);
+                settingsPanel.appendChild(opacityIcon);
+                settingsPanel.appendChild(opacityInput);
+
+                const controlsWrap = document.createElement('div');
+                controlsWrap.className = 'legend-controls-wrap';
+                // Initially keep configuration hidden unless global toggle is active.
+                controlsWrap.style.display = window.isCustomizationModeActive ? 'flex' : 'none';
+                controlsWrap.appendChild(settingsBtn);
+                controlsWrap.appendChild(settingsPanel);
+                
+                item.appendChild(controlsWrap);
+
+                if (currentOpt.color !== getDefaultColorForLayer(layer.layerId) || currentOpt.size !== 1 || currentOpt.opacity !== 1) {
+                    applyCustomization(layer.layerId, currentOpt.color, currentOpt.size, currentOpt.opacity, icon);
+                }
+
+                settingsBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    settingsPanel.style.display = settingsPanel.style.display === 'none' ? 'flex' : 'none';
+                });
+
+                const onUpdate = () => {
+                    currentOpt.color = colorInput.value;
+                    currentOpt.size = sizeInput.value;
+                    currentOpt.opacity = opacityInput.value;
+                    applyCustomization(layer.layerId, currentOpt.color, currentOpt.size, currentOpt.opacity, icon);
+                };
+
+                colorInput.addEventListener('input', onUpdate);
+                sizeInput.addEventListener('change', onUpdate);
+                opacityInput.addEventListener('change', onUpdate);
+            }
         }
 
         legendItemsContainer.appendChild(item);

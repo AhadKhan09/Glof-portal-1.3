@@ -88,6 +88,36 @@ class PitchToggleControl {
     }
 }
 
+// Custom Layer Customization Control
+class LayerCustomizationControl {
+    onAdd(map) {
+        this._map = map;
+        this._container = document.createElement('div');
+        this._container.className = 'mapboxgl-ctrl mapboxgl-ctrl-group';
+        this._btn = document.createElement('button');
+        this._btn.className = 'layer-customization-btn';
+        this._btn.title = 'Toggle Layer Customizations Settings';
+        this._btn.innerHTML = '&#127912;'; // Paint palette emoji
+        this._btn.onclick = () => {
+            window.isCustomizationModeActive = !window.isCustomizationModeActive;
+            
+            // Toggle visibility of existing active controls in the legend
+            const controls = document.querySelectorAll('.legend-controls-wrap');
+            controls.forEach(ctrl => {
+                ctrl.style.display = window.isCustomizationModeActive ? 'flex' : 'none';
+            });
+            
+            this._btn.style.backgroundColor = window.isCustomizationModeActive ? '#e2e8f0' : '';
+        };
+        this._container.appendChild(this._btn);
+        return this._container;
+    }
+    onRemove() {
+        this._container.parentNode.removeChild(this._container);
+        this._map = undefined;
+    }
+}
+
 class PopulatedPlacesSearchControl {
     constructor(options = {}) {
         this._defaultZoom = Number.isFinite(options.defaultZoom) ? options.defaultZoom : 10;
@@ -425,6 +455,8 @@ map1.addControl(
     'top-right'
 );
 map1.addControl(new PitchToggleControl(), 'top-right');
+window.isCustomizationModeActive = false; // Initial State
+map1.addControl(new LayerCustomizationControl(), 'top-right');
 //________________________________________________________________________________________________________________________________________________________________________________________
 map1.on('style.load', () => {
     map1.addSource('mapbox-dem', {

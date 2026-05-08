@@ -427,6 +427,67 @@ body:fullscreen #menu {
   color: #fde047;
 }
 
+.legend-controls-wrap {
+  display: flex;
+  align-items: center;
+  margin-left: 8px;
+  position: relative;
+}
+
+.legend-settings-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 2px 4px;
+  font-size: 14px;
+  border-radius: 4px;
+}
+.legend-settings-btn:hover {
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+}
+
+.legend-settings-panel {
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #1e293b;
+  border: 1px solid #475569;
+  padding: 4px 8px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-right: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+  z-index: 10;
+}
+
+.legend-settings-panel input[type="color"] {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.legend-number-input {
+  width: 40px;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid #475569;
+  color: #f8fafc;
+  border-radius: 3px;
+  padding: 2px 2px 2px 4px;
+  font-size: 11px;
+}
+.legend-number-input:focus {
+  outline: none;
+  border-color: #38bdf8;
+}
+
 .active-layers-legend-icon.icon-default {
   background: #93c5fd;
   border: 1px solid #ffffff;
