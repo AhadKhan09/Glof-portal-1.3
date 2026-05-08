@@ -11,6 +11,9 @@
     <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
     <link href="https://api.mapbox.com/mapbox-gl-js/v3.9.4/mapbox-gl.css" rel="stylesheet">
     <script src="https://api.mapbox.com/mapbox-gl-js/v3.9.4/mapbox-gl.js"></script>
+    <!-- Mapbox GL Geocoder (search) -->
+    <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.2/mapbox-gl-geocoder.css" />
+    <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.2/mapbox-gl-geocoder.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <link rel="icon" href="data/ndma_logo.png" type="image/icon type">
@@ -240,11 +243,11 @@
         <div class="quick-toggle-sections">
             <div class="quick-toggle-section">
                 <div class="form-check form-switch quick-toggle-item">
-                    <input class="form-check-input" type="checkbox" role="switch" id="inventory-toggle" onchange="toggleGlacialLakesInventory(this.checked)">
+                    <input class="form-check-input" type="checkbox" role="switch" id="inventory-toggle" data-legend-track="true" data-legend-icon="icon-default" onchange="toggleGlacialLakesInventory(this.checked)">
                     <label class="form-check-label" for="inventory-toggle">Glacial Lakes Inventory</label>
                 </div>
                 <div class="form-check form-switch quick-toggle-item">
-                    <input class="form-check-input" type="checkbox" role="switch" id="quick-akah-toggle" data-layer="akah-infrastructure-layer" data-legend-icon="icon-default" onchange="toggleQuickAkahLayer(this.checked)">
+                    <input class="form-check-input" type="checkbox" role="switch" id="quick-akah-toggle" data-layer="akah-infrastructure-layer" data-legend-track="true" data-legend-icon="icon-red-destination" onchange="toggleQuickAkahLayer(this.checked)">
                     <label class="form-check-label" for="quick-akah-toggle">AKAH Layer</label>
                 </div>
                 <div class="form-check form-switch quick-toggle-item">
@@ -252,28 +255,32 @@
                     <label class="form-check-label" for="quick-populated-places-toggle">Populated Places</label>
                 </div>
                 <div class="form-check form-switch quick-toggle-item">
-                    <input class="form-check-input" type="checkbox" role="switch" id="quick-gmrc-wapda-toggle" data-layer="gmrc-wapda-points-layer" data-legend-icon="icon-blue-destination" onchange="toggleQuickGmrcWapda(this.checked)">
+                    <input class="form-check-input" type="checkbox" role="switch" id="quick-gmrc-wapda-toggle" data-layer="gmrc-wapda-points-layer" data-legend-track="true" data-legend-icon="icon-blue-destination" onchange="toggleQuickGmrcWapda(this.checked)">
                     <label class="form-check-label" for="quick-gmrc-wapda-toggle">GMRC, WAPDA</label>
                 </div>
                 <div class="form-check form-switch quick-toggle-item">
-                    <input class="form-check-input" type="checkbox" role="switch" id="quick-glof-ii-toggle" data-layer="glof-ii-stations-layer" data-legend-icon="icon-yellow-destination" onchange="toggleQuickGlofII(this.checked)">
+                    <input class="form-check-input" type="checkbox" role="switch" id="quick-glof-ii-toggle" data-layer="glof-ii-stations-layer" data-legend-track="true" data-legend-icon="icon-yellow-destination" onchange="toggleQuickGlofII(this.checked)">
                     <label class="form-check-label" for="quick-glof-ii-toggle">GLOF II, PMD</label>
                 </div>
                 <div class="form-check form-switch quick-toggle-item">
-                    <input class="form-check-input" type="checkbox" role="switch" id="quick-glof-ii-damaged-toggle" data-layer="glof-ii-damaged-stations-layer" data-legend-icon="icon-warning" onchange="toggleQuickGlofIIDamagedStations(this.checked)">
+                    <input class="form-check-input" type="checkbox" role="switch" id="quick-glof-ii-damaged-toggle" data-layer="glof-ii-damaged-stations-layer" data-legend-track="true" data-legend-icon="icon-warning" onchange="toggleQuickGlofIIDamagedStations(this.checked)">
                     <label class="form-check-label" for="quick-glof-ii-damaged-toggle">GLOF II Damaged Stations</label>
                 </div>
                 <div class="form-check form-switch quick-toggle-item">
-                    <input class="form-check-input" type="checkbox" role="switch" id="quick-akah-stations-toggle" data-layer="akah-stations-layer" data-legend-icon="icon-green-destination" onchange="toggleQuickAkahStations(this.checked)">
+                    <input class="form-check-input" type="checkbox" role="switch" id="quick-akah-stations-toggle" data-layer="akah-stations-layer" data-legend-track="true" data-legend-icon="icon-green-destination" onchange="toggleQuickAkahStations(this.checked)">
                     <label class="form-check-label" for="quick-akah-stations-toggle">AKAH Stations</label>
                 </div>
                 <div class="form-check form-switch quick-toggle-item">
-                    <input class="form-check-input" type="checkbox" role="switch" id="quick-undp-all-sensors-toggle" data-layer="undp-all-sensors-layer" data-legend-icon="icon-orange-destination" onchange="toggleQuickUndpAllSensors(this.checked)">
+                    <input class="form-check-input" type="checkbox" role="switch" id="quick-undp-all-sensors-toggle" data-layer="undp-all-sensors-layer" data-legend-track="true" data-legend-icon="icon-orange-destination" onchange="toggleQuickUndpAllSensors(this.checked)">
                     <label class="form-check-label" for="quick-undp-all-sensors-toggle">UNDP All sensors</label>
                 </div>
                 <div class="form-check form-switch quick-toggle-item">
-                    <input class="form-check-input" type="checkbox" role="switch" id="quick-bri-ff-sensors-toggle" data-layer="bri-ff-sensors-layer" data-legend-icon="icon-red-destination" onchange="toggleQuickBriFfSensors(this.checked)">
+                    <input class="form-check-input" type="checkbox" role="switch" id="quick-bri-ff-sensors-toggle" data-layer="bri-ff-sensors-layer" data-legend-track="true" data-legend-icon="icon-red-destination" onchange="toggleQuickBriFfSensors(this.checked)">
                     <label class="form-check-label" for="quick-bri-ff-sensors-toggle">BRI_FF Sensors</label>
+                </div>
+                <div class="form-check form-switch quick-toggle-item">
+                    <input class="form-check-input" type="checkbox" role="switch" id="quick-vulnerable-melting-glaciers-toggle" data-layer="vulnerable-melting-glaciers-layer" onchange="toggleQuickVulnerableMeltingGlaciers(this.checked)">
+                    <label class="form-check-label" for="quick-vulnerable-melting-glaciers-toggle">Vulnerable Melting Glaciers</label>
                 </div>
                 <div class="form-check form-switch quick-toggle-item">
                     <input class="form-check-input" type="checkbox" role="switch" id="quick-flood-susceptibility-toggle" data-layer="flood-susceptibility-layer" data-legend-icon="icon-default" onchange="toggleFloodSusceptibility(this.checked)">
@@ -284,11 +291,11 @@
             <div class="quick-toggle-section">
                 <div class="quick-toggle-title">2025</div>
                 <div class="form-check form-switch quick-toggle-item">
-                    <input class="form-check-input" type="checkbox" role="switch" id="quick-vulsites-2025-toggle" onchange="toggleQuickVulnerableSites2025(this.checked)">
+                    <input class="form-check-input" type="checkbox" role="switch" id="quick-vulsites-2025-toggle" data-legend-track="true" data-legend-icon="icon-red-destination" onchange="toggleQuickVulnerableSites2025(this.checked)">
                     <label class="form-check-label" for="quick-vulsites-2025-toggle">Vulnerable Sites</label>
                 </div>
                 <div class="form-check form-switch quick-toggle-item">
-                    <input class="form-check-input" type="checkbox" role="switch" id="quick-vullakes-2025-toggle" onchange="toggleQuickVulnerableLakes2025(this.checked)">
+                    <input class="form-check-input" type="checkbox" role="switch" id="quick-vullakes-2025-toggle" data-legend-track="true" data-legend-icon="icon-red-ring" onchange="toggleQuickVulnerableLakes2025(this.checked)">
                     <label class="form-check-label" for="quick-vullakes-2025-toggle">Vulnerable Lakes 2025</label>
                 </div>
                 <div class="form-check form-switch quick-toggle-item">
@@ -300,11 +307,11 @@
             <div class="quick-toggle-section">
                 <div class="quick-toggle-title">2026</div>
                 <div class="form-check form-switch quick-toggle-item">
-                    <input class="form-check-input" type="checkbox" role="switch" id="quick-vulsites-2026-toggle" onchange="toggleQuickVulnerableSites2026(this.checked)">
+                    <input class="form-check-input" type="checkbox" role="switch" id="quick-vulsites-2026-toggle" data-legend-track="true" data-legend-icon="icon-red-destination" onchange="toggleQuickVulnerableSites2026(this.checked)">
                     <label class="form-check-label" for="quick-vulsites-2026-toggle">Vulnerable Sites 2026</label>
                 </div>
                 <div class="form-check form-switch quick-toggle-item">
-                    <input class="form-check-input" type="checkbox" role="switch" id="quick-vullakes-2026-toggle" onchange="toggleQuickVulnerableLakes2026(this.checked)">
+                    <input class="form-check-input" type="checkbox" role="switch" id="quick-vullakes-2026-toggle" data-legend-track="true" data-legend-icon="icon-red-ring" onchange="toggleQuickVulnerableLakes2026(this.checked)">
                     <label class="form-check-label" for="quick-vullakes-2026-toggle">Vulnerable Lakes 2026</label>
                 </div>
                 <div class="form-check form-switch quick-toggle-item">

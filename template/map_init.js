@@ -395,7 +395,23 @@ class PopulatedPlacesSearchControl {
         this._setOpen(false);
     }
 }
-map1.addControl(new PopulatedPlacesSearchControl({ defaultZoom: 10 }), 'top-right');
+// Add Mapbox Geocoder control (search) to the top of the top-right stack if the plugin is available
+try {
+    if (typeof MapboxGeocoder !== 'undefined') {
+        const geocoder = new MapboxGeocoder({
+            accessToken: mapboxgl.accessToken,
+            mapboxgl: mapboxgl,
+            placeholder: 'Search for place or address',
+            collapsed: true,
+            marker: {
+                color: '#ff0000'
+            }
+        });
+        map1.addControl(geocoder, 'top-right');
+    }
+} catch (err) {
+    console.warn('Mapbox Geocoder not available or failed to initialize.', err);
+}
 map1.addControl(new mapboxgl.FullscreenControl({ container: fullscreenContainer }), 'top-right');
 map1.addControl(new mapboxgl.NavigationControl(), 'top-right');
 map1.addControl(

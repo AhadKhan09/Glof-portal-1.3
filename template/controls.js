@@ -74,7 +74,8 @@ function refreshActiveLayersLegend() {
         return;
     }
 
-    const checkedInputs = Array.from(menu.querySelectorAll('input.form-check-input[type="checkbox"]:checked'));
+    const checkedInputs = Array.from(menu.querySelectorAll('input.form-check-input[type="checkbox"]:checked'))
+        .filter((inputElement) => inputElement.dataset.legendTrack === 'true');
     const enabledLayers = checkedInputs
         .map((inputElement) => {
             const label = menu.querySelector(`label[for="${inputElement.id}"]`);
@@ -108,8 +109,38 @@ function refreshActiveLayersLegend() {
         const text = document.createElement('span');
         text.textContent = layer.layerName;
 
-        item.appendChild(icon);
-        item.appendChild(text);
+        // Wrapper for icon and text (left-aligned)
+        const leftWrapper = document.createElement('span');
+        leftWrapper.className = 'active-layers-legend-left';
+        leftWrapper.appendChild(icon);
+        leftWrapper.appendChild(text);
+
+        item.appendChild(leftWrapper);
+
+        // Determine count: prefer precomputed counts from map loader, fallback to inspecting source data.
+        let count = null;
+        try {
+            if (window.layerFeatureCounts && Number.isFinite(window.layerFeatureCounts[layer.layerId])) {
+                count = window.layerFeatureCounts[layer.layerId];
+            } else if (map1 && map1.getLayer && map1.getLayer(layer.layerId)) {
+                const srcId = map1.getLayer(layer.layerId).source;
+                const src = map1.getSource(srcId);
+                const data = (src && (src._data || src.serialize && src.serialize().data || src.data)) || null;
+                if (data && Array.isArray(data.features)) {
+                    count = data.features.length;
+                }
+            }
+        } catch (e) {
+            count = null;
+        }
+
+        if (Number.isFinite(count)) {
+            const countSpan = document.createElement('span');
+            countSpan.textContent = String(count);
+            countSpan.className = 'active-layers-legend-count';
+            item.appendChild(countSpan);
+        }
+
         legendItemsContainer.appendChild(item);
     });
 }
@@ -213,6 +244,11 @@ function toggleQuickUndpAllSensors(isChecked) {
 
 function toggleQuickBriFfSensors(isChecked) {
     setLayerVisibility('bri-ff-sensors-layer', isChecked);
+}
+
+function toggleQuickVulnerableMeltingGlaciers(isChecked) {
+    setLayerVisibility('vulnerable-melting-glaciers-layer', isChecked);
+    setLayerVisibility('vulnerable-melting-glaciers-outline', isChecked);
 }
 
 function toggleFloodSusceptibility(isChecked) {

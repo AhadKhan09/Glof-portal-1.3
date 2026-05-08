@@ -776,6 +776,60 @@ map1.on('style.load', () => {
             features: []
         }
     });
+
+    // Initialize a global counts map so the legend can show point counts.
+    window.layerFeatureCounts = window.layerFeatureCounts || {};
+
+    // Fetch counts for remote WFS/GeoJSON sources (when accessible) and update counts.
+    (async function fetchInitialCounts() {
+        try {
+            // GMRC, WAPDA
+            try {
+                const resp = await fetch(gmrcWapdaSource.data);
+                if (resp.ok) {
+                    const json = await resp.json();
+                    window.layerFeatureCounts['gmrc-wapda-points-layer'] = Array.isArray(json.features) ? json.features.length : 0;
+                }
+            } catch (err) {
+                console.warn('Failed to fetch GMRC/WAPDA source for counts.', err);
+            }
+
+            // GLOF II stations
+            try {
+                const resp = await fetch(glofIISource.data);
+                if (resp.ok) {
+                    const json = await resp.json();
+                    window.layerFeatureCounts['glof-ii-stations-layer'] = Array.isArray(json.features) ? json.features.length : 0;
+                }
+            } catch (err) {
+                console.warn('Failed to fetch GLOF II stations source for counts.', err);
+            }
+
+            // GLOF II damaged stations
+            try {
+                const resp = await fetch(glofIIDamagedStationsSource.data);
+                if (resp.ok) {
+                    const json = await resp.json();
+                    window.layerFeatureCounts['glof-ii-damaged-stations-layer'] = Array.isArray(json.features) ? json.features.length : 0;
+                }
+            } catch (err) {
+                console.warn('Failed to fetch GLOF II damaged stations source for counts.', err);
+            }
+
+            // Refresh legend now that initial counts may be available
+            if (typeof refreshActiveLayersLegend === 'function') {
+                refreshActiveLayersLegend();
+            }
+        } catch (error) {
+            console.error('Error while fetching initial layer counts.', error);
+        }
+    })();
+
+    // Add source for Vulnerable Melting Glaciers
+    map1.addSource('vulnerableMeltingGlaciers', {
+        type: 'geojson',
+        data: 'http://172.18.1.85:8080/geoserver/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3Amelt_glac_vul2&outputFormat=application%2Fjson'
+    });
     map1.addSource('floodSusceptibilityRaster', floodSusceptibilityRasterSource);
     map1.addSource('akahHazardExposure', akahHazardExposureSource);
     map1.addSource('highTempWarning', highTempWarningSrc);
@@ -1040,6 +1094,36 @@ map1.on('style.load', () => {
     });
     const blinkingInterval = makeLayerBlink(map1, 'vulLakes', 500);
 
+    (function addInventoryHatchPattern() {
+        const size = 16;
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+
+        // Diagonal hatch strokes for clear polygon interior identification.
+        ctx.strokeStyle = 'rgba(8, 145, 178, 0.95)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(-4, 12);
+        ctx.lineTo(4, 4);
+        ctx.moveTo(0, 16);
+        ctx.lineTo(16, 0);
+        ctx.moveTo(12, 20);
+        ctx.lineTo(20, 12);
+        ctx.stroke();
+
+        const image = {
+            width: size,
+            height: size,
+            data: new Uint8Array(ctx.getImageData(0, 0, size, size).data)
+        };
+
+        if (!map1.hasImage('inventory-hatch-pattern')) {
+            map1.addImage('inventory-hatch-pattern', image);
+        }
+    })();
+
     map1.addLayer({
         id: 'glacial-lakes-inventory-fill',
         type: 'fill',
@@ -1048,8 +1132,8 @@ map1.on('style.load', () => {
             'visibility': 'none'
         },
         paint: {
-            'fill-color': '#38bdf8',
-            'fill-opacity': 0.28
+            'fill-pattern': 'inventory-hatch-pattern',
+            'fill-opacity': 1
         }
     });
     map1.addLayer({
@@ -1060,9 +1144,14 @@ map1.on('style.load', () => {
             'visibility': 'none'
         },
         paint: {
-            'line-color': '#93c5fd',
-            'line-width': 1.8,
-            'line-opacity': 0.95
+            'line-color': '#67e8f9',
+            'line-width': [
+                'interpolate', ['linear'], ['zoom'],
+                4, 2,
+                8, 2.7,
+                12, 3.4
+            ],
+            'line-opacity': 1
         }
     });
 
@@ -1075,17 +1164,17 @@ map1.on('style.load', () => {
         const ctx = canvas.getContext('2d');
 
         const center = size / 2;
-        const radius = 5.5;
+        const radius = 6.2;
 
         ctx.beginPath();
         ctx.arc(center, center, radius, 0, Math.PI * 2);
-        ctx.fillStyle = '#00b8ff';
+        ctx.fillStyle = '#22d3ee';
         ctx.fill();
 
         ctx.beginPath();
         ctx.arc(center, center, radius, 0, Math.PI * 2);
-        ctx.lineWidth = 2.5;
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
+        ctx.lineWidth = 2.8;
+        ctx.strokeStyle = 'rgba(12, 74, 110, 0.95)';
         ctx.stroke();
 
         const image = {
@@ -1572,6 +1661,7 @@ map1.on('style.load', () => {
             ],
             'text-offset': [0, 1.25],
             'text-anchor': 'top',
+            'text-optional': true,
             'text-allow-overlap': false,
             'text-ignore-placement': false
         },
@@ -1694,6 +1784,7 @@ map1.on('style.load', () => {
             ],
             'text-offset': [0, 1.25],
             'text-anchor': 'top',
+            'text-optional': true,
             'text-allow-overlap': false,
             'text-ignore-placement': false
         },
@@ -1822,6 +1913,7 @@ map1.on('style.load', () => {
             ],
             'text-offset': [0, 1.25],
             'text-anchor': 'top',
+            'text-optional': true,
             'text-allow-overlap': false,
             'text-ignore-placement': false
         },
@@ -2003,7 +2095,15 @@ map1.on('style.load', () => {
 
             const source = map1.getSource('akahStations');
             if (source && typeof source.setData === 'function') {
-                source.setData(buildAkahStationsFeatureCollection(rows));
+                const fc = buildAkahStationsFeatureCollection(rows);
+                source.setData(fc);
+                try {
+                    window.layerFeatureCounts = window.layerFeatureCounts || {};
+                    window.layerFeatureCounts['akah-stations-layer'] = Array.isArray(fc.features) ? fc.features.length : 0;
+                } catch (e) {
+                    // ignore
+                }
+                if (typeof refreshActiveLayersLegend === 'function') refreshActiveLayersLegend();
             }
         } catch (error) {
             console.error('Failed to load AKAH Stations workbook.', error);
@@ -2091,6 +2191,7 @@ map1.on('style.load', () => {
             ],
             'text-offset': [0, 1.25],
             'text-anchor': 'top',
+            'text-optional': true,
             'text-allow-overlap': false,
             'text-ignore-placement': false
         },
@@ -2148,7 +2249,13 @@ map1.on('style.load', () => {
             const csvText = await response.text();
             const source = map1.getSource('undpAllSensors');
             if (source && typeof source.setData === 'function') {
-                source.setData(buildUndpAllSensorsFeatureCollection(csvText));
+                const fc = buildUndpAllSensorsFeatureCollection(csvText);
+                source.setData(fc);
+                try {
+                    window.layerFeatureCounts = window.layerFeatureCounts || {};
+                    window.layerFeatureCounts['undp-all-sensors-layer'] = Array.isArray(fc.features) ? fc.features.length : 0;
+                } catch (e) {}
+                if (typeof refreshActiveLayersLegend === 'function') refreshActiveLayersLegend();
             }
         } catch (error) {
             console.error('Failed to load UNDP All sensors CSV.', error);
@@ -2236,6 +2343,7 @@ map1.on('style.load', () => {
             ],
             'text-offset': [0, 1.25],
             'text-anchor': 'top',
+            'text-optional': true,
             'text-allow-overlap': false,
             'text-ignore-placement': false
         },
@@ -2290,7 +2398,13 @@ map1.on('style.load', () => {
             const csvText = await response.text();
             const source = map1.getSource('briFfSensors');
             if (source && typeof source.setData === 'function') {
-                source.setData(buildBriFfSensorsFeatureCollection(csvText));
+                const fc = buildBriFfSensorsFeatureCollection(csvText);
+                source.setData(fc);
+                try {
+                    window.layerFeatureCounts = window.layerFeatureCounts || {};
+                    window.layerFeatureCounts['bri-ff-sensors-layer'] = Array.isArray(fc.features) ? fc.features.length : 0;
+                } catch (e) {}
+                if (typeof refreshActiveLayersLegend === 'function') refreshActiveLayersLegend();
             }
         } catch (error) {
             console.error('Failed to load BRI_FF sensors CSV.', error);
@@ -3252,6 +3366,23 @@ map1.addLayer({
         paint: {
             'icon-opacity': 1
         }
+    });
+
+    //__________________________________________________________________________________________________
+    // Vulnerable Melting Glaciers — polygon layer
+    map1.addLayer({
+        id: 'vulnerable-melting-glaciers-layer',
+        type: 'fill',
+        source: 'vulnerableMeltingGlaciers',
+        layout: { 'visibility': 'none' },
+        paint: { 'fill-color': '#ff6b9d', 'fill-opacity': 0.65 }
+    });
+    map1.addLayer({
+        id: 'vulnerable-melting-glaciers-outline',
+        type: 'line',
+        source: 'vulnerableMeltingGlaciers',
+        layout: { 'visibility': 'none' },
+        paint: { 'line-color': '#ff1493', 'line-width': 2.5, 'line-opacity': 1 }
     });
 
     //__________________________________________________________________________________________________
