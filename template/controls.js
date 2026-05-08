@@ -68,7 +68,7 @@ function setLayerVisibility(layerId, isVisible) {
 // Store for point customizations
 window.layerCustomizations = window.layerCustomizations || {};
 window.activeLayersLegendOrder = window.activeLayersLegendOrder || [];
-let activeLegendDragItem = null;
+let draggedLegendItem = null;
 
 function shadeColor(color, percent) {
     let R = parseInt(color.substring(1,3), 16);
@@ -275,7 +275,7 @@ function handleLegendDragStart(event) {
         return;
     }
 
-    activeLegendDragItem = item;
+    draggedLegendItem = item;
     item.classList.add('is-dragging');
     event.dataTransfer.effectAllowed = 'move';
     event.dataTransfer.setData('text/plain', item.dataset.layerKey || '');
@@ -284,12 +284,12 @@ function handleLegendDragStart(event) {
 function handleLegendDragOver(event) {
     event.preventDefault();
     const container = event.currentTarget;
-    if (!container || !activeLegendDragItem) {
+    if (!container || !draggedLegendItem) {
         return;
     }
 
     const targetItem = event.target.closest('.active-layers-legend-item');
-    if (!targetItem || targetItem === activeLegendDragItem) {
+    if (!targetItem || targetItem === draggedLegendItem) {
         return;
     }
 
@@ -298,25 +298,25 @@ function handleLegendDragOver(event) {
     const insertAfter = offset > rect.height / 2;
 
     if (insertAfter) {
-        if (targetItem.nextSibling !== activeLegendDragItem) {
-            container.insertBefore(activeLegendDragItem, targetItem.nextSibling);
+        if (targetItem.nextSibling !== draggedLegendItem) {
+            container.insertBefore(draggedLegendItem, targetItem.nextSibling);
         }
-    } else if (targetItem.previousSibling !== activeLegendDragItem) {
-        container.insertBefore(activeLegendDragItem, targetItem);
+    } else if (targetItem.previousSibling !== draggedLegendItem) {
+        container.insertBefore(draggedLegendItem, targetItem);
     }
 }
 
 function handleLegendDragEnd() {
-    if (activeLegendDragItem) {
-        activeLegendDragItem.classList.remove('is-dragging');
-        activeLegendDragItem = null;
+    if (draggedLegendItem) {
+        draggedLegendItem.classList.remove('is-dragging');
+        draggedLegendItem = null;
     }
     syncLegendOrderFromDom();
 }
 
 function bindLegendDragHandlers() {
     const legendContainer = document.getElementById('active-layers-legend-items');
-    if (!legendContainer || legendContainer.__dragHandlersBound) {
+    if (!legendContainer || legendContainer.dataset.dragHandlersBound === 'true') {
         return;
     }
 
@@ -325,7 +325,7 @@ function bindLegendDragHandlers() {
         event.preventDefault();
         syncLegendOrderFromDom(legendContainer);
     });
-    legendContainer.__dragHandlersBound = true;
+    legendContainer.dataset.dragHandlersBound = 'true';
 }
 
 function getDefaultColorForLayer(layerId) {
@@ -382,7 +382,7 @@ function refreshActiveLayersLegend() {
 
         const dragHandle = document.createElement('span');
         dragHandle.className = 'legend-drag-handle';
-        dragHandle.innerHTML = '&#9776;';
+        dragHandle.textContent = '☰';
         dragHandle.title = 'Drag to reorder';
         dragHandle.setAttribute('aria-hidden', 'true');
         dragHandle.draggable = true;
@@ -545,14 +545,14 @@ function getLegendIconClass(layer) {
 
 function initializeActiveLayersLegend() {
     const menu = document.getElementById('menu');
-    if (!menu || menu.__activeLayersLegendBound) {
+    if (!menu || menu.dataset.activeLayersLegendBound === 'true') {
         refreshActiveLayersLegend();
         return;
     }
 
     bindLegendDragHandlers();
     menu.addEventListener('change', refreshActiveLayersLegend);
-    menu.__activeLayersLegendBound = true;
+    menu.dataset.activeLayersLegendBound = 'true';
     refreshActiveLayersLegend();
 }
 
