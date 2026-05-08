@@ -67,6 +67,8 @@ function setLayerVisibility(layerId, isVisible) {
 
 // Store for point customizations
 window.layerCustomizations = window.layerCustomizations || {};
+window.activeLayersLegendOrder = window.activeLayersLegendOrder || [];
+let draggedLegendItem = null;
 
 function shadeColor(color, percent) {
     let R = parseInt(color.substring(1,3), 16);
@@ -201,6 +203,131 @@ function applyCustomization(layerId, color, size, opacity, iconElement) {
     }
 }
 
+function getLegendLayerKey(layer) {
+    return layer.layerId || layer.id;
+}
+
+function normalizeLegendOrder(enabledLayers) {
+    const existingOrder = Array.isArray(window.activeLayersLegendOrder)
+        ? window.activeLayersLegendOrder
+        : [];
+    const orderSet = new Set(existingOrder);
+    const newKeys = [];
+
+    enabledLayers.forEach((layer) => {
+        const key = getLegendLayerKey(layer);
+        layer.legendKey = key;
+        if (key && !orderSet.has(key)) {
+            newKeys.push(key);
+            orderSet.add(key);
+        }
+    });
+
+    if (newKeys.length) {
+        window.activeLayersLegendOrder = existingOrder.concat(newKeys);
+    }
+
+    const orderLookup = new Map(window.activeLayersLegendOrder.map((key, index) => [key, index]));
+    enabledLayers.sort((a, b) => {
+        const aIndex = orderLookup.has(a.legendKey) ? orderLookup.get(a.legendKey) : Number.MAX_SAFE_INTEGER;
+        const bIndex = orderLookup.has(b.legendKey) ? orderLookup.get(b.legendKey) : Number.MAX_SAFE_INTEGER;
+        if (aIndex === bIndex) {
+            return a.menuIndex - b.menuIndex;
+        }
+        return aIndex - bIndex;
+    });
+}
+
+function applyLegendLayerOrder(legendItems) {
+    if (!map1 || !map1.getLayer || !Array.isArray(legendItems)) {
+        return;
+    }
+
+    const orderedLayerIds = legendItems
+        .map((item) => item.dataset.layerId)
+        .filter((layerId) => layerId && map1.getLayer(layerId));
+
+    for (let index = orderedLayerIds.length - 1; index >= 0; index -= 1) {
+        map1.moveLayer(orderedLayerIds[index]);
+    }
+}
+
+function syncLegendOrderFromDom(container) {
+    const legendContainer = container || document.getElementById('active-layers-legend-items');
+    if (!legendContainer) {
+        return;
+    }
+
+    const items = Array.from(legendContainer.querySelectorAll('.active-layers-legend-item'));
+    const visibleKeys = items.map((item) => item.dataset.layerKey).filter(Boolean);
+    const existingOrder = Array.isArray(window.activeLayersLegendOrder)
+        ? window.activeLayersLegendOrder
+        : [];
+    const remainingKeys = existingOrder.filter((key) => !visibleKeys.includes(key));
+    window.activeLayersLegendOrder = visibleKeys.concat(remainingKeys);
+    applyLegendLayerOrder(items);
+}
+
+function handleLegendDragStart(event) {
+    const handle = event.target;
+    const item = handle.closest('.active-layers-legend-item');
+    if (!item || !event.dataTransfer) {
+        return;
+    }
+
+    draggedLegendItem = item;
+    item.classList.add('is-dragging');
+    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.setData('text/plain', item.dataset.layerKey || '');
+}
+
+function handleLegendDragOver(event) {
+    event.preventDefault();
+    const container = event.currentTarget;
+    if (!container || !draggedLegendItem) {
+        return;
+    }
+
+    const targetItem = event.target.closest('.active-layers-legend-item');
+    if (!targetItem || targetItem === draggedLegendItem) {
+        return;
+    }
+
+    const rect = targetItem.getBoundingClientRect();
+    const offset = event.clientY - rect.top;
+    const insertAfter = offset > rect.height / 2;
+
+    if (insertAfter) {
+        if (targetItem.nextSibling !== draggedLegendItem) {
+            container.insertBefore(draggedLegendItem, targetItem.nextSibling);
+        }
+    } else if (targetItem.previousSibling !== draggedLegendItem) {
+        container.insertBefore(draggedLegendItem, targetItem);
+    }
+}
+
+function handleLegendDragEnd() {
+    if (draggedLegendItem) {
+        draggedLegendItem.classList.remove('is-dragging');
+        draggedLegendItem = null;
+    }
+    syncLegendOrderFromDom();
+}
+
+function bindLegendDragHandlers() {
+    const legendContainer = document.getElementById('active-layers-legend-items');
+    if (!legendContainer || legendContainer.dataset.dragHandlersBound === 'true') {
+        return;
+    }
+
+    legendContainer.addEventListener('dragover', handleLegendDragOver);
+    legendContainer.addEventListener('drop', (event) => {
+        event.preventDefault();
+        syncLegendOrderFromDom(legendContainer);
+    });
+    legendContainer.dataset.dragHandlersBound = 'true';
+}
+
 function getDefaultColorForLayer(layerId) {
     const id = layerId.toLowerCase();
     if (id.includes('glof-ii')) return '#facc15';
@@ -223,11 +350,12 @@ function refreshActiveLayersLegend() {
     const checkedInputs = Array.from(menu.querySelectorAll('input.form-check-input[type="checkbox"]:checked'))
         .filter((inputElement) => inputElement.dataset.legendTrack === 'true');
     const enabledLayers = checkedInputs
-        .map((inputElement) => {
+        .map((inputElement, index) => {
             const label = menu.querySelector(`label[for="${inputElement.id}"]`);
             const layerName = label ? label.textContent.trim() : '';
             return {
                 id: inputElement.id,
+                menuIndex: index,
                 layerName,
                 legendIcon: inputElement.dataset.legendIcon || '',
                 layerId: inputElement.dataset.layer || ''
@@ -244,9 +372,23 @@ function refreshActiveLayersLegend() {
 
     legendPanel.classList.remove('is-hidden');
 
+    normalizeLegendOrder(enabledLayers);
+
     enabledLayers.forEach((layer) => {
         const item = document.createElement('div');
         item.className = 'active-layers-legend-item';
+        item.dataset.layerId = layer.layerId || '';
+        item.dataset.layerKey = layer.legendKey || '';
+
+        const dragHandle = document.createElement('button');
+        dragHandle.type = 'button';
+        dragHandle.className = 'legend-drag-handle';
+        dragHandle.textContent = '☰';
+        dragHandle.title = 'Drag to reorder';
+        dragHandle.setAttribute('aria-label', 'Drag to reorder layer');
+        dragHandle.draggable = true;
+        dragHandle.addEventListener('dragstart', handleLegendDragStart);
+        dragHandle.addEventListener('dragend', handleLegendDragEnd);
 
         const icon = document.createElement('span');
         icon.className = `active-layers-legend-icon ${getLegendIconClass(layer)}`;
@@ -258,6 +400,7 @@ function refreshActiveLayersLegend() {
         // Wrapper for icon and text (left-aligned)
         const leftWrapper = document.createElement('span');
         leftWrapper.className = 'active-layers-legend-left';
+        leftWrapper.appendChild(dragHandle);
         leftWrapper.appendChild(icon);
         leftWrapper.appendChild(text);
 
@@ -300,32 +443,13 @@ function refreshActiveLayersLegend() {
                 settingsPanel.style.display = 'none';
 
                 if(!window.layerCustomizations[layer.layerId]) {
-                    window.layerCustomizations[layer.layerId] = { color: getDefaultColorForLayer(layer.layerId), size: 1, opacity: 1 };
+                    window.layerCustomizations[layer.layerId] = { color: getDefaultColorForLayer(layer.layerId), opacity: 1, size: 1 };
                 }
                 const currentOpt = window.layerCustomizations[layer.layerId];
 
                 const colorInput = document.createElement('input');
                 colorInput.type = 'color';
                 colorInput.value = currentOpt.color;
-                
-                const sizeIcon = document.createElement('i');
-                sizeIcon.className = 'fas fa-expand-arrows-alt';
-                sizeIcon.style.color = '#94a3b8';
-                sizeIcon.style.marginLeft = '4px';
-                sizeIcon.style.fontSize = '12px';
-                sizeIcon.title = 'Scale Icon';
-
-                const sizeInput = document.createElement('input');
-                sizeInput.type = 'range';
-                sizeInput.min = '0.5';
-                sizeInput.max = '5.0';
-                sizeInput.step = '0.1';
-                sizeInput.value = currentOpt.size;
-                sizeInput.className = 'legend-range-input';
-
-                const sizeValue = document.createElement('span');
-                sizeValue.className = 'legend-range-value';
-                sizeValue.textContent = `${normalizeScaleValue(currentOpt.size, 1).toFixed(1)}x`;
                 
                 const opacityIcon = document.createElement('i');
                 opacityIcon.className = 'fas fa-adjust';
@@ -343,9 +467,6 @@ function refreshActiveLayersLegend() {
                 opacityInput.className = 'legend-number-input';
 
                 settingsPanel.appendChild(colorInput);
-                settingsPanel.appendChild(sizeIcon);
-                settingsPanel.appendChild(sizeInput);
-                settingsPanel.appendChild(sizeValue);
                 settingsPanel.appendChild(opacityIcon);
                 settingsPanel.appendChild(opacityInput);
 
@@ -358,8 +479,8 @@ function refreshActiveLayersLegend() {
                 
                 item.appendChild(controlsWrap);
 
-                if (currentOpt.color !== getDefaultColorForLayer(layer.layerId) || currentOpt.size !== 1 || currentOpt.opacity !== 1) {
-                    applyCustomization(layer.layerId, currentOpt.color, currentOpt.size, currentOpt.opacity, icon);
+                if (currentOpt.color !== getDefaultColorForLayer(layer.layerId) || currentOpt.opacity !== 1) {
+                    applyCustomization(layer.layerId, currentOpt.color, 1, currentOpt.opacity, icon);
                 }
 
                 settingsBtn.addEventListener('click', (e) => {
@@ -369,20 +490,19 @@ function refreshActiveLayersLegend() {
 
                 const onUpdate = () => {
                     currentOpt.color = colorInput.value;
-                    currentOpt.size = sizeInput.value;
                     currentOpt.opacity = opacityInput.value;
-                    sizeValue.textContent = `${normalizeScaleValue(currentOpt.size, 1).toFixed(1)}x`;
-                    applyCustomization(layer.layerId, currentOpt.color, currentOpt.size, currentOpt.opacity, icon);
+                    applyCustomization(layer.layerId, currentOpt.color, 1, currentOpt.opacity, icon);
                 };
 
                 colorInput.addEventListener('input', onUpdate);
-                sizeInput.addEventListener('input', onUpdate);
                 opacityInput.addEventListener('change', onUpdate);
             }
         }
 
         legendItemsContainer.appendChild(item);
     });
+
+    applyLegendLayerOrder(Array.from(legendItemsContainer.querySelectorAll('.active-layers-legend-item')));
 }
 
 function getLegendIconClass(layer) {
@@ -426,13 +546,17 @@ function getLegendIconClass(layer) {
 
 function initializeActiveLayersLegend() {
     const menu = document.getElementById('menu');
-    if (!menu || menu.__activeLayersLegendBound) {
+    if (!menu) {
         refreshActiveLayersLegend();
         return;
     }
 
-    menu.addEventListener('change', refreshActiveLayersLegend);
-    menu.__activeLayersLegendBound = true;
+    if (menu.dataset.activeLayersLegendBound !== 'true') {
+        bindLegendDragHandlers();
+        menu.addEventListener('change', refreshActiveLayersLegend);
+        menu.dataset.activeLayersLegendBound = 'true';
+    }
+
     refreshActiveLayersLegend();
 }
 
