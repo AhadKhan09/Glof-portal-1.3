@@ -144,7 +144,7 @@ function recreatePinIcon(imageName, baseColor) {
 window.originalLayerSizes = window.originalLayerSizes || {};
 
 function normalizeScaleValue(rawValue, fallbackValue = 1) {
-    const parsedValue = Number.parseFloat(rawValue);
+    const parsedValue = parseFloat(rawValue);
     return Number.isFinite(parsedValue) ? parsedValue : fallbackValue;
 }
 
