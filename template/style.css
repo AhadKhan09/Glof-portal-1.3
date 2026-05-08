@@ -418,6 +418,8 @@ body:fullscreen #menu {
   padding: 2px;
   display: inline-flex;
   align-items: center;
+  background: transparent;
+  border: none;
 }
 
 .legend-drag-handle:active {

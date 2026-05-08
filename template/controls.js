@@ -380,11 +380,12 @@ function refreshActiveLayersLegend() {
         item.dataset.layerId = layer.layerId || '';
         item.dataset.layerKey = layer.legendKey || '';
 
-        const dragHandle = document.createElement('span');
+        const dragHandle = document.createElement('button');
+        dragHandle.type = 'button';
         dragHandle.className = 'legend-drag-handle';
         dragHandle.textContent = '☰';
         dragHandle.title = 'Drag to reorder';
-        dragHandle.setAttribute('aria-hidden', 'true');
+        dragHandle.setAttribute('aria-label', 'Drag to reorder layer');
         dragHandle.draggable = true;
         dragHandle.addEventListener('dragstart', handleLegendDragStart);
         dragHandle.addEventListener('dragend', handleLegendDragEnd);
@@ -442,7 +443,7 @@ function refreshActiveLayersLegend() {
                 settingsPanel.style.display = 'none';
 
                 if(!window.layerCustomizations[layer.layerId]) {
-                    window.layerCustomizations[layer.layerId] = { color: getDefaultColorForLayer(layer.layerId), opacity: 1 };
+                    window.layerCustomizations[layer.layerId] = { color: getDefaultColorForLayer(layer.layerId), opacity: 1, size: 1 };
                 }
                 const currentOpt = window.layerCustomizations[layer.layerId];
 
@@ -545,14 +546,17 @@ function getLegendIconClass(layer) {
 
 function initializeActiveLayersLegend() {
     const menu = document.getElementById('menu');
-    if (!menu || menu.dataset.activeLayersLegendBound === 'true') {
+    if (!menu) {
         refreshActiveLayersLegend();
         return;
     }
 
-    bindLegendDragHandlers();
-    menu.addEventListener('change', refreshActiveLayersLegend);
-    menu.dataset.activeLayersLegendBound = 'true';
+    if (menu.dataset.activeLayersLegendBound !== 'true') {
+        bindLegendDragHandlers();
+        menu.addEventListener('change', refreshActiveLayersLegend);
+        menu.dataset.activeLayersLegendBound = 'true';
+    }
+
     refreshActiveLayersLegend();
 }
 
