@@ -548,7 +548,7 @@ map1.on('style.load', () => {
 // TEMPERATURE FROM OPENWEATHERMAP DYNAMIC LAYER INITIALIZATION
 // ==========================================================================
 
-const OWM_API_KEY = "dec8c58f7b91bff0bbd3876dec903bf4";
+const OWM_API_KEY = CONFIG.OWM_API_KEY;
 window.weatherMarkers = [];
 
 // Determine color and class for temperature value
@@ -735,4 +735,4 @@ async function refreshWeatherData(event) {
 window.refreshWeatherData = refreshWeatherData;
 
 
-
+
