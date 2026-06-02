@@ -16,6 +16,8 @@
     <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.2/mapbox-gl-geocoder.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/togeojson/0.16.0/togeojson.min.js"></script>
     <link rel="icon" href="data/ndma_logo.png" type="image/icon type">
 </head>
 <!-- _______________________________________________________________________________________________________________________________________________________ -->
@@ -85,6 +87,180 @@
         <div id="active-layers-legend" aria-live="polite" aria-label="Enabled layers legend">
             <div id="active-layers-legend-items"></div>
         </div>
+        <div id="lake-temp-widget" aria-live="polite" aria-label="Lake temperature trend">
+            <div id="lake-temp-header">
+                <div id="lake-temp-header-text">
+                    <div id="lake-temp-title">Lake Temperature Trend</div>
+                </div>
+                <div id="lake-temp-actions">
+                    <button class="panel-expand-btn" type="button" onclick="openPanelModal('lakeTempChart')" title="Open chart in full view" aria-label="Open chart in modal view" style="position: static; margin-right: 4px;">
+                        <i class="fas fa-up-right-and-down-left-from-center"></i>
+                    </button>
+                    <button id="lake-temp-close" type="button" onclick="closeLakeTempWidget()" aria-label="Close temperature widget">&times;</button>
+                </div>
+            </div>
+            <div id="lake-temp-chart-wrap">
+                <canvas id="lakeTempChartCanvas"></canvas>
+            </div>
+        </div>
+        <div id="lake-video-widget" aria-live="polite" aria-label="Lake area change animation video">
+            <div id="lake-video-wrap">
+                <video id="lakeAreaVideoPlayer" autoplay loop muted controls></video>
+                <img id="lakeAreaGifPlayer" style="display: none;" alt="Lake area change animation gif" />
+                <div id="lake-video-placeholder" style="display: none;">
+                    <i class="fas fa-video-slash"></i>
+                    <span>Video coming soon for this lake</span>
+                </div>
+            </div>
+        </div>
+        <div id="lake-area-widget" class="gp" role="region" aria-label="GLOF Lake Area Change Monitor">
+            <h2 style="position:absolute;left:-9999px;">Lake GLOF monitor, area change time series, gauge anomaly.</h2>
+
+            <!-- HEADER -->
+            <div class="gp-header" style="text-align: center; display: flex; justify-content: center; align-items: center;">
+                <div class="gp-header-glow"></div>
+                <div class="gp-title" id="gp-title-text" style="width: 100%; text-align: center;">Badswat Lake, Ghizer</div>
+            </div>
+
+            <!-- TOP PANELS -->
+            <div class="top-panels">
+
+                <!-- LEFT: WATER ANIMATION -->
+                <div class="lake-panel">
+                    <svg style="position:absolute;bottom:0;left:0;width:100%;height:100%;" viewBox="0 0 210 220" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="210" height="220" fill="#030508"/>
+                        <polygon points="0,220 0,130 25,95 50,115 75,60 100,90 125,40 155,75 180,50 210,70 210,220" fill="#080e1c"/>
+                        <polygon points="0,220 0,150 20,130 50,145 80,110 110,130 140,90 170,115 195,100 210,112 210,220" fill="#06091a"/>
+                        <polygon points="0,220 0,168 30,155 65,162 95,142 130,158 160,140 190,152 210,145 210,220" fill="#04060f"/>
+                        <rect x="60" y="52" width="14" height="6" rx="3" fill="rgba(255,255,255,0.5)"/>
+                        <rect x="115" y="35" width="18" height="7" rx="3" fill="rgba(255,255,255,0.45)"/>
+                        <rect x="168" y="45" width="12" height="5" rx="2.5" fill="rgba(255,255,255,0.4)"/>
+                    </svg>
+                    <canvas class="water-canvas" id="waterCanvas"></canvas>
+                    <div class="lake-top-fade"></div>
+                    <div class="lake-bottom-fade"></div>
+
+                    <!-- CURRENT LAKE AREA BOX — centered -->
+                    <div class="lake-area-box">
+                        <div class="lab-label" id="labLabelYear">Current Lake Area</div>
+                        <div class="lab-val-row" style="display: flex; align-items: baseline; justify-content: center; gap: 4px;">
+                            <span class="lab-num" id="lakeNum">0</span>
+                            <span class="lab-unit">m²</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT: GAUGE -->
+                <div class="gauge-panel">
+                    <div class="gauge-panel-glow"></div>
+                    <div class="gauge-title" id="gaugeTitleText">vs 5-Year Avg</div>
+                    <canvas class="gauge-canvas-el" id="gaugeCanvas" height="145"></canvas>
+                </div>
+
+            </div>
+
+            <!-- TIMELINE -->
+            <div class="timeline-section">
+                <div class="ts-header">
+                    <div class="ts-title">Year-by-Year Area</div>
+                </div>
+                <div class="ts-rows" id="tsRows"></div>
+            </div>
+
+            <!-- PARTICLE STRIP -->
+            <div class="particle-row">
+                <canvas class="particle-canvas" id="particleCanvas" height="28"></canvas>
+            </div>
+        </div>
+
+        <!-- ======== CHARTS ROW — moved inside map container as overlays ======== -->
+        <div id="charts-row" class="hidden-charts">
+
+            <!-- Chart 1: Glacial Lake Area -->
+            <div class="chart-card" id="chart-card-1">
+                <div class="chart-card-header">
+                    <div class="chart-card-title">
+                        <i class="fas fa-water"></i>
+                        <span>Glacial Lake Area (m&sup2;)</span>
+                    </div>
+                    <select id="lake-select" onchange="updateLakeChart()">
+                        <option value="ALL">&#127790; All Lakes</option>
+                        <optgroup label="── Ghizer ──">
+                            <option value="DIST:GHIZER">&#128205; All Ghizer Lakes</option>
+                            <option value="Darkut">Darkut Glacial Lake</option>
+                            <option value="Badswat">Badswat Glacial Lake</option>
+                            <option value="Ishkoman">Ishkoman Glacial Lake</option>
+                            <option value="Tersat Hundur">Tersat Hundur Glacial Lake</option>
+                        </optgroup>
+                        <optgroup label="── Chitral ──">
+                            <option value="DIST:CHITRAL">&#128205; All Chitral Lakes</option>
+                            <option value="Thalo 2">Thalo 2 Glacial Lake</option>
+                            <option value="Pindoru Chaat">Pindoru Chaat Glacial Lake</option>
+                            <option value="Near Chatiboi">Near Chatiboi Glacial Lake</option>
+                            <option value="Chatiboi">Chatiboi Glacial Lake</option>
+                            <option value="Lasht">Lasht Glacial Lake</option>
+                            <option value="Reshun">Reshun Glacial Lake</option>
+                            <option value="Brep">Brep Glacial Lake</option>
+                        </optgroup>
+                        <optgroup label="── Upper Dir ──">
+                            <option value="DIST:UPPER DIR">&#128205; All Upper Dir Lakes</option>
+                            <option value="Thalo 1">Thalo 1 Glacial Lake</option>
+                        </optgroup>
+                        <optgroup label="── Hunza Nagar ──">
+                            <option value="DIST:HUNZA NAGAR">&#128205; All Hunza Nagar Lakes</option>
+                            <option value="Ultar">Ultar Glacial Lake</option>
+                            <option value="Shisper">Shisper Glacial Lake</option>
+                        </optgroup>
+                    </select>
+                </div>
+                <div class="chart-canvas-wrap">
+                    <canvas id="lakeAreaChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Chart 2: Volume District-wise -->
+            <div class="chart-card" id="chart-card-2">
+                <div class="chart-card-header">
+                    <div class="chart-card-title">
+                        <i class="fas fa-mountain"></i>
+                        <span>Glacial Lake Volume (m&sup3;)</span>
+                    </div>
+                    <select id="vol-lake-select" onchange="updateVolumeChart()">
+                        <option value="ALL">&#127790; All Lakes</option>
+                        <optgroup label="── Ghizer ──">
+                            <option value="DIST:GHIZER">&#128205; All Ghizer Lakes</option>
+                            <option value="Darkut">Darkut Glacial Lake</option>
+                            <option value="Badswat">Badswat Glacial Lake</option>
+                            <option value="Ishkoman">Ishkoman Glacial Lake</option>
+                            <option value="Tersat Hundur">Tersat Hundur Glacial Lake</option>
+                        </optgroup>
+                        <optgroup label="── Chitral ──">
+                            <option value="DIST:CHITRAL">&#128205; All Chitral Lakes</option>
+                            <option value="Thalo 2">Thalo 2 Glacial Lake</option>
+                            <option value="Pindoru Chaat">Pindoru Chaat Glacial Lake</option>
+                            <option value="Near Chatiboi">Near Chatiboi Glacial Lake</option>
+                            <option value="Chatiboi">Chatiboi Glacial Lake</option>
+                            <option value="Lasht">Lasht Glacial Lake</option>
+                            <option value="Reshun">Reshun Glacial Lake</option>
+                            <option value="Brep">Brep Glacial Lake</option>
+                        </optgroup>
+                        <optgroup label="── Upper Dir ──">
+                            <option value="DIST:UPPER DIR">&#128205; All Upper Dir Lakes</option>
+                            <option value="Thalo 1">Thalo 1 Glacial Lake</option>
+                        </optgroup>
+                        <optgroup label="── Hunza Nagar ──">
+                            <option value="DIST:HUNZA NAGAR">&#128205; All Hunza Nagar Lakes</option>
+                            <option value="Ultar">Ultar Glacial Lake</option>
+                            <option value="Shisper">Shisper Glacial Lake</option>
+                        </optgroup>
+                    </select>
+                </div>
+                <div class="chart-canvas-wrap">
+                    <canvas id="lakeVolumeChart"></canvas>
+                </div>
+            </div>
+
+        </div>
     </div>
 
     <!-- LST Floating Control Panel -->
@@ -114,91 +290,7 @@
         </div>
     </div>
 
-    <!-- ======== CHARTS ROW — below the map ======== -->
-    <div id="charts-row">
-
-        <!-- Chart 1: Glacial Lake Area -->
-        <div class="chart-card" id="chart-card-1">
-            <div class="chart-card-header">
-                <div class="chart-card-title">
-                    <i class="fas fa-water"></i>
-                    <span>Glacial Lake Area Monitoring (m&sup2;)</span>
-                </div>
-                <select id="lake-select" onchange="updateLakeChart()">
-                    <option value="ALL">&#127790; All Lakes</option>
-                    <optgroup label="── Ghizer ──">
-                        <option value="DIST:GHIZER">&#128205; All Ghizer Lakes</option>
-                        <option value="Darkut">Darkut Glacial Lake</option>
-                        <option value="Badswat">Badswat Glacial Lake</option>
-                        <option value="Ishkoman">Ishkoman Glacial Lake</option>
-                    </optgroup>
-                    <optgroup label="── Chitral ──">
-                        <option value="DIST:CHITRAL">&#128205; All Chitral Lakes</option>
-                        <option value="Thalo 2">Thalo 2 Glacial Lake</option>
-                        <option value="Pindoru Chaat">Pindoru Chaat Glacial Lake</option>
-                        <option value="Near Chatiboi">Near Chatiboi Glacial Lake</option>
-                        <option value="Chatiboi">Chatiboi Glacial Lake</option>
-                        <option value="Lasht">Lasht Glacial Lake</option>
-                        <option value="Reshun">Reshun Glacial Lake</option>
-                        <option value="Brep">Brep Glacial Lake</option>
-                    </optgroup>
-                    <optgroup label="── Upper Dir ──">
-                        <option value="DIST:UPPER DIR">&#128205; All Upper Dir Lakes</option>
-                        <option value="Thalo 1">Thalo 1 Glacial Lake</option>
-                    </optgroup>
-                    <optgroup label="── Hunza Nagar ──">
-                        <option value="DIST:HUNZA NAGAR">&#128205; All Hunza Nagar Lakes</option>
-                        <option value="Ultar">Ultar Glacial Lake</option>
-                    </optgroup>
-                </select>
-            </div>
-            <div class="chart-canvas-wrap">
-                <canvas id="lakeAreaChart"></canvas>
-            </div>
-        </div>
-
-        <!-- Chart 2: Volume District-wise -->
-        <div class="chart-card" id="chart-card-2">
-            <div class="chart-card-header">
-                <div class="chart-card-title">
-                    <i class="fas fa-mountain"></i>
-                    <span>Glacial Lake Volume Monitoring (m&sup3;)</span>
-                </div>
-                <select id="vol-lake-select" onchange="updateVolumeChart()">
-                    <option value="ALL">&#127790; All Lakes</option>
-                    <optgroup label="── Ghizer ──">
-                        <option value="DIST:GHIZER">&#128205; All Ghizer Lakes</option>
-                        <option value="Darkut">Darkut Glacial Lake</option>
-                        <option value="Badswat">Badswat Glacial Lake</option>
-                        <option value="Ishkoman">Ishkoman Glacial Lake</option>
-                    </optgroup>
-                    <optgroup label="── Chitral ──">
-                        <option value="DIST:CHITRAL">&#128205; All Chitral Lakes</option>
-                        <option value="Thalo 2">Thalo 2 Glacial Lake</option>
-                        <option value="Pindoru Chaat">Pindoru Chaat Glacial Lake</option>
-                        <option value="Near Chatiboi">Near Chatiboi Glacial Lake</option>
-                        <option value="Chatiboi">Chatiboi Glacial Lake</option>
-                        <option value="Lasht">Lasht Glacial Lake</option>
-                        <option value="Reshun">Reshun Glacial Lake</option>
-                        <option value="Brep">Brep Glacial Lake</option>
-                    </optgroup>
-                    <optgroup label="── Upper Dir ──">
-                        <option value="DIST:UPPER DIR">&#128205; All Upper Dir Lakes</option>
-                        <option value="Thalo 1">Thalo 1 Glacial Lake</option>
-                    </optgroup>
-                    <optgroup label="── Hunza Nagar ──">
-                        <option value="DIST:HUNZA NAGAR">&#128205; All Hunza Nagar Lakes</option>
-                        <option value="Ultar">Ultar Glacial Lake</option>
-                    </optgroup>
-                </select>
-            </div>
-            <div class="chart-canvas-wrap">
-                <canvas id="lakeVolumeChart"></canvas>
-            </div>
-        </div>
-
-    </div>
-    <!-- ======== END CHARTS ROW ======== -->
+    <!-- ======== CHARTS ROW MOVED INSIDE MAP VIEWPORT ======== -->
 
     <div id="controlChart">
         <button class="panel-expand-btn" type="button" onclick="openPanelModal('controlChart')" title="Open chart in modal view" aria-label="Open control chart in modal view">
@@ -243,20 +335,28 @@
         <div class="quick-toggle-sections">
             <div class="quick-toggle-section">
                 <div class="form-check form-switch quick-toggle-item">
-                    <input class="form-check-input" type="checkbox" role="switch" id="inventory-toggle" data-legend-track="true" data-legend-icon="icon-default" onchange="toggleGlacialLakesInventory(this.checked)">
+                    <input class="form-check-input" type="checkbox" role="switch" id="inventory-toggle" data-legend-track="true" data-legend-icon="icon-cyan-dot" onchange="toggleGlacialLakesInventory(this.checked)">
                     <label class="form-check-label" for="inventory-toggle">Glacial Lakes Inventory</label>
                 </div>
                 <div class="form-check form-switch quick-toggle-item">
-                    <input class="form-check-input" type="checkbox" role="switch" id="quick-akah-toggle" data-layer="akah-infrastructure-layer" data-legend-track="true" data-legend-icon="icon-red-destination" onchange="toggleQuickAkahLayer(this.checked)">
+                    <input class="form-check-input" type="checkbox" role="switch" id="quick-akah-toggle" data-layer="akah-infrastructure-layer" data-legend-track="true" data-legend-icon="icon-circle-red-small" onchange="toggleQuickAkahLayer(this.checked)">
                     <label class="form-check-label" for="quick-akah-toggle">AKAH Layer</label>
                 </div>
                 <div class="form-check form-switch quick-toggle-item">
-                    <input class="form-check-input" type="checkbox" role="switch" id="quick-populated-places-toggle" data-layer="populated-places-points-layer" data-legend-icon="icon-default" onchange="toggleQuickPopulatedPlaces(this.checked)">
+                    <input class="form-check-input" type="checkbox" role="switch" id="quick-populated-places-toggle" data-layer="populated-places-points-layer" data-legend-icon="icon-untracked" onchange="toggleQuickPopulatedPlaces(this.checked)">
                     <label class="form-check-label" for="quick-populated-places-toggle">Populated Places</label>
                 </div>
                 <div class="form-check form-switch quick-toggle-item">
                     <input class="form-check-input" type="checkbox" role="switch" id="quick-gmrc-wapda-toggle" data-layer="gmrc-wapda-points-layer" data-legend-track="true" data-legend-icon="icon-blue-destination" onchange="toggleQuickGmrcWapda(this.checked)">
                     <label class="form-check-label" for="quick-gmrc-wapda-toggle">GMRC, WAPDA</label>
+                </div>
+                <div class="form-check form-switch quick-toggle-item">
+                    <input class="form-check-input" type="checkbox" role="switch" id="quick-pdma-kp-toggle" data-layer="pdma-kp-points-layer" data-legend-track="true" data-legend-icon="icon-blue-destination" onchange="toggleQuickPdmaKp(this.checked)">
+                    <label class="form-check-label" for="quick-pdma-kp-toggle">PDMA, KP</label>
+                </div>
+                <div class="form-check form-switch quick-toggle-item">
+                    <input class="form-check-input" type="checkbox" role="switch" id="quick-evk2cnr-toggle" data-layer="evk2cnr-points-layer" data-legend-track="true" data-legend-icon="icon-green-destination" onchange="toggleQuickEvK2CNR(this.checked)">
+                    <label class="form-check-label" for="quick-evk2cnr-toggle">EvK2CNR</label>
                 </div>
                 <div class="form-check form-switch quick-toggle-item">
                     <input class="form-check-input" type="checkbox" role="switch" id="quick-glof-ii-toggle" data-layer="glof-ii-stations-layer" data-legend-track="true" data-legend-icon="icon-yellow-destination" onchange="toggleQuickGlofII(this.checked)">
@@ -283,7 +383,11 @@
                     <label class="form-check-label" for="quick-vulnerable-melting-glaciers-toggle">Vulnerable Melting Glaciers</label>
                 </div>
                 <div class="form-check form-switch quick-toggle-item">
-                    <input class="form-check-input" type="checkbox" role="switch" id="quick-flood-susceptibility-toggle" data-layer="flood-susceptibility-layer" data-legend-icon="icon-default" onchange="toggleFloodSusceptibility(this.checked)">
+                    <input class="form-check-input" type="checkbox" role="switch" id="quick-vulnerable-melting-points-toggle" data-layer="vulnerable-melting-points-layer" onchange="toggleQuickVulnerableMeltingPoints(this.checked)">
+                    <label class="form-check-label" for="quick-vulnerable-melting-points-toggle">Vulnerable Melting Points</label>
+                </div>
+                <div class="form-check form-switch quick-toggle-item">
+                    <input class="form-check-input" type="checkbox" role="switch" id="quick-flood-susceptibility-toggle" data-layer="flood-susceptibility-layer" data-legend-icon="icon-untracked" onchange="toggleFloodSusceptibility(this.checked)">
                     <label class="form-check-label" for="quick-flood-susceptibility-toggle">Flood Susceptibility</label>
                 </div>
             </div>
@@ -307,7 +411,7 @@
             <div class="quick-toggle-section">
                 <div class="quick-toggle-title">2026</div>
                 <div class="form-check form-switch quick-toggle-item">
-                    <input class="form-check-input" type="checkbox" role="switch" id="quick-vulsites-2026-toggle" data-legend-track="true" data-legend-icon="icon-red-destination" onchange="toggleQuickVulnerableSites2026(this.checked)">
+                    <input class="form-check-input" type="checkbox" role="switch" id="quick-vulsites-2026-toggle" data-legend-track="true" data-legend-icon="icon-red-pin" onchange="toggleQuickVulnerableSites2026(this.checked)">
                     <label class="form-check-label" for="quick-vulsites-2026-toggle">Vulnerable Sites 2026</label>
                 </div>
                 <div class="form-check form-switch quick-toggle-item">
@@ -321,6 +425,92 @@
                 <div class="form-check form-switch quick-toggle-item">
                     <input class="form-check-input" type="checkbox" role="switch" id="quick-high-temp-2026-toggle" onchange="showHighTempWarning(this.checked)">
                     <label class="form-check-label" for="quick-high-temp-2026-toggle">High Temp Warning</label>
+                </div>
+                <div class="form-check form-switch quick-toggle-item d-flex align-items-center justify-content-between" style="padding-right: 8px;">
+                    <div>
+                        <input class="form-check-input" type="checkbox" role="switch" id="quick-temperature-toggle" onchange="toggleTemperatureLayer(this.checked)">
+                        <label class="form-check-label" for="quick-temperature-toggle" style="margin-left: 8px;">Temperature</label>
+                    </div>
+                    <button id="refresh-weather-btn" onclick="refreshWeatherData(event)" title="Refresh weather from OpenWeatherMap" style="background: none; border: none; color: #93c5fd; cursor: pointer; transition: transform 0.2s; padding: 0; outline: none; display: flex; align-items: center;">
+                        <i class="fas fa-sync-alt" id="refresh-weather-icon"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!--________________________________________________________ -->
+        <!--______________________ PMD Sensors _____________________ -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="pmd-sensors-heading">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#pmd-sensors-collapse" aria-expanded="false" aria-controls="pmd-sensors-collapse">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-broadcast-pin" viewBox="0 0 16 16">
+                  <path d="M2.75 10.5a.5.5 0 0 1 .854-.354l2.063 2.063c.222-.222.257-.591.077-.852l-2.072-3a.5.5 0 0 1 .828-.57l2.072 3c.36.52.36 1.258-.02 1.776l-2.126 2.126a.5.5 0 0 1-.854-.354v-3.835zm10.5 0v3.835a.5.5 0 0 1-.854.354l-2.126-2.126c-.38-.518-.38-1.256-.02-1.776l2.072-3a.5.5 0 1 1 .828.57l-2.072 3c-.18.261-.145.63.077.852l2.063-2.063a.5.5 0 0 1 .854.354z"/>
+                  <path d="M8 2a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zm0 4a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/>
+                </svg>
+                <span class="ms-2"><u>PMD Sensors</u></span>
+            </button>
+            </h2>
+            <div id="pmd-sensors-collapse" class="accordion-collapse collapse" aria-labelledby="pmd-sensors-heading">
+                <div class="accordion-body">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id="pmd-sensors-arg-toggle" data-layer="pmd-sensors-ARG-layer" data-legend-track="true" onchange="toggleLayersVisibility(map1, ['pmd-sensors-ARG-layer'])">
+                        <label class="form-check-label" for="pmd-sensors-arg-toggle">ARG</label>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id="pmd-sensors-aws-toggle" data-layer="pmd-sensors-AWS-layer" data-legend-track="true" onchange="toggleLayersVisibility(map1, ['pmd-sensors-AWS-layer'])">
+                        <label class="form-check-label" for="pmd-sensors-aws-toggle">AWS</label>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id="pmd-sensors-wlr-toggle" data-layer="pmd-sensors-WL-R-layer" data-legend-track="true" onchange="toggleLayersVisibility(map1, ['pmd-sensors-WL-R-layer'])">
+                        <label class="form-check-label" for="pmd-sensors-wlr-toggle">WL-R</label>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id="pmd-sensors-wll-toggle" data-layer="pmd-sensors-WL-L-layer" data-legend-track="true" onchange="toggleLayersVisibility(map1, ['pmd-sensors-WL-L-layer'])">
+                        <label class="form-check-label" for="pmd-sensors-wll-toggle">WL-L</label>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id="pmd-sensors-wp-toggle" data-layer="pmd-sensors-WP-layer" data-legend-track="true" onchange="toggleLayersVisibility(map1, ['pmd-sensors-WP-layer'])">
+                        <label class="form-check-label" for="pmd-sensors-wp-toggle">WP</label>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" id="pmd-sensors-dg-toggle" data-layer="pmd-sensors-DG-layer" data-legend-track="true" onchange="toggleLayersVisibility(map1, ['pmd-sensors-DG-layer'])">
+                        <label class="form-check-label" for="pmd-sensors-dg-toggle">DG</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--________________________________________________________ -->
+        <!--______________________ Routes __________________________ -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="routes-heading">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#routes-collapse" aria-expanded="false" aria-controls="routes-collapse">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-map" viewBox="0 0 16 16">
+                  <path fill-rule="evenodd" d="M15.817.113A.5.5 0 0 1 16 .5v14a.5.5 0 0 1-.402.49l-5 1a.5.5 0 0 1-.196 0L5.5 15.01l-4.902.98A.5.5 0 0 1 0 15.5v-14a.5.5 0 0 1 .402-.49l5-1a.5.5 0 0 1 .196 0L10.5.99l4.902-.98a.5.5 0 0 1 .415.103M10 1.91l-4-.8v12.98l4 .8zm1 12.98 4-.8V1.11l-4 .8zm-6-.8V1.11l-4 .8v12.98z"/>
+                </svg>
+                <span class="ms-2"><u>Routes</u></span>
+            </button>
+            </h2>
+            <div id="routes-collapse" class="accordion-collapse collapse" aria-labelledby="routes-heading">
+                <div class="accordion-body">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input route-toggle" type="checkbox" role="switch" id="route-arandu-toggle" onchange="toggleRoute('arandu', this.checked)">
+                        <label class="form-check-label" for="route-arandu-toggle">Arandu Route</label>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input route-toggle" type="checkbox" role="switch" id="route-bashu-valley-toggle" onchange="toggleRoute('bashu valley', this.checked)">
+                        <label class="form-check-label" for="route-bashu-valley-toggle">Bashu Valley Route</label>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input route-toggle" type="checkbox" role="switch" id="route-ghulkin-toggle" onchange="toggleRoute('ghulkin', this.checked)">
+                        <label class="form-check-label" for="route-ghulkin-toggle">Ghulkin Route</label>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input route-toggle" type="checkbox" role="switch" id="route-hopper-toggle" onchange="toggleRoute('hopper', this.checked)">
+                        <label class="form-check-label" for="route-hopper-toggle">Hopper Route</label>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input route-toggle" type="checkbox" role="switch" id="route-khaplu-toggle" onchange="toggleRoute('Khaplu', this.checked)">
+                        <label class="form-check-label" for="route-khaplu-toggle">Khaplu Route</label>
+                    </div>
                 </div>
             </div>
         </div>
@@ -942,6 +1132,7 @@
     <script src="data/incident.js"></script>
     <script src="template/map_layers.js"></script>
     <script src="template/map_layer_legends.js"></script>
+    <script src="template/routes.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>
@@ -957,21 +1148,25 @@
     // Data: district, lake name, area in m² (2020-2025)
     // -------------------------------------------------------
     const lakeAreaData = [
-        { district: 'GHIZER',      name: 'Darkut',         values: [202000, 215000, 222900, 219100, 221600, 221400], volume: [3553303,   3882361,   4086482,   3987912,   4052681,   4047488]   },
-        { district: 'UPPER DIR',   name: 'Thalo 1',        values: [233000, 273700, 259200, 227200, 137800, 263100], volume: [4351898,   5469701,   5062850,   4198877,   2064273,   5171362]   },
-        { district: 'CHITRAL',     name: 'Thalo 2',        values: [42700,  164400, 172100, 182800, 164600, 62200],  volume: [391057.8,  2652247,   2830363,   3083469,   2656830,   667138]    },
-        { district: 'CHITRAL',     name: 'Pindoru Chaat',  values: [219500, 238500, 250700, 274200, 293700, 301200], volume: [3998254,   4498491,   4828725,   5483895,   6045844,   6266245]   },
-        { district: 'CHITRAL',     name: 'Near Chatiboi',  values: [10500,  9500,   3900,   3500,   4300,   4200],   volume: [53348.49,  46280.8,   13072.09,  11210.11,  15016.15,  14522.7]   },
-        { district: 'CHITRAL',     name: 'Chatiboi',       values: [211900, 186800, 201600, 202900, 244000, 221000], volume: [3803114,   3179717,   3543316,   3575805,   4646510,   4037108]   },
-        { district: 'CHITRAL',     name: 'Lasht',          values: [27300,  17500,  40400,  52300,  74200,  77800],  volume: [207197.4,  110191.3,  361488.8,  521561.8,  857051.4,  916694]    },
-        { district: 'GHIZER',      name: 'Badswat',        values: [750600, 690700, 792500, 825000, 720900, 738800], volume: [22914664,  20362184,  24752114,  26205832,  21637938,  22404823]  },
-        { district: 'GHIZER',      name: 'Ishkoman',       values: [74400,  72700,  77300,  72300,  74800,  79900],  volume: [860333.6,  832553.6,  908339.5,  826056.4,  866909.2,  952028.1]  },
-        { district: 'HUNZA NAGAR', name: 'Ultar',          values: [12000,  11100,  11000,  9600,   8600,   71],     volume: [64486.78,  57728.73,  56991.61,  46974.1,   40181.04,  44.24052]  },
-        { district: 'CHITRAL',     name: 'Reshun',         values: [2900,   1400,   1900,   3000,   3700,   2700],   volume: [8582.988,  3051.653,  4708.293,  9006.282,  12130.53,  7754.787]  },
-        { district: 'CHITRAL',     name: 'Brep',           values: [24900,  19900,  16400,  17300,  23100,  25000],  volume: [181817.8,  132252.7,  100487.4,  108407.4,  163441.5,  182855.6]  }
+        { district: 'GHIZER',      name: 'Darkut',         values: [202000, 215000, 222900, 219100, 221600, 221400, 244200], volume: [3553303,   3882361,   4086482,   3987912,   4052681,   4047488]   },
+        { district: 'UPPER DIR',   name: 'Thalo 1',        values: [233000, 273700, 259200, 227200, 137800, 263100, 257742], volume: [4351898,   5469701,   5062850,   4198877,   2064273,   5171362]   },
+        { district: 'CHITRAL',     name: 'Thalo 2',        values: [42700,  164400, 172100, 182800, 164600, 62200,  165634], volume: [391057.8,  2652247,   2830363,   3083469,   2656830,   667138]    },
+        { district: 'CHITRAL',     name: 'Pindoru Chaat',  values: [219500, 238500, 250700, 274200, 293700, 301200, 301543], volume: [3998254,   4498491,   4828725,   5483895,   6045844,   6266245]   },
+        { district: 'CHITRAL',     name: 'Near Chatiboi',  values: [10500,  9500,   3900,   3500,   4300,   4200,   5639],   volume: [53348.49,  46280.8,   13072.09,  11210.11,  15016.15,  14522.7]   },
+        { district: 'CHITRAL',     name: 'Chatiboi',       values: [211900, 186800, 201600, 202900, 244000, 221000, 234499], volume: [3803114,   3179717,   3543316,   3575805,   4646510,   4037108]   },
+        { district: 'CHITRAL',     name: 'Lasht',          values: [27300,  17500,  40400,  52300,  74200,  77800,  58208],  volume: [207197.4,  110191.3,  361488.8,  521561.8,  857051.4,  916694]    },
+        { district: 'GHIZER',      name: 'Badswat',        values: [750600, 690700, 792500, 825000, 720900, 738800, 836474], volume: [22914664,  20362184,  24752114,  26205832,  21637938,  22404823]  },
+        { district: 'GHIZER',      name: 'Ishkoman',       values: [74400,  72700,  77300,  72300,  74800,  79900,  83694],  volume: [860333.6,  832553.6,  908339.5,  826056.4,  866909.2,  952028.1]  },
+        { district: 'GHIZER',      name: 'Tersat Hundur',  values: [140400, 135500, 134900, 136200, 134900, 134800, 150139], volume: [2119799,   2015520,   2002859,   2030322,   2002859,   2000751]   },
+        { district: 'HUNZA NAGAR', name: 'Ultar',          values: [12000,  11100,  11000,  9600,   8600,   71,     8962],   volume: [64486.78,  57728.73,  56991.61,  46974.1,   40181.04,  44.24052]  },
+        { district: 'CHITRAL',     name: 'Reshun',         values: [2900,   1400,   1900,   3000,   3700,   2700,   2819],   volume: [8582.988,  3051.653,  4708.293,  9006.282,  12130.53,  7754.787]  },
+        { district: 'CHITRAL',     name: 'Brep',           values: [24900,  19900,  16400,  17300,  23100,  25000,  22577],  volume: [181817.8,  132252.7,  100487.4,  108407.4,  163441.5,  182855.6]  },
+        { district: 'HUNZA NAGAR', name: 'Shisper',        values: [27300,  17500,  40400,  52300,  74200,  77800,  63200],  volume: [null,    null,    null,    null,    null,    null]      }
     ];
+    window.lakeAreaData = lakeAreaData;
 
     const chartYears = ['2020', '2021', '2022', '2023', '2024', '2025'];
+    const areaChartYears = ['2020', '2021', '2022', '2023', '2024', '2025', '2026'];
 
     // Palette for individual lakes
     const lakeColors = [
@@ -1054,7 +1249,7 @@
         lakeChart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: chartYears,
+                labels: areaChartYears,
                 datasets: buildLakeDatasets('ALL')
             },
             options: {
@@ -1086,7 +1281,13 @@
                         bodyFont: { size: 10 },
                         padding: 8,
                         callbacks: {
-                            label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString()} m²`
+                            label: ctx => {
+                                const val = ctx.parsed.y;
+                                const formatted = (val !== null && val !== undefined && !isNaN(val))
+                                    ? val.toLocaleString() + ' m²'
+                                    : '-';
+                                return ` ${ctx.dataset.label}: ${formatted}`;
+                            }
                         }
                     }
                 },
@@ -1113,6 +1314,7 @@
                 }
             }
         });
+        window.lakeChart = lakeChart;
     }
 
     function updateLakeChart() {
@@ -1144,6 +1346,7 @@
     let volumeChart = null;
 
     function fmtVol(v) {
+        if (v === null || v === undefined || isNaN(v)) return '-';
         if (v >= 1e6)  return (v / 1e6).toFixed(2)  + 'M';
         if (v >= 1e3)  return (v / 1e3).toFixed(1)  + 'k';
         return v.toFixed(0);
@@ -1154,7 +1357,10 @@
             // One stacked dataset per district — summed volume
             return Object.keys(districtPalette).map(d => {
                 const lakes = lakeAreaData.filter(l => l.district === d);
-                const sums  = chartYears.map((_, i) => lakes.reduce((acc, l) => acc + l.volume[i], 0));
+                const sums  = chartYears.map((_, i) => lakes.reduce((acc, l) => {
+                    const val = l.volume && l.volume[i];
+                    return acc + (val !== null && val !== undefined && !isNaN(val) ? val : 0);
+                }, 0));
                 return {
                     label: d.charAt(0) + d.slice(1).toLowerCase(),
                     data: sums,
@@ -1236,7 +1442,13 @@
                         bodyFont: { size: 10 },
                         padding: 8,
                         callbacks: {
-                            label: ctx => ` ${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString(undefined, {maximumFractionDigits:1})} m³`
+                            label: ctx => {
+                                const val = ctx.parsed.y;
+                                const formatted = (val !== null && val !== undefined && !isNaN(val))
+                                    ? val.toLocaleString(undefined, {maximumFractionDigits: 1}) + ' m³'
+                                    : '-';
+                                return ` ${ctx.dataset.label}: ${formatted}`;
+                            }
                         }
                     }
                 },
@@ -1261,6 +1473,7 @@
                 }
             }
         });
+        window.volumeChart = volumeChart;
     }
 
     function updateVolumeChart() {

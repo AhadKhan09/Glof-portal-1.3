@@ -11,15 +11,15 @@ const pakDistrictBoundarySource = {
     data: 'http://172.18.1.85:8080/geoserver/Pak_Boundaries/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=Pak_Boundaries%3ADistrict_Boundary_Updated&outputFormat=application%2Fjson'
 };
 
-const vulSitesSrc={
+const vulSitesSrc = {
     type: 'geojson',
     data: glof_sites
 }
-const vulLakesSrc={
+const vulLakesSrc = {
     type: 'geojson',
     data: glof_lakes
 }
-const incidentSrc={
+const incidentSrc = {
     type: 'geojson',
     data: incident_data
 }
@@ -51,6 +51,14 @@ const glofIIDamagedStationsSource = {
 const AKAH_STATIONS_XLSX_URL = 'data/WMP%20AWS%20EWS.xlsx';
 const UNDP_ALL_SENSORS_CSV_URL = 'data/279_EWS_List_GLOF-II.csv';
 const BRI_FF_SENSORS_CSV_URL = 'data/EWS%20Station%20Location%20under%20ECARE%20Project%20in%20GB.csv';
+const pdmaKpSource = {
+    type: 'geojson',
+    data: 'http://172.18.1.85:8080/geoserver/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3AGLOF_vul_Lakes_KP&outputFormat=application%2Fjson'
+};
+const evk2cnrSource = {
+    type: 'geojson',
+    data: 'data/geojsons/evk2cnr.geojson'
+};
 
 function parseWorkbookNumber(rawValue) {
     const cleaned = String(rawValue ?? '').replace(/[^0-9.+-]/g, '');
@@ -390,19 +398,19 @@ const reshunGlacierSource = {
     type: 'geojson',
     data: glacier_reshun
 };
-const chitralRiverSource={
+const chitralRiverSource = {
     type: 'geojson',
     data: chitral_river
 }
-const faultlineReshunSource={
+const faultlineReshunSource = {
     type: 'geojson',
     data: faultline_reshun
 }
-const nullahReshunSource={
+const nullahReshunSource = {
     type: 'geojson',
     data: nullah_reshun
 }
-const reshunRiskZonationSource={
+const reshunRiskZonationSource = {
     type: 'geojson',
     data: risk_zonation_reshun
 }
@@ -478,55 +486,55 @@ const shisperLakeSource = {
     type: 'geojson',
     data: 'http://172.18.1.85:8080/geoserver/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3AShisper_Lake&outputFormat=application%2Fjson'
 };
-const brep_zonationSource={
+const brep_zonationSource = {
     type: 'geojson',
     data: brep_zonation
 }
-const darkot_zonationSrc={
+const darkot_zonationSrc = {
     type: 'geojson',
     data: darkotRz
 }
-const darkotSchoolsSrc={
+const darkotSchoolsSrc = {
     type: 'geojson',
     data: darkotSchools
 }
-const darkotBuildingsSrc={
+const darkotBuildingsSrc = {
     type: 'geojson',
     data: darkotBuildings
 }
-const darkotRiversSrc={
+const darkotRiversSrc = {
     type: 'geojson',
     data: darkot_river
 }
-const darkotGlacierSrc={
+const darkotGlacierSrc = {
     type: 'geojson',
-    data: darkot_glaciers    
+    data: darkot_glaciers
 }
-const gulmitLineSrc= {
+const gulmitLineSrc = {
     type: 'geojson',
     data: 'http://172.18.1.4:8080/geoserver/abdul_sattar/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=abdul_sattar%3ADistrict_Boundary&outputFormat=application%2Fjson&CQL_FILTER=DISTRICT=%27HUNZA%20NAGAR%27'
 }
-const gulmit_zonationSource={
+const gulmit_zonationSource = {
     type: 'geojson',
     data: gulmitRz
 }
-const gulmitBuildingsSrc={
+const gulmitBuildingsSrc = {
     type: 'geojson',
     data: gulmitBuildings
 }
-const gulmitRoadsSrc={
+const gulmitRoadsSrc = {
     type: 'geojson',
     data: gulmitRoads
 }
-const gulmitRiversSrc={
+const gulmitRiversSrc = {
     type: 'geojson',
     data: gulmitRivers
 }
-const gulmitSchoolsSrc={
+const gulmitSchoolsSrc = {
     type: 'geojson',
     data: gulmitSchools
 }
-const thalu_zonationSource={
+const thalu_zonationSource = {
     type: 'geojson',
     data: thaluRz
 }
@@ -733,7 +741,7 @@ window.hidePopulatedPlacesHoverAnimationMarker = hidePopulatedPlacesHoverAnimati
 //____________________________________________________________________________________________________________________________________________________________________________________
 map1.loadImage('https://i.ibb.co/20MBc92N/glacier-icon.png', function (error, image) {
     if (error) throw error;
-    
+
     // Add the image to Mapbox
     if (!map1.hasImage('glofIcon')) {
         map1.addImage('glofIcon', image);
@@ -816,6 +824,39 @@ map1.on('style.load', () => {
                 console.warn('Failed to fetch GLOF II damaged stations source for counts.', err);
             }
 
+            // PDMA, KP
+            try {
+                const resp = await fetch(pdmaKpSource.data);
+                if (resp.ok) {
+                    const json = await resp.json();
+                    window.layerFeatureCounts['pdma-kp-points-layer'] = Array.isArray(json.features) ? json.features.length : 0;
+                }
+            } catch (err) {
+                console.warn('Failed to fetch PDMA, KP source for counts.', err);
+            }
+
+            // EvK2CNR
+            try {
+                const resp = await fetch(evk2cnrSource.data);
+                if (resp.ok) {
+                    const json = await resp.json();
+                    window.layerFeatureCounts['evk2cnr-points-layer'] = Array.isArray(json.features) ? json.features.length : 0;
+                }
+            } catch (err) {
+                console.warn('Failed to fetch EvK2CNR source for counts.', err);
+            }
+
+            // Vulnerable Melting Points Count
+            try {
+                const resp = await fetch('http://172.18.1.85:8080/geoserver/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3AVul_Melt_Zones&outputFormat=application%2Fjson');
+                if (resp.ok) {
+                    const json = await resp.json();
+                    window.layerFeatureCounts['vulnerable-melting-points-layer'] = Array.isArray(json.features) ? json.features.length : 0;
+                }
+            } catch (err) {
+                console.warn('Failed to fetch Vulnerable Melting Points source for counts.', err);
+            }
+
             // Refresh legend now that initial counts may be available
             if (typeof refreshActiveLayersLegend === 'function') {
                 refreshActiveLayersLegend();
@@ -830,10 +871,17 @@ map1.on('style.load', () => {
         type: 'geojson',
         data: 'http://172.18.1.85:8080/geoserver/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3Amelt_glac_vul2&outputFormat=application%2Fjson'
     });
+    // Add source for Vulnerable Melting Points
+    map1.addSource('vulnerableMeltingPoints', {
+        type: 'geojson',
+        data: 'http://172.18.1.85:8080/geoserver/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3AVul_Melt_Zones&outputFormat=application%2Fjson'
+    });
     map1.addSource('floodSusceptibilityRaster', floodSusceptibilityRasterSource);
     map1.addSource('akahHazardExposure', akahHazardExposureSource);
     map1.addSource('highTempWarning', highTempWarningSrc);
     map1.addSource('stationPoints', stationPointsSrc);
+    map1.addSource('pdmaKpPoints', pdmaKpSource);
+    map1.addSource('evk2cnrPoints', evk2cnrSource);
     map1.addSource('badswatBound', badswatBoundSource);
     map1.addSource('badswatfaultline', badswatfaultlineSource);
     map1.addSource('badswatGlacier', badswatGlacierSource);
@@ -1068,7 +1116,7 @@ map1.on('style.load', () => {
     map1.on('click', 'vulLakes', function (e) {
         const coordinates = e.features[0].geometry.coordinates.slice(); // Extract coordinates
         const properties = e.features[0].properties; // Extract all properties
-    
+
         // Construct the popup HTML
         const popupContent = `
             <strong><u>Lake Name:</u></strong> ${properties.Lake_Name} <br>
@@ -1078,7 +1126,7 @@ map1.on('style.load', () => {
             <strong><u>Area at Risk:</u></strong> ${properties.Areas_at_R} <br>
             <strong><u>Observed Level:</u></strong> ${properties.Observed_L} <br>
         `;
-    
+
         // Create and show the popup
         new mapboxgl.Popup()
             .setLngLat(coordinates)
@@ -1404,24 +1452,24 @@ map1.on('style.load', () => {
             'circle-opacity': 0.9
         }
     });
-    
+
     // Add click event for incident layer
     map1.on('click', 'incident', function (e) {
         const coordinates = e.features[0].geometry.coordinates.slice();
         const properties = e.features[0].properties;
-    
+
         const popupContent = `
             <strong><u>Incident Location</u></strong><br>
             <strong>Name:</strong> ${properties.name || 'Incident Point'}<br>
             <strong>Coordinates:</strong> ${coordinates[1].toFixed(6)}, ${coordinates[0].toFixed(6)}
         `;
-    
+
         new mapboxgl.Popup()
             .setLngLat(coordinates)
             .setHTML(popupContent)
             .addTo(map1);
     });
-    
+
     // Change cursor to pointer when hovering over incident point
     map1.on('mouseenter', 'incident', function () {
         map1.getCanvas().style.cursor = 'pointer';
@@ -1637,11 +1685,11 @@ map1.on('style.load', () => {
 
     map1.addLayer({
         id: 'gmrc-wapda-points-layer',
-        type: 'symbol',
+        type: 'circle', // 'symbol'
         source: 'gmrcWapdaPoints',
         layout: {
             'visibility': 'none',
-            'icon-image': 'gmrc-wapda-icon',
+            /* 'icon-image': 'gmrc-wapda-icon',
             'icon-size': [
                 'interpolate', ['linear'], ['zoom'],
                 4, 0.72,
@@ -1663,12 +1711,16 @@ map1.on('style.load', () => {
             'text-anchor': 'top',
             'text-optional': true,
             'text-allow-overlap': false,
-            'text-ignore-placement': false
+            'text-ignore-placement': false */
         },
         paint: {
-            'text-color': '#ffffff',
+            'circle-color': '#0284c7',
+            'circle-radius': 6,
+            'circle-stroke-color': '#ffffff',
+            'circle-stroke-width': 1
+            /* 'text-color': '#ffffff',
             'text-halo-color': '#082f49',
-            'text-halo-width': 1.3
+            'text-halo-width': 1.3 */
         }
     });
 
@@ -1702,6 +1754,105 @@ map1.on('style.load', () => {
         map1.getCanvas().style.cursor = 'pointer';
     });
     map1.on('mouseleave', 'gmrc-wapda-points-layer', function () {
+        map1.getCanvas().style.cursor = '';
+    });
+
+    map1.addLayer({
+        id: 'pdma-kp-points-layer',
+        type: 'circle',
+        source: 'pdmaKpPoints',
+        layout: {
+            'visibility': 'none'
+        },
+        paint: {
+            'circle-color': '#0ea5e9',
+            'circle-radius': 6,
+            'circle-stroke-color': '#ffffff',
+            'circle-stroke-width': 1
+        }
+    });
+
+    map1.on('click', 'pdma-kp-points-layer', function (e) {
+        const feature = e && e.features && e.features[0] ? e.features[0] : null;
+        if (!feature) {
+            return;
+        }
+
+        const properties = feature.properties || {};
+        const coordinates = feature.geometry && Array.isArray(feature.geometry.coordinates)
+            ? feature.geometry.coordinates.slice()
+            : null;
+        const pointName = properties.Name || properties.name || properties.lake_name || 'PDMA, KP Point';
+
+        if (!coordinates) {
+            return;
+        }
+
+        new mapboxgl.Popup()
+            .setLngLat(coordinates)
+            .setHTML(`
+                <strong><u>PDMA, KP</u></strong><br>
+                <strong>Name:</strong> ${pointName}<br>
+                <strong>Coordinates:</strong> ${coordinates[1].toFixed(6)}, ${coordinates[0].toFixed(6)}
+            `)
+            .addTo(map1);
+    });
+
+    map1.on('mouseenter', 'pdma-kp-points-layer', function () {
+        map1.getCanvas().style.cursor = 'pointer';
+    });
+    map1.on('mouseleave', 'pdma-kp-points-layer', function () {
+        map1.getCanvas().style.cursor = '';
+    });
+
+    map1.addLayer({
+        id: 'evk2cnr-points-layer',
+        type: 'circle',
+        source: 'evk2cnrPoints',
+        layout: {
+            'visibility': 'none'
+        },
+        paint: {
+            'circle-color': '#16a34a',
+            'circle-radius': 6,
+            'circle-stroke-color': '#ffffff',
+            'circle-stroke-width': 1
+        }
+    });
+
+    map1.on('click', 'evk2cnr-points-layer', function (e) {
+        const feature = e && e.features && e.features[0] ? e.features[0] : null;
+        if (!feature) {
+            return;
+        }
+
+        const properties = feature.properties || {};
+        const coordinates = feature.geometry && Array.isArray(feature.geometry.coordinates)
+            ? feature.geometry.coordinates.slice()
+            : null;
+        const pointName = properties.Name || 'EvK2CNR Point';
+        const group = properties.Group || 'EvK2CNR AWS';
+        const elevation = properties.Elevation || 'Unknown';
+
+        if (!coordinates) {
+            return;
+        }
+
+        new mapboxgl.Popup()
+            .setLngLat(coordinates)
+            .setHTML(`
+                <strong><u>${group}</u></strong><br>
+                <strong>Name:</strong> ${pointName}<br>
+                <strong>Elevation:</strong> ${elevation}<br>
+                <strong>Coordinates:</strong> ${coordinates[1].toFixed(6)}, ${coordinates[0].toFixed(6)}
+            `)
+            .addTo(map1);
+    });
+
+    map1.on('mouseenter', 'evk2cnr-points-layer', function () {
+        map1.getCanvas().style.cursor = 'pointer';
+    });
+    map1.on('mouseleave', 'evk2cnr-points-layer', function () {
         map1.getCanvas().style.cursor = '';
     });
 
@@ -1760,11 +1911,11 @@ map1.on('style.load', () => {
 
     map1.addLayer({
         id: 'glof-ii-stations-layer',
-        type: 'symbol',
+        type: 'circle', // 'symbol'
         source: 'glofIIStations',
         layout: {
             'visibility': 'none',
-            'icon-image': 'glof-ii-destination-icon',
+            /* 'icon-image': 'glof-ii-destination-icon',
             'icon-size': [
                 'interpolate', ['linear'], ['zoom'],
                 4, 0.72,
@@ -1786,12 +1937,16 @@ map1.on('style.load', () => {
             'text-anchor': 'top',
             'text-optional': true,
             'text-allow-overlap': false,
-            'text-ignore-placement': false
+            'text-ignore-placement': false */
         },
         paint: {
-            'text-color': '#ffffff',
+            'circle-color': '#facc15',
+            'circle-radius': 6,
+            'circle-stroke-color': '#ffffff',
+            'circle-stroke-width': 1
+            /* 'text-color': '#ffffff',
             'text-halo-color': '#713f12',
-            'text-halo-width': 1.25
+            'text-halo-width': 1.25 */
         }
     });
 
@@ -1889,11 +2044,11 @@ map1.on('style.load', () => {
 
     map1.addLayer({
         id: 'glof-ii-damaged-stations-layer',
-        type: 'symbol',
+        type: 'circle', // 'symbol'
         source: 'glofIIDamagedStations',
         layout: {
             'visibility': 'none',
-            'icon-image': 'glof-ii-damaged-warning-icon',
+            /* 'icon-image': 'glof-ii-damaged-warning-icon',
             'icon-size': [
                 'interpolate', ['linear'], ['zoom'],
                 4, 0.75,
@@ -1915,12 +2070,16 @@ map1.on('style.load', () => {
             'text-anchor': 'top',
             'text-optional': true,
             'text-allow-overlap': false,
-            'text-ignore-placement': false
+            'text-ignore-placement': false */
         },
         paint: {
-            'text-color': '#ffffff',
+            'circle-color': '#f59e0b',
+            'circle-radius': 6,
+            'circle-stroke-color': '#ffffff',
+            'circle-stroke-width': 1
+            /* 'text-color': '#ffffff',
             'text-halo-color': '#7c2d12',
-            'text-halo-width': 1.25
+            'text-halo-width': 1.25 */
         }
     });
 
@@ -2016,11 +2175,11 @@ map1.on('style.load', () => {
 
     map1.addLayer({
         id: 'akah-stations-layer',
-        type: 'symbol',
+        type: 'circle', // 'symbol'
         source: 'akahStations',
         layout: {
             'visibility': 'none',
-            'icon-image': 'akah-stations-destination-icon',
+            /* 'icon-image': 'akah-stations-destination-icon',
             'icon-size': [
                 'interpolate', ['linear'], ['zoom'],
                 4, 0.72,
@@ -2029,7 +2188,13 @@ map1.on('style.load', () => {
             ],
             'icon-anchor': 'bottom',
             'icon-allow-overlap': true,
-            'icon-ignore-placement': true
+            'icon-ignore-placement': true */
+        },
+        paint: {
+            'circle-color': '#16a34a',
+            'circle-radius': 6,
+            'circle-stroke-color': '#ffffff',
+            'circle-stroke-width': 1
         }
     });
 
@@ -2167,11 +2332,11 @@ map1.on('style.load', () => {
 
     map1.addLayer({
         id: 'undp-all-sensors-layer',
-        type: 'symbol',
+        type: 'circle', // 'symbol'
         source: 'undpAllSensors',
         layout: {
             'visibility': 'none',
-            'icon-image': 'undp-all-sensors-destination-icon',
+            /* 'icon-image': 'undp-all-sensors-destination-icon',
             'icon-size': [
                 'interpolate', ['linear'], ['zoom'],
                 4, 0.72,
@@ -2193,12 +2358,16 @@ map1.on('style.load', () => {
             'text-anchor': 'top',
             'text-optional': true,
             'text-allow-overlap': false,
-            'text-ignore-placement': false
+            'text-ignore-placement': false */
         },
         paint: {
-            'text-color': '#ffffff',
+            'circle-color': '#f97316',
+            'circle-radius': 6,
+            'circle-stroke-color': '#ffffff',
+            'circle-stroke-width': 1
+            /* 'text-color': '#ffffff',
             'text-halo-color': '#7c2d12',
-            'text-halo-width': 1.25
+            'text-halo-width': 1.25 */
         }
     });
 
@@ -2239,6 +2408,61 @@ map1.on('style.load', () => {
         map1.getCanvas().style.cursor = '';
     });
 
+    // -- PMD SENSORS CATEGORIZED --
+    const pmdTypes = [
+        { code: 'ARG', color: '#ca8a04', name: 'ARG' },
+        { code: 'AWS', color: '#e11d48', name: 'AWS' },
+        { code: 'WL-R', color: '#2563eb', name: 'WL-R' },
+        { code: 'WL-L', color: '#0d9488', name: 'WL-L' },
+        { code: 'WP', color: '#9333ea', name: 'WP' },
+        { code: 'DG', color: '#ea580c', name: 'DG' }
+    ];
+
+    pmdTypes.forEach(pt => {
+        const layerId = `pmd-sensors-${pt.code}-layer`;
+        map1.addLayer({
+            id: layerId,
+            type: 'circle',
+            source: 'undpAllSensors',
+            filter: ['==', ['get', 'Code'], pt.code],
+            layout: { 'visibility': 'none' },
+            paint: {
+                'circle-color': pt.color,
+                'circle-radius': 6,
+                'circle-stroke-color': '#ffffff',
+                'circle-stroke-width': 1
+            }
+        });
+
+        map1.on('click', layerId, function (e) {
+            const feature = e && e.features && e.features[0] ? e.features[0] : null;
+            if (!feature) return;
+
+            const properties = feature.properties || {};
+            const coordinates = feature.geometry && Array.isArray(feature.geometry.coordinates)
+                ? feature.geometry.coordinates.slice()
+                : null;
+
+            if (!coordinates) return;
+
+            new mapboxgl.Popup()
+                .setLngLat(coordinates)
+                .setHTML(`
+                    <strong><u>${pt.name}</u></strong><br>
+                    <strong>Station:</strong> ${properties.StationNames || '--'}<br>
+                    <strong>Code:</strong> ${properties.Code || '--'}<br>
+                    <strong>Status:</strong> ${properties.Status || '--'}<br>
+                    <strong>Province:</strong> ${properties.Province || '--'}<br>
+                    <strong>Elevation:</strong> ${properties.Elev || '--'}<br>
+                    <strong>Coordinates:</strong> ${coordinates[1].toFixed(6)}, ${coordinates[0].toFixed(6)}
+                `)
+                .addTo(map1);
+        });
+
+        map1.on('mouseenter', layerId, function () { map1.getCanvas().style.cursor = 'pointer'; });
+        map1.on('mouseleave', layerId, function () { map1.getCanvas().style.cursor = ''; });
+    });
+
     const loadUndpAllSensorsCsv = async () => {
         try {
             const response = await fetch(UNDP_ALL_SENSORS_CSV_URL);
@@ -2254,7 +2478,13 @@ map1.on('style.load', () => {
                 try {
                     window.layerFeatureCounts = window.layerFeatureCounts || {};
                     window.layerFeatureCounts['undp-all-sensors-layer'] = Array.isArray(fc.features) ? fc.features.length : 0;
-                } catch (e) {}
+
+                    // PMD Sensor counts
+                    pmdTypes.forEach(pt => {
+                        window.layerFeatureCounts[`pmd-sensors-${pt.code}-layer`] = Array.isArray(fc.features) ?
+                            fc.features.filter(f => f.properties.Code === pt.code).length : 0;
+                    });
+                } catch (e) { }
                 if (typeof refreshActiveLayersLegend === 'function') refreshActiveLayersLegend();
             }
         } catch (error) {
@@ -2319,11 +2549,11 @@ map1.on('style.load', () => {
 
     map1.addLayer({
         id: 'bri-ff-sensors-layer',
-        type: 'symbol',
+        type: 'circle', // 'symbol'
         source: 'briFfSensors',
         layout: {
             'visibility': 'none',
-            'icon-image': 'bri-ff-sensors-destination-icon',
+            /* 'icon-image': 'bri-ff-sensors-destination-icon',
             'icon-size': [
                 'interpolate', ['linear'], ['zoom'],
                 4, 0.72,
@@ -2345,12 +2575,16 @@ map1.on('style.load', () => {
             'text-anchor': 'top',
             'text-optional': true,
             'text-allow-overlap': false,
-            'text-ignore-placement': false
+            'text-ignore-placement': false */
         },
         paint: {
-            'text-color': '#ffffff',
+            'circle-color': '#ef4444',
+            'circle-radius': 6,
+            'circle-stroke-color': '#ffffff',
+            'circle-stroke-width': 1
+            /* 'text-color': '#ffffff',
             'text-halo-color': '#7f1d1d',
-            'text-halo-width': 1.25
+            'text-halo-width': 1.25 */
         }
     });
 
@@ -2403,7 +2637,7 @@ map1.on('style.load', () => {
                 try {
                     window.layerFeatureCounts = window.layerFeatureCounts || {};
                     window.layerFeatureCounts['bri-ff-sensors-layer'] = Array.isArray(fc.features) ? fc.features.length : 0;
-                } catch (e) {}
+                } catch (e) { }
                 if (typeof refreshActiveLayersLegend === 'function') refreshActiveLayersLegend();
             }
         } catch (error) {
@@ -2463,7 +2697,7 @@ map1.on('style.load', () => {
 
         map1.__stationPointInteractionsBound = true;
     }
-    
+
     //_____________________________________________________________________________________________________________________________________________________________
     // Add the boundary line layer (initially hidden)
     map1.addLayer({
@@ -2501,7 +2735,7 @@ map1.on('style.load', () => {
         },
         paint: {
             'fill-color': '#ADD8E6', // Light blue
-            'fill-opacity':0.6
+            'fill-opacity': 0.6
         }
     });
     map1.addLayer({
@@ -2534,7 +2768,7 @@ map1.on('style.load', () => {
             ],
             'fill-opacity': 0.7
         }
-    });    
+    });
     map1.addLayer({
         id: 'badswat-faultine-layer',
         type: 'line',
@@ -2651,7 +2885,7 @@ map1.on('style.load', () => {
         },
         paint: {
             'fill-color': '#ADD8E6', // Light blue
-            'fill-opacity':0.6
+            'fill-opacity': 0.6
         }
     });
     map1.addLayer({
@@ -2720,7 +2954,7 @@ map1.on('style.load', () => {
         },
         paint: {
             'fill-color': '#ADD8E6', // Light blue
-            'fill-opacity':0.6
+            'fill-opacity': 0.6
         }
     });
     map1.addLayer({
@@ -2790,8 +3024,8 @@ map1.on('style.load', () => {
             'fill-opacity': 0.7
         }
     });
-//__________________________________________________________________________________________________
-//Terset Hundur Layers
+    //__________________________________________________________________________________________________
+    //Terset Hundur Layers
     map1.addLayer({
         id: 'terset-hundur-lake-layer',
         type: 'fill',
@@ -2853,8 +3087,8 @@ map1.on('style.load', () => {
             'fill-opacity': 0.7
         }
     });
-//__________________________________________________________________________________________________
-//Ishokoman Risk Layers
+    //__________________________________________________________________________________________________
+    //Ishokoman Risk Layers
     map1.addLayer({
         id: 'ishokoman-risk-low-layer',
         type: 'fill',
@@ -2891,8 +3125,8 @@ map1.on('style.load', () => {
             'fill-opacity': 0.7
         }
     });
-//__________________________________________________________________________________________________
-//Lusht Risk Layers
+    //__________________________________________________________________________________________________
+    //Lusht Risk Layers
     map1.addLayer({
         id: 'lusht-risk-low-layer',
         type: 'fill',
@@ -2929,8 +3163,8 @@ map1.on('style.load', () => {
             'fill-opacity': 0.7
         }
     });
-//__________________________________________________________________________________________________
-//Ulter Risk Layers
+    //__________________________________________________________________________________________________
+    //Ulter Risk Layers
     map1.addLayer({
         id: 'ulter-risk-low-layer',
         type: 'fill',
@@ -2968,8 +3202,8 @@ map1.on('style.load', () => {
         }
     });
 
-//__________________________________________________________________________________________________
-//Shisper Risk Layers
+    //__________________________________________________________________________________________________
+    //Shisper Risk Layers
     map1.addLayer({
         id: 'shisper-lake-layer',
         type: 'fill',
@@ -3018,224 +3252,224 @@ map1.on('style.load', () => {
             'fill-opacity': 0.7
         }
     });
-//__________________________________________________________________________________________________
-//BREP
-map1.addLayer({
-    id: 'brep-zonation-layer',
-    type: 'fill',
-    source: 'brepZonation',
-    layout: {
-        'visibility': 'none'
-    },
-    paint: {
-        'fill-color': [
-            'match',
-            ['downcase', ['to-string', ['coalesce', ['get', 'Zonation'], ['get', 'zonation'], ['get', 'RISK'], ['get', 'risk'], '']]],
-            'low', '#00990f',     // Green for low risk
-            'medium', '#f0e02e',  // Yellow for medium risk
-            'high', '#7d0800',    // Red for high risk
-            '#000000'             // Default color (black) if no match
-        ],
-        'fill-opacity': 0.7
-    }
-});
-//Darkot
-map1.addLayer({
-    id: 'darkot-zonation-layer',
-    type: 'fill',
-    source: 'darkotRz',
-    layout: {
-        'visibility': 'none'
-    },
-    paint: {
-        'fill-color': [
-            'match',
-            ['get', 'zonation'], // Attribute to match
-            'Low', '#00990f',     // Green for low risk
-            'Medium', '#f0e02e',  // Yellow for medium risk
-            'High', '#7d0800',    // Red for high risk
-            '#000000'             // Default color (black) if no match
-        ],
-        'fill-opacity': 0.7
-    }
-});
-map1.addLayer({
-    id: 'darkot-buildings-layer',
-    type: 'fill',
-    source: 'darkotBuildings',
-    layout: {
-        'visibility': 'none'
-    },
-    paint: {
-        'fill-color': 'grey', 
-        'fill-opacity': 0.8,
-        'fill-outline-color': 'black' // Add this line for the outline
-    }
-});
-map1.addLayer({
-    id: 'darkot-roads-layer',
-    type: 'line',
-    source: 'darkotRivers',
-    layout: {
-        'visibility': 'none'
-    },
-    paint: {
-        'line-color': '#000000', 
-        'line-width': 2
-    }
-});
-map1.addLayer({
-    id: 'darkot-rivers-layer',
-    type: 'line',
-    source: 'darkotRivers',
-    layout: {
-        'visibility': 'none'
-    },
-    paint: {
-        'line-color': '#0000FF', 
-        'line-width': 2
-    }
-});
-map1.loadImage('https://i.ibb.co/5g8k2HMX/school.png', (error, image) => {
-    if (error) throw error;
-
-    // Add the image to the map with a unique name
-    map1.addImage('school-icon', image);
-
+    //__________________________________________________________________________________________________
+    //BREP
     map1.addLayer({
-        id: 'darkot-schools-layer',
-        type: 'symbol',  // Use 'symbol' for custom icons
-        source: 'darkotSchools',
+        id: 'brep-zonation-layer',
+        type: 'fill',
+        source: 'brepZonation',
         layout: {
-            'icon-image': 'school-icon',  // Reference the icon by name
-            'icon-size': 0.05  // Adjust size as needed
+            'visibility': 'none'
+        },
+        paint: {
+            'fill-color': [
+                'match',
+                ['downcase', ['to-string', ['coalesce', ['get', 'Zonation'], ['get', 'zonation'], ['get', 'RISK'], ['get', 'risk'], '']]],
+                'low', '#00990f',     // Green for low risk
+                'medium', '#f0e02e',  // Yellow for medium risk
+                'high', '#7d0800',    // Red for high risk
+                '#000000'             // Default color (black) if no match
+            ],
+            'fill-opacity': 0.7
         }
     });
-    map1.setLayoutProperty('darkot-schools-layer', 'visibility', 'none');
-});
-map1.addLayer({
-    id: 'darkot-glacier-layer',
-    type: 'fill',
-    source: 'darkotGlacier',
-    layout: {
-        'visibility': 'none' // ❌ Hidden by default
-    },
-    paint: {
-        'fill-color': '#ADD8E6', // Light blue
-        'fill-opacity':0.6
-    }
-});
-//__________________________________________________________________________________________________
-//Gulmit
-map1.addLayer({
-    id: 'gulmit-line-layer',
-    type: 'line',
-    source: 'gulmitLine',
-    layout: {
-        'visibility': 'none' // Hidden by default
-    },
-    paint: {
-        'line-color': '#088', // Change to any color
-        'line-width': 6, // Adjust thickness
-    }
-});
-map1.addLayer({
-    id: 'gulmit-zonation-layer',
-    type: 'fill',
-    source: 'gulmitRz',
-    layout: {
-        'visibility': 'none'
-    },
-    paint: {
-        'fill-color': [
-            'match',
-            ['get', 'Name'], // Attribute to match
-            'Low', '#00990f',     // Green for low risk
-            'Medium', '#f0e02e',  // Yellow for medium risk
-            'High', '#7d0800',    // Red for high risk
-            '#000000'             // Default color (black) if no match
-        ],
-        'fill-opacity': 0.7
-    }   
-});
-map1.addLayer({
-    id: 'gulmit-buildings-layer',
-    type: 'fill',
-    source: 'gulmitBuildings',
-    layout: {
-        'visibility': 'none'
-    },
-    paint: {
-        'fill-color': 'grey', 
-        'fill-opacity': 0.8,
-        'fill-outline-color': 'black' // Add this line for the outline
-    }
-});
-
-map1.addLayer({
-    id: 'gulmit-roads-layer',
-    type: 'line',
-    source: 'gulmitRoads',
-    layout: {
-        'visibility': 'none'
-    },
-    paint: {
-        'line-color': '#000000', 
-        'line-width': 2
-    }
-});
-map1.addLayer({
-    id: 'gulmit-rivers-layer',
-    type: 'line',
-    source: 'gulmitRivers',
-    layout: {
-        'visibility': 'none'
-    },
-    paint: {
-        'line-color': '#0000FF', 
-        'line-width': 2
-    }
-});
-map1.loadImage('https://i.ibb.co/5g8k2HMX/school.png', (error, image) => {
-    if (error) throw error;
-
-    // Add the image to the map with a unique name
-    map1.addImage('school-icon', image);
-
+    //Darkot
     map1.addLayer({
-        id: 'gulmit-schools-layer',
-        type: 'symbol',  // Use 'symbol' for custom icons
-        source: 'gulmitSchools',
+        id: 'darkot-zonation-layer',
+        type: 'fill',
+        source: 'darkotRz',
         layout: {
-            'icon-image': 'school-icon',  // Reference the icon by name
-            'icon-size': 0.05  // Adjust size as needed
+            'visibility': 'none'
+        },
+        paint: {
+            'fill-color': [
+                'match',
+                ['get', 'zonation'], // Attribute to match
+                'Low', '#00990f',     // Green for low risk
+                'Medium', '#f0e02e',  // Yellow for medium risk
+                'High', '#7d0800',    // Red for high risk
+                '#000000'             // Default color (black) if no match
+            ],
+            'fill-opacity': 0.7
         }
     });
-    map1.setLayoutProperty('gulmit-schools-layer', 'visibility', 'none');
-});
+    map1.addLayer({
+        id: 'darkot-buildings-layer',
+        type: 'fill',
+        source: 'darkotBuildings',
+        layout: {
+            'visibility': 'none'
+        },
+        paint: {
+            'fill-color': 'grey',
+            'fill-opacity': 0.8,
+            'fill-outline-color': 'black' // Add this line for the outline
+        }
+    });
+    map1.addLayer({
+        id: 'darkot-roads-layer',
+        type: 'line',
+        source: 'darkotRivers',
+        layout: {
+            'visibility': 'none'
+        },
+        paint: {
+            'line-color': '#000000',
+            'line-width': 2
+        }
+    });
+    map1.addLayer({
+        id: 'darkot-rivers-layer',
+        type: 'line',
+        source: 'darkotRivers',
+        layout: {
+            'visibility': 'none'
+        },
+        paint: {
+            'line-color': '#0000FF',
+            'line-width': 2
+        }
+    });
+    map1.loadImage('https://i.ibb.co/5g8k2HMX/school.png', (error, image) => {
+        if (error) throw error;
 
-//__________________________________________________________________________________________________
-//Thalu
-map1.addLayer({
-    id: 'thalu-zonation-layer',
-    type: 'fill',
-    source: 'thaluRz',
-    layout: {
-        'visibility': 'none'
-    },
-    paint: {
-        'fill-color': [
-            'match',
-            ['get', 'Name'], // Attribute to match
-            'Low', '#00990f',     // Green for low risk
-            'Medium', '#f0e02e',  // Yellow for medium risk
-            'High', '#7d0800',    // Red for high risk
-            '#f0e02e'             // Default color (black) if no match
-        ],
-        'fill-opacity': 0.7
-    }
+        // Add the image to the map with a unique name
+        map1.addImage('school-icon', image);
 
-});
+        map1.addLayer({
+            id: 'darkot-schools-layer',
+            type: 'symbol',  // Use 'symbol' for custom icons
+            source: 'darkotSchools',
+            layout: {
+                'icon-image': 'school-icon',  // Reference the icon by name
+                'icon-size': 0.05  // Adjust size as needed
+            }
+        });
+        map1.setLayoutProperty('darkot-schools-layer', 'visibility', 'none');
+    });
+    map1.addLayer({
+        id: 'darkot-glacier-layer',
+        type: 'fill',
+        source: 'darkotGlacier',
+        layout: {
+            'visibility': 'none' // ❌ Hidden by default
+        },
+        paint: {
+            'fill-color': '#ADD8E6', // Light blue
+            'fill-opacity': 0.6
+        }
+    });
+    //__________________________________________________________________________________________________
+    //Gulmit
+    map1.addLayer({
+        id: 'gulmit-line-layer',
+        type: 'line',
+        source: 'gulmitLine',
+        layout: {
+            'visibility': 'none' // Hidden by default
+        },
+        paint: {
+            'line-color': '#088', // Change to any color
+            'line-width': 6, // Adjust thickness
+        }
+    });
+    map1.addLayer({
+        id: 'gulmit-zonation-layer',
+        type: 'fill',
+        source: 'gulmitRz',
+        layout: {
+            'visibility': 'none'
+        },
+        paint: {
+            'fill-color': [
+                'match',
+                ['get', 'Name'], // Attribute to match
+                'Low', '#00990f',     // Green for low risk
+                'Medium', '#f0e02e',  // Yellow for medium risk
+                'High', '#7d0800',    // Red for high risk
+                '#000000'             // Default color (black) if no match
+            ],
+            'fill-opacity': 0.7
+        }
+    });
+    map1.addLayer({
+        id: 'gulmit-buildings-layer',
+        type: 'fill',
+        source: 'gulmitBuildings',
+        layout: {
+            'visibility': 'none'
+        },
+        paint: {
+            'fill-color': 'grey',
+            'fill-opacity': 0.8,
+            'fill-outline-color': 'black' // Add this line for the outline
+        }
+    });
+
+    map1.addLayer({
+        id: 'gulmit-roads-layer',
+        type: 'line',
+        source: 'gulmitRoads',
+        layout: {
+            'visibility': 'none'
+        },
+        paint: {
+            'line-color': '#000000',
+            'line-width': 2
+        }
+    });
+    map1.addLayer({
+        id: 'gulmit-rivers-layer',
+        type: 'line',
+        source: 'gulmitRivers',
+        layout: {
+            'visibility': 'none'
+        },
+        paint: {
+            'line-color': '#0000FF',
+            'line-width': 2
+        }
+    });
+    map1.loadImage('https://i.ibb.co/5g8k2HMX/school.png', (error, image) => {
+        if (error) throw error;
+
+        // Add the image to the map with a unique name
+        map1.addImage('school-icon', image);
+
+        map1.addLayer({
+            id: 'gulmit-schools-layer',
+            type: 'symbol',  // Use 'symbol' for custom icons
+            source: 'gulmitSchools',
+            layout: {
+                'icon-image': 'school-icon',  // Reference the icon by name
+                'icon-size': 0.05  // Adjust size as needed
+            }
+        });
+        map1.setLayoutProperty('gulmit-schools-layer', 'visibility', 'none');
+    });
+
+    //__________________________________________________________________________________________________
+    //Thalu
+    map1.addLayer({
+        id: 'thalu-zonation-layer',
+        type: 'fill',
+        source: 'thaluRz',
+        layout: {
+            'visibility': 'none'
+        },
+        paint: {
+            'fill-color': [
+                'match',
+                ['get', 'Name'], // Attribute to match
+                'Low', '#00990f',     // Green for low risk
+                'Medium', '#f0e02e',  // Yellow for medium risk
+                'High', '#7d0800',    // Red for high risk
+                '#f0e02e'             // Default color (black) if no match
+            ],
+            'fill-opacity': 0.7
+        }
+
+    });
 
     const ensureLakeSymbologyIcons = function ensureLakeSymbologyIcons() {
         const size = 80;
@@ -3375,14 +3609,45 @@ map1.addLayer({
         type: 'fill',
         source: 'vulnerableMeltingGlaciers',
         layout: { 'visibility': 'none' },
-        paint: { 'fill-color': '#ff6b9d', 'fill-opacity': 0.65 }
+        paint: { 'fill-color': '#00aeff', 'fill-opacity': 0.65 }
     });
     map1.addLayer({
         id: 'vulnerable-melting-glaciers-outline',
         type: 'line',
         source: 'vulnerableMeltingGlaciers',
         layout: { 'visibility': 'none' },
-        paint: { 'line-color': '#ff1493', 'line-width': 2.5, 'line-opacity': 1 }
+        paint: { 'line-color': '#1466ff', 'line-width': 2.5, 'line-opacity': 1 }
+    });
+
+    //__________________________________________________________________________________________________
+    // Vulnerable Melting Points — polygon layers
+    map1.addLayer({
+        id: 'vulnerable-melting-points-layer',
+        type: 'fill',
+        source: 'vulnerableMeltingPoints',
+        layout: { 'visibility': 'none' },
+        paint: { 'fill-color': '#ff3d00', 'fill-opacity': 0.60 }
+    });
+    map1.addLayer({
+        id: 'vulnerable-melting-points-outline',
+        type: 'line',
+        source: 'vulnerableMeltingPoints',
+        layout: { 'visibility': 'none' },
+        paint: { 'line-color': '#d50000', 'line-width': 2.5, 'line-opacity': 1 }
+    });
+    // Vulnerable Melting Points — point circle layer
+    map1.addLayer({
+        id: 'vulnerable-melting-points-circle',
+        type: 'circle',
+        source: 'vulnerableMeltingPoints',
+        layout: { 'visibility': 'none' },
+        paint: {
+            'circle-color': '#ff3d00',
+            'circle-radius': 7,
+            'circle-stroke-color': '#ffffff',
+            'circle-stroke-width': 1.5,
+            'circle-opacity': 0.85
+        }
     });
 
     //__________________________________________________________________________________________________
@@ -3464,8 +3729,8 @@ map1.addLayer({
     //__________________________________________________________________________________________________
     // Land Surface Temperature (LST) — 12 Monthly WMS Raster Layers
     // All 12 layers are added upfront (hidden). Show/hide only; no reload after first fetch.
-    const lstMonths = ['January','February','March','April','May','June',
-                       'July','August','September','October','November','December'];
+    const lstMonths = ['January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'];
     for (let month = 1; month <= 12; month++) {
         map1.addSource(`lst-month-${month}`, {
             type: 'raster',
@@ -3551,3 +3816,14 @@ const buildGlofLakesPopup = (props) => {
 addPopup('glof-lakes-fill', buildGlofLakesPopup);
 addPopup('glof-lakes-outline', buildGlofLakesPopup);
 addPopup('glof-lakes-centroid', buildGlofLakesPopup);
+
+addPopup('vulnerable-melting-points-layer', (props) => `
+    <strong><u>Vulnerable Melting Zone</u></strong><br>
+    Name: ${props.Name || props.name || props.ZONE || props.zone || 'Melt Point'}
+`);
+addPopup('vulnerable-melting-points-circle', (props) => `
+    <strong><u>Vulnerable Melting Point</u></strong><br>
+    Name: ${props.Name || props.name || props.ZONE || props.zone || 'Melt Point'}
+`);
+
+

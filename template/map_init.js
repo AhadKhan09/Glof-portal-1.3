@@ -88,28 +88,102 @@ class PitchToggleControl {
     }
 }
 
-// Custom Layer Customization Control
-class LayerCustomizationControl {
+// Custom Glacial Lake Dashboard Widgets show/hide control panel
+class DashboardWidgetsTogglesControl {
     onAdd(map) {
         this._map = map;
         this._container = document.createElement('div');
         this._container.className = 'mapboxgl-ctrl mapboxgl-ctrl-group';
-        this._btn = document.createElement('button');
-        this._btn.className = 'layer-customization-btn';
-        this._btn.title = 'Toggle Layer Customizations Settings';
-        this._btn.innerHTML = '&#127912;'; // Paint palette emoji
-        this._btn.onclick = () => {
-            window.isCustomizationModeActive = !window.isCustomizationModeActive;
+        
+        // Define all widget toggles
+        const toggles = [
+            {
+                id: 'toggle-charts',
+                title: 'Toggle Glacial Lake Charts',
+                icon: 'fas fa-chart-bar',
+                targetId: 'charts-row',
+                hiddenClass: 'hidden-charts',
+                startHidden: true, // starts hidden by default
+                onToggle: (isHidden) => {
+                    // Trigger window resize immediately
+                    window.dispatchEvent(new Event('resize'));
+                    // Also trigger chart redraws after CSS transitions finish
+                    if (!isHidden) {
+                        setTimeout(() => {
+                            if (window.lakeChart) { window.lakeChart.resize(); window.lakeChart.update(); }
+                            if (window.volumeChart) { window.volumeChart.resize(); window.volumeChart.update(); }
+                        }, 350);
+                    }
+                }
+            },
+            {
+                id: 'toggle-area-monitor',
+                title: 'Toggle GLOF Area Monitor',
+                icon: 'fas fa-tachometer-alt',
+                targetId: 'lake-area-widget',
+                hiddenClass: 'hidden-widget',
+                startHidden: false
+            },
+            {
+                id: 'toggle-temp-forecast',
+                title: 'Toggle Temperature Forecast',
+                icon: 'fas fa-temperature-high',
+                targetId: 'lake-temp-widget',
+                hiddenClass: 'hidden-widget',
+                startHidden: false
+            },
+            {
+                id: 'toggle-video-widget',
+                title: 'Toggle Lake Area Change Video',
+                icon: 'fas fa-video',
+                targetId: 'lake-video-widget',
+                hiddenClass: 'hidden-widget',
+                startHidden: false
+            },
+            {
+                id: 'toggle-impact-map',
+                title: 'Toggle Lake Impact Map',
+                icon: 'fas fa-map',
+                targetId: 'lake-map-preview',
+                hiddenClass: 'hidden-widget',
+                startHidden: false
+            },
+            {
+                id: 'toggle-active-legend',
+                title: 'Toggle Active Layers Legend',
+                icon: 'fas fa-list-ul',
+                targetId: 'active-layers-legend',
+                hiddenClass: 'hidden-widget',
+                startHidden: false
+            }
+        ];
+
+        toggles.forEach((t) => {
+            const btn = document.createElement('button');
+            btn.className = `widget-toggle-btn${t.startHidden ? ' widget-hidden' : ''}`;
+            btn.type = 'button';
+            btn.title = t.title;
+            btn.innerHTML = `<i class="${t.icon}" style="font-size: 11px;"></i>`;
             
-            // Toggle visibility of existing active controls in the legend
-            const controls = document.querySelectorAll('.legend-controls-wrap');
-            controls.forEach(ctrl => {
-                ctrl.style.display = window.isCustomizationModeActive ? 'flex' : 'none';
-            });
-            
-            this._btn.style.backgroundColor = window.isCustomizationModeActive ? '#e2e8f0' : '';
-        };
-        this._container.appendChild(this._btn);
+            btn.onclick = () => {
+                const target = document.getElementById(t.targetId);
+                if (target) {
+                    const isHidden = target.classList.toggle(t.hiddenClass);
+                    btn.classList.toggle('widget-hidden', isHidden);
+                    
+                    // Trigger dynamic offset updates in controls.js
+                    if (typeof updateActiveLegendOffset === 'function') {
+                        updateActiveLegendOffset();
+                    }
+                    
+                    if (t.onToggle) {
+                        t.onToggle(isHidden);
+                    }
+                }
+            };
+            this._container.appendChild(btn);
+        });
+
         return this._container;
     }
     onRemove() {
@@ -117,6 +191,7 @@ class LayerCustomizationControl {
         this._map = undefined;
     }
 }
+
 
 class PopulatedPlacesSearchControl {
     constructor(options = {}) {
@@ -455,8 +530,8 @@ map1.addControl(
     'top-right'
 );
 map1.addControl(new PitchToggleControl(), 'top-right');
-window.isCustomizationModeActive = false; // Initial State
-map1.addControl(new LayerCustomizationControl(), 'top-right');
+map1.addControl(new DashboardWidgetsTogglesControl(), 'top-right');
+window.isCustomizationModeActive = true; // Always in editable/customization mode
 //________________________________________________________________________________________________________________________________________________________________________________________
 map1.on('style.load', () => {
     map1.addSource('mapbox-dem', {
@@ -468,3 +543,196 @@ map1.on('style.load', () => {
     // add the DEM source as a terrain layer with exaggerated height
     map1.setTerrain({ 'source': 'mapbox-dem', 'exaggeration': 1.5 });
 });
+
+// ==========================================================================
+// TEMPERATURE FROM OPENWEATHERMAP DYNAMIC LAYER INITIALIZATION
+// ==========================================================================
+
+const OWM_API_KEY = "dec8c58f7b91bff0bbd3876dec903bf4";
+window.weatherMarkers = [];
+
+// Determine color and class for temperature value
+function getWeatherColorAndClass(temp) {
+    let color = "#ef4444"; // Red fallback
+    let isBlinking = false;
+    
+    if (temp < 0) {
+        color = "#3b82f6"; // Blue
+    } else if (temp >= 0 && temp <= 10) {
+        color = "#eab308"; // Yellow
+    } else if (temp > 10 && temp <= 20) {
+        color = "#f97316"; // Orange
+    } else if (temp > 20 && temp <= 30) {
+        color = "#ef4444"; // Red
+    } else if (temp > 30) {
+        color = "#dc2626"; // Blinking Red
+        isBlinking = true;
+    }
+    
+    return { color, isBlinking };
+}
+
+// Function to render weather markers on the map
+function renderWeatherMarkers(weatherData) {
+    // Clear existing markers
+    clearWeatherMarkers();
+
+    weatherData.forEach(item => {
+        const { color, isBlinking } = getWeatherColorAndClass(item.temp);
+        
+        // Create custom HTML element for marker
+        const el = document.createElement('div');
+        el.className = `weather-circle-marker ${isBlinking ? 'blink' : ''}`;
+        el.style.backgroundColor = color;
+        el.style.borderColor = shadeColor(color, -20);
+        el.textContent = `${item.temp.toFixed(1)}°`;
+
+        // Create Mapbox popup
+        const popup = new mapboxgl.Popup({
+            offset: [0, -20],
+            closeButton: true,
+            closeOnClick: false,
+            className: 'weather-marker-popup'
+        }).setHTML(`
+            <div class="weather-popup-header" style="border-bottom: 1px solid rgba(255,255,255,0.15); padding-bottom: 4px; margin-bottom: 6px;">
+                <h4 style="margin: 0; font-size: 14px; font-weight: 700; color: #93c5fd;">${item.name}</h4>
+                <span style="font-size: 10px; color: #bfdbfe; text-transform: uppercase;">${item.type} EWS</span>
+            </div>
+            <div class="weather-popup-body" style="font-size: 12px; line-height: 1.4;">
+                <p style="margin: 2px 0;"><strong>Temperature:</strong> <span style="font-size: 14px; font-weight: 700; color: #ffffff;">${item.temp.toFixed(1)}°C</span></p>
+                <p style="margin: 2px 0; color: #94a3b8; font-size: 11px;"><strong>Coordinates:</strong> ${item.lat.toFixed(5)}°N, ${item.lon.toFixed(5)}°E</p>
+                <p style="margin: 4px 0 0 0; color: #a1a1aa; font-size: 9.5px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 4px;">Last Refreshed:<br>${item.last_updated}</p>
+            </div>
+        `);
+
+        // Create Mapbox marker and add to map
+        const marker = new mapboxgl.Marker({
+            element: el,
+            anchor: 'center'
+        })
+        .setLngLat([item.lon, item.lat])
+        .setPopup(popup)
+        .addTo(map1);
+
+        window.weatherMarkers.push(marker);
+    });
+}
+
+// Clear markers from map
+function clearWeatherMarkers() {
+    if (window.weatherMarkers) {
+        window.weatherMarkers.forEach(marker => marker.remove());
+    }
+    window.weatherMarkers = [];
+}
+
+// Toggle Temperature Layer on/off
+async function toggleTemperatureLayer(visible) {
+    if (visible) {
+        // Load data from localStorage or fetch from openweathermap.json
+        let storedData = localStorage.getItem('openweathermap_data');
+        if (storedData) {
+            try {
+                const weatherData = JSON.parse(storedData);
+                renderWeatherMarkers(weatherData);
+            } catch (e) {
+                console.error("Error parsing stored weather data, fetching default:", e);
+                await fetchAndLoadDefaultWeather();
+            }
+        } else {
+            await fetchAndLoadDefaultWeather();
+        }
+    } else {
+        clearWeatherMarkers();
+    }
+}
+window.toggleTemperatureLayer = toggleTemperatureLayer;
+
+// Fetch and load default JSON data
+async function fetchAndLoadDefaultWeather() {
+    try {
+        const response = await fetch('data/openweathermap.json');
+        if (!response.ok) throw new Error("Failed to fetch openweathermap.json");
+        const weatherData = await response.json();
+        localStorage.setItem('openweathermap_data', JSON.stringify(weatherData));
+        renderWeatherMarkers(weatherData);
+    } catch (err) {
+        console.error("Error loading openweathermap.json default data:", err);
+    }
+}
+
+// Refresh weather data from OpenWeatherMap API
+async function refreshWeatherData(event) {
+    if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+    }
+
+    const refreshIcon = document.getElementById('refresh-weather-icon');
+    const refreshBtn = document.getElementById('refresh-weather-btn');
+    if (refreshIcon) refreshIcon.classList.add('fa-spin');
+    if (refreshBtn) refreshBtn.disabled = true;
+
+    try {
+        // Load current data array (we need coordinate information)
+        let currentData = [];
+        let storedData = localStorage.getItem('openweathermap_data');
+        
+        if (storedData) {
+            currentData = JSON.parse(storedData);
+        } else {
+            const response = await fetch('data/openweathermap.json');
+            currentData = await response.json();
+        }
+
+        const now = new Date();
+        const timestamp = now.getFullYear() + '-' + 
+                          String(now.getMonth() + 1).padStart(2, '0') + '-' + 
+                          String(now.getDate()).padStart(2, '0') + ' ' + 
+                          String(now.getHours()).padStart(2, '0') + ':' + 
+                          String(now.getMinutes()).padStart(2, '0') + ':' + 
+                          String(now.getSeconds()).padStart(2, '0');
+
+        // Fetch new data for each coordinate in parallel using sequential fallback if rates limit
+        const fetchPromises = currentData.map(async (item) => {
+            try {
+                const apiResponse = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${item.lat}&lon=${item.lon}&appid=${OWM_API_KEY}&units=metric`);
+                if (!apiResponse.ok) throw new Error(`HTTP Error ${apiResponse.status}`);
+                const data = await apiResponse.json();
+                if (data && data.main && typeof data.main.temp === 'number') {
+                    item.temp = data.main.temp;
+                    item.last_updated = timestamp;
+                }
+            } catch (err) {
+                console.warn(`Could not refresh weather for ${item.name}:`, err);
+            }
+            return item;
+        });
+
+        const updatedData = await Promise.all(fetchPromises);
+        
+        // Save to localStorage
+        localStorage.setItem('openweathermap_data', JSON.stringify(updatedData));
+
+        // Re-render markers if the layer is active (toggle is checked)
+        const toggleCheckbox = document.getElementById('quick-temperature-toggle');
+        if (toggleCheckbox && toggleCheckbox.checked) {
+            renderWeatherMarkers(updatedData);
+        }
+
+        // Simple visual feedback: flash refresh button green briefly
+        if (refreshBtn) {
+            refreshBtn.style.color = "#22c55e";
+            setTimeout(() => { refreshBtn.style.color = "#93c5fd"; }, 1500);
+        }
+    } catch (err) {
+        console.error("Failed to refresh weather data:", err);
+    } finally {
+        if (refreshIcon) refreshIcon.classList.remove('fa-spin');
+        if (refreshBtn) refreshBtn.disabled = false;
+    }
+}
+window.refreshWeatherData = refreshWeatherData;
+
+
+

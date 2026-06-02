@@ -24,12 +24,12 @@ function toggleGlofLakes(map) {
     const isVisible = map.getLayoutProperty(pinLayer, 'visibility') === 'visible';
 
     if (!isVisible) {
-        // Keep polygon layers hidden, show centroid ring layer only
-        if (map.getLayer(fillLayer)) map.setLayoutProperty(fillLayer, 'visibility', 'none');
-        if (map.getLayer(outLayer)) map.setLayoutProperty(outLayer, 'visibility', 'none');
+        // Show polygon layers AND centroid ring layer
+        if (map.getLayer(fillLayer)) map.setLayoutProperty(fillLayer, 'visibility', 'visible');
+        if (map.getLayer(outLayer)) map.setLayoutProperty(outLayer, 'visibility', 'visible');
         if (map.getLayer(pinLayer)) map.setLayoutProperty(pinLayer, 'visibility', 'visible');
 
-        // Blink ring icon similar to 2025 marker blinking behavior
+        // Blink ring icon
         let iconOn = true;
         glofLakesBlinkInterval = setInterval(function () {
             if (map.getLayer(pinLayer)) {
@@ -38,7 +38,7 @@ function toggleGlofLakes(map) {
             iconOn = !iconOn;
         }, 500);
     } else {
-        // Stop blinking and hide
+        // Stop blinking and hide everything
         if (glofLakesBlinkInterval !== null) {
             clearInterval(glofLakesBlinkInterval);
             glofLakesBlinkInterval = null;
@@ -164,39 +164,95 @@ function buildScaledIconSize(layerId, scaleValue) {
     return scaleValue;
 }
 
-function applyCustomization(layerId, color, size, opacity, iconElement) {
-    if (!map1 || !map1.getLayer(layerId)) return;
+function applyCustomization(layerIds, color, size, opacity, iconElement) {
+    if (!map1) return;
     
-    const layoutIconImg = map1.getLayoutProperty(layerId, 'icon-image');
-    if (!layoutIconImg) return; 
+    const layerArray = Array.isArray(layerIds) ? layerIds : [layerIds];
+    
+    layerArray.forEach(layerId => {
+        if (!map1.getLayer(layerId)) return;
+        
+        const layerType = map1.getLayer(layerId).type;
+        
+        if (layerType === 'symbol') {
+            let layoutIconImg;
+            try {
+                layoutIconImg = map1.getLayoutProperty(layerId, 'icon-image');
+            } catch(e) {}
+            if (layoutIconImg && !Array.isArray(layoutIconImg)) {
+                const imageName = layoutIconImg;
+                recreatePinIcon(imageName, color);
+                
+                if (!window.originalLayerSizes[layerId]) {
+                    const currentSize = map1.getLayoutProperty(layerId, 'icon-size');
+                    window.originalLayerSizes[layerId] = currentSize || 1;
+                }
+                const scaleValue = normalizeScaleValue(size, 1);
+                const scaledIconSize = buildScaledIconSize(layerId, scaleValue);
+                map1.setLayoutProperty(layerId, 'icon-size', scaledIconSize);
 
-    const imageName = Array.isArray(layoutIconImg) ? null : layoutIconImg;
-    
-    if (imageName) {
-        recreatePinIcon(imageName, color);
-    }
-    
-    if (!window.originalLayerSizes[layerId]) {
-        const currentSize = map1.getLayoutProperty(layerId, 'icon-size');
-        window.originalLayerSizes[layerId] = currentSize || 1;
-    }
-    
-    // In MapBox GL JS, multiplying by an interpolation expression requires careful syntax.
-    // Wrap it safely.
-    const scaleValue = normalizeScaleValue(size, 1);
-    const scaledIconSize = buildScaledIconSize(layerId, scaleValue);
-    map1.setLayoutProperty(layerId, 'icon-size', scaledIconSize);
+                if (opacity !== undefined) {
+                    map1.setPaintProperty(layerId, 'icon-opacity', parseFloat(opacity));
+                    if (map1.getLayoutProperty(layerId, 'text-field')) {
+                        map1.setPaintProperty(layerId, 'text-opacity', parseFloat(opacity));
+                    }
+                }
+            }
+        } else if (layerType === 'circle') {
+            // It's a circle layer
+            map1.setPaintProperty(layerId, 'circle-color', color);
+            
+            if (!window.originalLayerSizes[layerId]) {
+                const currentSize = map1.getPaintProperty(layerId, 'circle-radius');
+                window.originalLayerSizes[layerId] = currentSize || 6;
+            }
+            
+            const scaleValue = normalizeScaleValue(size, 1);
+            const scaledIconSize = buildScaledIconSize(layerId, scaleValue);
+            map1.setPaintProperty(layerId, 'circle-radius', scaledIconSize);
 
-    if (opacity !== undefined) {
-        map1.setPaintProperty(layerId, 'icon-opacity', parseFloat(opacity));
-        if (map1.getLayoutProperty(layerId, 'text-field')) {
-            map1.setPaintProperty(layerId, 'text-opacity', parseFloat(opacity));
+            if (opacity !== undefined) {
+                map1.setPaintProperty(layerId, 'circle-opacity', parseFloat(opacity));
+                map1.setPaintProperty(layerId, 'circle-stroke-opacity', parseFloat(opacity));
+            }
+        } else if (layerType === 'fill') {
+            // It's a fill (polygon) layer
+            map1.setPaintProperty(layerId, 'fill-color', color);
+            
+            if (opacity !== undefined) {
+                map1.setPaintProperty(layerId, 'fill-opacity', parseFloat(opacity));
+            }
+        } else if (layerType === 'line') {
+            // It's a line layer
+            map1.setPaintProperty(layerId, 'line-color', color);
+            
+            if (!window.originalLayerSizes[layerId]) {
+                const currentSize = map1.getPaintProperty(layerId, 'line-width');
+                window.originalLayerSizes[layerId] = currentSize || 2;
+            }
+            
+            const scaleValue = normalizeScaleValue(size, 1);
+            const scaledIconSize = buildScaledIconSize(layerId, scaleValue);
+            map1.setPaintProperty(layerId, 'line-width', scaledIconSize);
+
+            if (opacity !== undefined) {
+                map1.setPaintProperty(layerId, 'line-opacity', parseFloat(opacity));
+            }
+        } else if (layerType === 'raster') {
+            // It's a raster/image layer
+            if (opacity !== undefined) {
+                map1.setPaintProperty(layerId, 'raster-opacity', parseFloat(opacity));
+            }
         }
-    }
+    });
 
     if (iconElement) {
-        iconElement.style.background = `radial-gradient(circle at center, #f8fafc 0 28%, ${color} 30% 72%, ${shadeColor(color, -20)} 74% 100%)`;
-        iconElement.style.border = `1px solid ${shadeColor(color, -40)}`;
+        iconElement.style.background = color;
+        if (iconElement.classList.contains('icon-line')) {
+            iconElement.style.border = 'none';
+        } else {
+            iconElement.style.border = `1px solid ${shadeColor(color, -40)}`;
+        }
         if (opacity !== undefined) {
             iconElement.style.opacity = opacity;
         }
@@ -330,6 +386,16 @@ function bindLegendDragHandlers() {
 
 function getDefaultColorForLayer(layerId) {
     const id = layerId.toLowerCase();
+    // PMD categorized layers
+    if (id.includes('pmd-sensors-arg')) return '#ca8a04';
+    if (id.includes('pmd-sensors-aws')) return '#e11d48';
+    if (id.includes('pmd-sensors-wl-r')) return '#2563eb';
+    if (id.includes('pmd-sensors-wl-l')) return '#0d9488';
+    if (id.includes('pmd-sensors-wp')) return '#9333ea';
+    if (id.includes('pmd-sensors-dg')) return '#ea580c';
+    
+    if (id.includes('vulnerable-melting-glaciers')) return '#00aeff';
+    if (id.includes('vulnerable-melting-points')) return '#ff3d00';
     if (id.includes('glof-ii')) return '#facc15';
     if (id.includes('akah')) return '#22c55e';
     if (id.includes('undp')) return '#fb923c';
@@ -347,21 +413,73 @@ function refreshActiveLayersLegend() {
         return;
     }
 
-    const checkedInputs = Array.from(menu.querySelectorAll('input.form-check-input[type="checkbox"]:checked'))
-        .filter((inputElement) => inputElement.dataset.legendTrack === 'true');
+    const checkedInputs = Array.from(menu.querySelectorAll('input.form-check-input[type="checkbox"]:checked'));
+    let hasRiskZonationChecked = false;
+    
     const enabledLayers = checkedInputs
         .map((inputElement, index) => {
             const label = menu.querySelector(`label[for="${inputElement.id}"]`);
             const layerName = label ? label.textContent.trim() : '';
+            
+            if (layerName === 'Risk Zonation') {
+                hasRiskZonationChecked = true;
+                return null;
+            }
+            
+            let layerIds = [];
+            if (inputElement.dataset.layer) {
+                layerIds.push(inputElement.dataset.layer);
+            } else {
+                layerIds = parseLayerIdsFromToggleInput(inputElement);
+            }
+            
+            // Fallback for hardcoded functions that don't pass the array inline
+            if (!layerIds.length) {
+                const id = inputElement.id;
+                if (id === 'inventory-toggle') layerIds = ['glacial-lakes-inventory-fill', 'glacial-lakes-inventory-outline', 'glacial-lakes-inventory-centers'];
+                else if (id === 'quick-incident-2025-toggle') layerIds = ['incident'];
+                else if (id === 'quick-station-points-toggle') layerIds = ['station-points-animated-layer', 'station-points-animated-halo-layer', 'station-points-label-layer'];
+                else if (id === 'quick-high-temp-2026-toggle') layerIds = ['high-temp-warning-area'];
+                else if (id === 'lst-layer-toggle') layerIds = ['lst-month-1'];
+                else if (id === 'risk-zonation-ava-toggle') layerIds = ['akah-hzd-ava-layer', 'akah-hzd-ava-outline-layer'];
+                else if (id === 'risk-zonation-dbf-toggle') layerIds = ['akah-hzd-dbf-layer', 'akah-hzd-dbf-outline-layer'];
+                else if (id === 'risk-zonation-bnk-toggle') layerIds = ['akah-hzd-bnk-layer', 'akah-hzd-bnk-outline-layer'];
+                else if (id === 'risk-zonation-fld-toggle') layerIds = ['akah-hzd-fld-layer', 'akah-hzd-fld-outline-layer'];
+                else if (id === 'risk-zonation-lds-toggle') layerIds = ['akah-hzd-lds-layer', 'akah-hzd-lds-outline-layer'];
+                else if (id === 'risk-zonation-rkf-toggle') layerIds = ['akah-hzd-rkf-layer', 'akah-hzd-rkf-outline-layer'];
+                else if (id === 'risk-zonation-ufl-toggle') layerIds = ['akah-hzd-ufl-layer', 'akah-hzd-ufl-outline-layer'];
+                else if (id === 'quick-vulsites-2025-toggle') layerIds = ['vulSites'];
+                else if (id === 'quick-vullakes-2025-toggle') layerIds = ['vulLakes'];
+                else if (id === 'quick-vulsites-2026-toggle') layerIds = ['vul-sites-2026-layer'];
+                else if (id === 'quick-vullakes-2026-toggle') layerIds = ['glof-lakes-centroid'];
+                else if (id === 'quick-vulnerable-melting-glaciers-toggle') layerIds = ['vulnerable-melting-glaciers-layer', 'vulnerable-melting-glaciers-outline'];
+                else if (id === 'quick-vulnerable-melting-points-toggle') layerIds = ['vulnerable-melting-points-layer', 'vulnerable-melting-points-outline', 'vulnerable-melting-points-circle'];
+            }
+
             return {
                 id: inputElement.id,
                 menuIndex: index,
                 layerName,
                 legendIcon: inputElement.dataset.legendIcon || '',
-                layerId: inputElement.dataset.layer || ''
+                layerId: layerIds[0] || '',
+                layerIds: layerIds.filter(id => !!id),
+                inputId: inputElement.id
             };
         })
-        .filter((layer) => layer.layerName.length > 0);
+        .filter((layer) => layer && layer.layerName.length > 0 && layer.layerId);
+
+    if (hasRiskZonationChecked) {
+        enabledLayers.push({
+            id: 'virtual-risk-zonation-toggle',
+            menuIndex: 999,
+            layerName: 'Risk Zonation',
+            legendIcon: 'icon-untracked',
+            layerId: 'virtual-risk-zonation-layer',
+            layerIds: [],
+            inputId: 'virtual-risk-zonation-toggle',
+            isVirtualRiskZonation: true
+        });
+    }
 
     legendItemsContainer.innerHTML = '';
 
@@ -390,9 +508,55 @@ function refreshActiveLayersLegend() {
         dragHandle.addEventListener('dragstart', handleLegendDragStart);
         dragHandle.addEventListener('dragend', handleLegendDragEnd);
 
+        let layerType = null;
+        if (layer.layerId && map1 && map1.getLayer(layer.layerId)) {
+            layerType = map1.getLayer(layer.layerId).type;
+        }
+
         const icon = document.createElement('span');
-        icon.className = `active-layers-legend-icon ${getLegendIconClass(layer)}`;
+        let iconClass = getLegendIconClass(layer);
+        
+        if (layer.id === 'inventory-toggle') {
+            iconClass = 'icon-cyan-dot';
+            layerType = 'symbol';
+        } else if (layerType === 'line') {
+            iconClass = 'icon-line';
+        } else if (layerType === 'fill') {
+            iconClass = 'icon-polygon';
+        }
+        
+        icon.className = `active-layers-legend-icon ${iconClass}`;
         icon.setAttribute('aria-hidden', 'true');
+
+        if (iconClass === 'icon-untracked' || iconClass === 'icon-default') {
+            icon.style.opacity = '0';
+            icon.style.pointerEvents = 'none';
+        }
+
+        let defaultColor = getDefaultColorForLayer(layer.layerId || layer.inputId);
+        let actualColor = defaultColor;
+        if (layerType === 'line') {
+            try { actualColor = map1.getPaintProperty(layer.layerId, 'line-color'); } catch(e){}
+        } else if (layerType === 'fill') {
+            try { actualColor = map1.getPaintProperty(layer.layerId, 'fill-color'); } catch(e){}
+        } else if (layerType === 'circle') {
+            try { actualColor = map1.getPaintProperty(layer.layerId, 'circle-color'); } catch(e){}
+        }
+        
+        if (typeof actualColor !== 'string') {
+            actualColor = defaultColor; 
+        }
+
+        if (layerType === 'line') {
+            icon.style.backgroundColor = actualColor;
+            icon.style.borderColor = 'transparent';
+        } else if (layerType === 'fill') {
+            icon.style.backgroundColor = actualColor;
+            icon.style.borderColor = '#ffffff';
+        } else if (layer.layerId && layer.layerId.includes('pmd-sensors')) {
+            icon.style.backgroundColor = defaultColor;
+            icon.style.borderColor = '#ffffff';
+        }
 
         const text = document.createElement('span');
         text.textContent = layer.layerName;
@@ -430,22 +594,41 @@ function refreshActiveLayersLegend() {
             item.appendChild(countSpan);
         }
 
+        const controlsWrap = document.createElement('div');
+        controlsWrap.className = 'legend-controls-wrap';
+        controlsWrap.style.display = 'flex';
+
+        let settingsBtn = null;
+        let settingsPanel = null;
+        let isCustomizable = false;
+        let currentOpt = { color: '#cccccc', opacity: 1, size: 1 };
+
         if (layer.layerId && map1 && map1.getLayer(layer.layerId)) {
-            const layoutIconImg = map1.getLayoutProperty(layer.layerId, 'icon-image');
-            if (layoutIconImg && !Array.isArray(layoutIconImg)) {
-                const settingsBtn = document.createElement('button');
+            const layerType = map1.getLayer(layer.layerId).type;
+            let layoutIconImg = undefined;
+            if (layerType === 'symbol') {
+                try {
+                    layoutIconImg = map1.getLayoutProperty(layer.layerId, 'icon-image');
+                } catch (e) {}
+            }
+            
+            isCustomizable = true; // Make ANY valid layer type we find editable through generic properties if possible, or fallback safely
+            currentOpt.color = getDefaultColorForLayer(layer.layerId);
+
+            if (isCustomizable) {
+                settingsBtn = document.createElement('button');
                 settingsBtn.innerHTML = '&#9881;';
                 settingsBtn.className = 'legend-settings-btn';
                 settingsBtn.title = 'Customize styling';
                 
-                const settingsPanel = document.createElement('div');
+                settingsPanel = document.createElement('div');
                 settingsPanel.className = 'legend-settings-panel';
                 settingsPanel.style.display = 'none';
 
                 if(!window.layerCustomizations[layer.layerId]) {
-                    window.layerCustomizations[layer.layerId] = { color: getDefaultColorForLayer(layer.layerId), opacity: 1, size: 1 };
+                    window.layerCustomizations[layer.layerId] = { color: currentOpt.color, opacity: 1, size: 1 };
                 }
-                const currentOpt = window.layerCustomizations[layer.layerId];
+                currentOpt = window.layerCustomizations[layer.layerId];
 
                 const colorInput = document.createElement('input');
                 colorInput.type = 'color';
@@ -465,23 +648,48 @@ function refreshActiveLayersLegend() {
                 opacityInput.step = '0.1';
                 opacityInput.value = currentOpt.opacity !== undefined ? currentOpt.opacity : 1;
                 opacityInput.className = 'legend-number-input';
+                
+                const sizeIcon = document.createElement('i');
+                sizeIcon.className = 'fas fa-search-plus';
+                sizeIcon.style.color = '#94a3b8';
+                sizeIcon.style.marginLeft = '4px';
+                sizeIcon.style.fontSize = '12px';
+                sizeIcon.title = 'Size scale';
 
-                settingsPanel.appendChild(colorInput);
+                const sizeInput = document.createElement('input');
+                sizeInput.type = 'number';
+                sizeInput.min = '0.1';
+                sizeInput.max = '5.0';
+                sizeInput.step = '0.1';
+                sizeInput.value = currentOpt.size !== undefined ? currentOpt.size : 1;
+                sizeInput.className = 'legend-number-input';
+
                 settingsPanel.appendChild(opacityIcon);
                 settingsPanel.appendChild(opacityInput);
-
-                const controlsWrap = document.createElement('div');
-                controlsWrap.className = 'legend-controls-wrap';
-                // Initially keep configuration hidden unless global toggle is active.
-                controlsWrap.style.display = window.isCustomizationModeActive ? 'flex' : 'none';
-                controlsWrap.appendChild(settingsBtn);
-                controlsWrap.appendChild(settingsPanel);
                 
-                item.appendChild(controlsWrap);
+                // Hide color picker for risk zonation layers since their styles are predefined multi-color rules
+                const isRiskZonation = layer.layerName.toLowerCase().includes('risk') || 
+                                       layer.layerName.toLowerCase().includes('zonation') || 
+                                       layer.layerId.toLowerCase().includes('risk') ||
+                                       layer.layerName.toLowerCase().includes('susceptibility') ||
+                                       layer.inputId === 'risk-zonation-ava-toggle' ||
+                                       layer.inputId === 'risk-zonation-dbf-toggle' ||
+                                       layer.inputId === 'risk-zonation-bnk-toggle' ||
+                                       layer.inputId === 'risk-zonation-fld-toggle' ||
+                                       layer.inputId === 'risk-zonation-lds-toggle' ||
+                                       layer.inputId === 'risk-zonation-rkf-toggle' ||
+                                       layer.inputId === 'risk-zonation-ufl-toggle';
 
-                if (currentOpt.color !== getDefaultColorForLayer(layer.layerId) || currentOpt.opacity !== 1) {
-                    applyCustomization(layer.layerId, currentOpt.color, 1, currentOpt.opacity, icon);
+                if (layerType !== 'raster' && !isRiskZonation) {
+                    settingsPanel.insertBefore(colorInput, opacityIcon);
                 }
+                
+                if (layerType !== 'fill' && layerType !== 'raster') {
+                    settingsPanel.appendChild(sizeIcon);
+                    settingsPanel.appendChild(sizeInput);
+                }
+
+                controlsWrap.appendChild(settingsBtn);
 
                 settingsBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
@@ -491,12 +699,73 @@ function refreshActiveLayersLegend() {
                 const onUpdate = () => {
                     currentOpt.color = colorInput.value;
                     currentOpt.opacity = opacityInput.value;
-                    applyCustomization(layer.layerId, currentOpt.color, 1, currentOpt.opacity, icon);
+                    currentOpt.size = sizeInput.value;
+                    applyCustomization(layer.layerIds, currentOpt.color, currentOpt.size, currentOpt.opacity, icon);
                 };
 
                 colorInput.addEventListener('input', onUpdate);
                 opacityInput.addEventListener('change', onUpdate);
+                sizeInput.addEventListener('change', onUpdate);
             }
+        }
+
+        const closeBtn = document.createElement('button');
+        closeBtn.innerHTML = '&#10005;'; // cross symbol
+        closeBtn.className = 'legend-settings-btn';
+        closeBtn.title = 'Remove layer';
+        closeBtn.style.color = '#ef4444';
+
+        closeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (layer.isVirtualRiskZonation) {
+                const checkedRiskInputs = Array.from(menu.querySelectorAll('input.form-check-input[type="checkbox"]:checked'))
+                    .filter(input => {
+                        const labelText = menu.querySelector(`label[for="${input.id}"]`)?.textContent.trim() || '';
+                        return labelText === 'Risk Zonation';
+                    });
+                checkedRiskInputs.forEach(cb => cb.click());
+            } else {
+                const checkbox = document.getElementById(layer.inputId || layer.id);
+                if (checkbox) {
+                    checkbox.click();
+                } else if (layer.inputId) {
+                    try {
+                        const cb = document.querySelector(`input[data-layer-id="${layer.layerId}"]`) || document.getElementById(layer.inputId);
+                        if(cb) cb.click();
+                    } catch(e) {}
+                }
+            }
+        });
+
+        controlsWrap.appendChild(closeBtn);
+        if (settingsPanel) {
+            controlsWrap.appendChild(settingsPanel);
+        }
+        
+        item.appendChild(controlsWrap);
+
+        if (isCustomizable && (currentOpt.color !== getDefaultColorForLayer(layer.layerId) || currentOpt.opacity !== 1 || currentOpt.size !== 1)) {
+            applyCustomization(layer.layerIds, currentOpt.color, currentOpt.size, currentOpt.opacity, icon);
+        }
+
+        if (layer.isVirtualRiskZonation) {
+            const subLegend = document.createElement('div');
+            subLegend.className = 'risk-zonation-sub-legend';
+            subLegend.innerHTML = `
+                <span class="sub-legend-item">
+                    <span class="sub-legend-color" style="background-color: #7d0800;"></span>
+                    <span class="sub-legend-text">High</span>
+                </span>
+                <span class="sub-legend-item">
+                    <span class="sub-legend-color" style="background-color: #f0e02e;"></span>
+                    <span class="sub-legend-text">Medium</span>
+                </span>
+                <span class="sub-legend-item">
+                    <span class="sub-legend-color" style="background-color: #00990f;"></span>
+                    <span class="sub-legend-text">Low</span>
+                </span>
+            `;
+            item.appendChild(subLegend);
         }
 
         legendItemsContainer.appendChild(item);
@@ -511,7 +780,26 @@ function getLegendIconClass(layer) {
     const explicitLegendIcon = String(layer && layer.legendIcon ? layer.legendIcon : '').trim();
 
     if (explicitLegendIcon) {
+        if (explicitLegendIcon === 'icon-default') {
+            return 'icon-untracked';
+        }
         return explicitLegendIcon;
+    }
+
+    if (inputId === 'inventory-toggle') {
+        return 'icon-cyan-dot';
+    }
+
+    if (inputId === 'quick-akah-toggle') {
+        return 'icon-circle-red-small';
+    }
+
+    if (inputId === 'quick-vulsites-2026-toggle') {
+        return 'icon-red-pin';
+    }
+
+    if (inputId === 'quick-vullakes-2026-toggle') {
+        return 'icon-red-ring';
     }
 
     const normalizedName = layerName.toLowerCase();
@@ -541,7 +829,7 @@ function getLegendIconClass(layer) {
         return 'icon-green-destination';
     }
 
-    return 'icon-default';
+    return 'icon-untracked';
 }
 
 function initializeActiveLayersLegend() {
@@ -590,6 +878,14 @@ function toggleQuickGmrcWapda(isChecked) {
     setLayerVisibility('gmrc-wapda-points-layer', isChecked);
 }
 
+function toggleQuickPdmaKp(isChecked) {
+    setLayerVisibility('pdma-kp-points-layer', isChecked);
+}
+
+function toggleQuickEvK2CNR(isChecked) {
+    setLayerVisibility('evk2cnr-points-layer', isChecked);
+}
+
 function toggleQuickGlofII(isChecked) {
     setLayerVisibility('glof-ii-stations-layer', isChecked);
 }
@@ -613,6 +909,12 @@ function toggleQuickBriFfSensors(isChecked) {
 function toggleQuickVulnerableMeltingGlaciers(isChecked) {
     setLayerVisibility('vulnerable-melting-glaciers-layer', isChecked);
     setLayerVisibility('vulnerable-melting-glaciers-outline', isChecked);
+}
+
+function toggleQuickVulnerableMeltingPoints(isChecked) {
+    setLayerVisibility('vulnerable-melting-points-layer', isChecked);
+    setLayerVisibility('vulnerable-melting-points-outline', isChecked);
+    setLayerVisibility('vulnerable-melting-points-circle', isChecked);
 }
 
 function toggleFloodSusceptibility(isChecked) {
@@ -1836,11 +2138,14 @@ function showHighTempWarning(forceVisible = null) {
 
 document.getElementById("menuToggle").addEventListener("click", function() {
     var menu = document.getElementById("menu");
+    var chartsRow = document.getElementById("charts-row");
     
     if (menu.style.display === "none" || menu.style.display === "") {
       menu.style.display = "block"; // Show menu
+      if (chartsRow) chartsRow.classList.add("menu-open");
     } else {
       menu.style.display = "none"; // Hide menu
+      if (chartsRow) chartsRow.classList.remove("menu-open");
     }
   });
 
@@ -2294,6 +2599,38 @@ function openPanelModal(panelType) {
         const previewTitle = (previewCaption && previewCaption.textContent) ? previewCaption.textContent : 'Map Preview';
         title.textContent = `${previewTitle} Map`;
         body.innerHTML = `<img src="${previewSrc}" alt="${previewTitle} map">`;
+    } else if (panelType === 'lakeTempChart') {
+        title.textContent = `${window.currentActiveLakeName || 'Lake'} Temperature Trend`;
+        body.innerHTML = `
+            <div style="width: 100%; height: 100%; padding: 24px; box-sizing: border-box; background: rgba(3, 8, 18, 0.6); display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                <div style="width: 100%; flex: 1; min-height: 0; position: relative;">
+                    <canvas id="lakeTempChartModalCanvas" style="width: 100%; height: 100%;"></canvas>
+                </div>
+            </div>
+        `;
+        setTimeout(() => {
+            renderLakeTempChartInModal();
+        }, 120);
+    } else if (panelType === 'lakeAreaVideo') {
+        const videoSrc = getLakeVideoPath(currentActiveLakeCollapseId);
+        title.textContent = `${window.currentActiveLakeName || 'Lake'} Area Change Video`;
+        body.innerHTML = `
+            <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #000; border-radius: 8px; overflow: hidden; position: relative;">
+                <video id="lakeAreaVideoModalPlayer" controls autoplay loop muted style="max-width: 100%; max-height: 100%; object-fit: contain;"></video>
+            </div>
+        `;
+        const modalPlayer = document.getElementById('lakeAreaVideoModalPlayer');
+        if (modalPlayer) {
+            modalPlayer.src = videoSrc;
+            modalPlayer.onerror = function() {
+                body.innerHTML = `
+                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; color: #94a3b8; height: 100%;">
+                        <i class="fas fa-video-slash" style="font-size: 48px; color: #3b82f6;"></i>
+                        <span style="font-size: 18px; font-weight: 600;">Video coming soon for this lake</span>
+                    </div>
+                `;
+            };
+        }
     } else {
         return;
     }
@@ -2404,6 +2741,34 @@ const accordionMapImageStates = {
     'ulter-collapse': {
         src: 'Maps/Ulter.jpg',
         title: 'Ulter'
+    },
+    'badswat-collapse': {
+        src: 'Maps/Badswat.jpg',
+        title: 'Badswat'
+    },
+    'darkot-collapse': {
+        src: 'Maps/Darkut.jpg',
+        title: 'Darkut'
+    },
+    'gulmit-collapse': {
+        src: 'Maps/Gulmit.jpg',
+        title: 'Gulmit'
+    },
+    'hiranchi-collapse': {
+        src: 'Maps/Hinarchi.jpg',
+        title: 'Hinarchi'
+    },
+    'reshun-collapse': {
+        src: 'Maps/Reshun.jpg',
+        title: 'Reshun'
+    },
+    'terset-hundur-collapse': {
+        src: 'Maps/Tersat Hundur.jpg',
+        title: 'Tersat Hundur'
+    },
+    'shisper-collapse': {
+        src: 'Maps/Shishper.jpg',
+        title: 'Shisper'
     }
 };
 
@@ -2419,7 +2784,9 @@ const accordionChartLakeMap = {
     'brep-collapse': 'Brep',
     'ishokoman-collapse': 'Ishkoman',
     'lusht-collapse': 'Lasht',
-    'ulter-collapse': 'Ultar'
+    'ulter-collapse': 'Ultar',
+    'terset-hundur-collapse': 'Tersat Hundur',
+    'shisper-collapse': 'Shisper'
 };
 
 function syncChartsForAccordion(accordionId) {
@@ -2473,18 +2840,43 @@ function setLakeMapPreview(state) {
         preview.style.display = 'none';
         previewImg.removeAttribute('src');
         previewCaption.textContent = 'Map Preview';
+        if (typeof updateActiveLegendOffset === 'function') {
+            updateActiveLegendOffset();
+        }
         return;
     }
 
     previewImg.src = state.src;
     previewCaption.textContent = state.title;
     preview.style.display = 'block';
+    if (typeof updateActiveLegendOffset === 'function') {
+        updateActiveLegendOffset();
+    }
+}
+
+function initLakeMapPreviewAspectObserver() {
+    const preview = document.getElementById('lake-map-preview');
+    const previewImg = document.getElementById('lake-map-preview-img');
+    if (!preview || !previewImg) return;
+
+    function adjustAspect() {
+        if (previewImg.naturalWidth && previewImg.naturalHeight) {
+            preview.style.aspectRatio = `${previewImg.naturalWidth} / ${previewImg.naturalHeight}`;
+        }
+    }
+
+    previewImg.addEventListener('load', adjustAspect);
+    
+    if (previewImg.complete) {
+        adjustAspect();
+    }
 }
 
 function syncAccordionMapPreview() {
     const activeAccordionId = accordionMapImageStack[accordionMapImageStack.length - 1];
-    const state = activeAccordionId ? accordionMapImageStates[activeAccordionId] : null;
-    setLakeMapPreview(state || null);
+    
+    const stateMap = activeAccordionId ? accordionMapImageStates[activeAccordionId] : null;
+    setLakeMapPreview(stateMap || null);
 }
 
 function registerAccordionMapPreviewHandlers() {
@@ -2500,7 +2892,11 @@ function registerAccordionMapPreviewHandlers() {
         });
     }
 
-    Object.keys(accordionMapImageStates).forEach((accordionId) => {
+    const allAccordionIds = new Set([
+        ...Object.keys(accordionMapImageStates)
+    ]);
+
+    allAccordionIds.forEach((accordionId) => {
         const collapseElement = document.getElementById(accordionId);
 
         if (!collapseElement) {
@@ -2723,8 +3119,93 @@ function toggleLayersVisibility(map, layerIds) {
         );
     });
 }//____________________________________________________________________________________________________________________________________________________________________________________
+window.currentBasemapType = 'hybrid'; // Default basemap type
+
+function updateMapLabelsColor() {
+    const basemapType = window.currentBasemapType || 'hybrid';
+    const isLight = (basemapType === 'light');
+
+    const textColor = isLight ? '#000000' : '#ffffff';
+    const textHaloColor = isLight ? '#ffffff' : '#000000';
+    const textHaloWidth = isLight ? 2.0 : 1.2;
+
+    const labelLayers = [
+        'district-boundary-label-layer',
+        'populated-places-name-label-layer',
+        'populated-places-population-label-layer',
+        'station-points-label-layer',
+        'gmrc-wapda-label-layer',
+        'glof-ii-label-layer',
+        'glof-ii-damaged-stations-label-layer',
+        'undp-all-sensors-label-layer',
+        'bri-ff-sensors-label-layer'
+    ];
+
+    // Read any active travel route labels from toggles
+    const routeToggles = document.querySelectorAll('.route-toggle');
+    routeToggles.forEach(toggle => {
+        let routeName = '';
+        if (toggle.id === 'route-arandu-toggle') routeName = 'arandu';
+        else if (toggle.id === 'route-bashu-valley-toggle') routeName = 'bashu valley';
+        else if (toggle.id === 'route-ghulkin-toggle') routeName = 'ghulkin';
+        else if (toggle.id === 'route-hopper-toggle') routeName = 'hopper';
+        else if (toggle.id === 'route-khaplu-toggle') routeName = 'Khaplu';
+
+        if (routeName) {
+            const labelLayerId = `route-label-${routeName.replace(/\s+/g, '-').toLowerCase()}`;
+            labelLayers.push(labelLayerId);
+        }
+    });
+
+    labelLayers.forEach(layerId => {
+        if (map1.getLayer(layerId)) {
+            let color = textColor;
+            if (layerId === 'populated-places-population-label-layer' && !isLight) {
+                color = '#ffff00'; // Keep yellow on dark theme for highlight!
+            } else if (layerId === 'district-boundary-label-layer' && !isLight) {
+                color = '#f8fafc';
+            }
+
+            map1.setPaintProperty(layerId, 'text-color', color);
+            map1.setPaintProperty(layerId, 'text-halo-color', textHaloColor);
+            map1.setPaintProperty(layerId, 'text-halo-width', textHaloWidth);
+        }
+    });
+
+    window._originalMapTextSizes = window._originalMapTextSizes || {};
+
+    const styleLayers = map1.getStyle().layers;
+    styleLayers.forEach(layer => {
+        if (layer.type === 'symbol' && layer.layout && layer.layout['text-field']) {
+            if (!window._originalMapTextSizes[layer.id]) {
+                window._originalMapTextSizes[layer.id] = layer.layout['text-size'] || 18;
+            }
+
+            if (isLight) {
+                // Increase text size for ALL labels in light theme
+                map1.setLayoutProperty(layer.id, 'text-size', ['*', 2.25, window._originalMapTextSizes[layer.id]]);
+
+                // Enforce black color for native mapbox text labels
+                if (!labelLayers.includes(layer.id)) {
+                    map1.setPaintProperty(layer.id, 'text-color', '#000000');
+                    map1.setPaintProperty(layer.id, 'text-halo-color', '#ffffff');
+                    map1.setPaintProperty(layer.id, 'text-halo-width', 1.0);
+                }
+            } else {
+                // Restore original sizes
+                map1.setLayoutProperty(layer.id, 'text-size', window._originalMapTextSizes[layer.id]);
+            }
+        }
+    });
+}
+window.updateMapLabelsColor = updateMapLabelsColor;
+
 function changeBasemap(type) {
+    // Reset cached text sizes when a new basemap is loaded to prevent issues with different base styles
+    window._originalMapTextSizes = {};
+    
     console.log("Selected Basemap:", type);
+    window.currentBasemapType = type;
     
     if (!map1) {
         console.error("Map instance is not available.");
@@ -2770,6 +3251,9 @@ function changeBasemap(type) {
         if (typeof window.reapplyStationPointAnimationFrame === 'function') {
             window.reapplyStationPointAnimationFrame();
         }
+
+        // Apply high contrast labels color configuration based on active theme
+        updateMapLabelsColor();
 
         console.log("Restored visibility for layers:", visibleLayers);
     });
@@ -2846,6 +3330,1115 @@ function closeIncidentVideo() {
         incidentPopup = null;
     }
 }
+
+// ============================================================
+// LAKE TEMPERATURE FORECAST CHART (GOOGLE SHEET TELEMETRY)
+// ============================================================
+
+const LAKE_TEMP_GIDS = {
+    'darkot-collapse': { name: 'Darkut', gid: '0' },
+    'thalu-collapse': { name: 'Thalo', gid: '1438256342' },
+    'pindoru-collapse': { name: 'Pindoru Chaat', gid: '1511487579' },
+    'chatiboi-collapse': { name: 'Chatiboi', gid: '1755543447' },
+    'lusht-collapse': { name: 'Lasht', gid: '931317354' },
+    'badswat-collapse': { name: 'Badswat', gid: '2026285818' },
+    'ishokoman-collapse': { name: 'Iskoman', gid: '1704219657' },
+    'terset-hundur-collapse': { name: 'Tersat Hundur', gid: '1587227881' },
+    'ulter-collapse': { name: 'Ultar', gid: '1695337647' },
+    'reshun-collapse': { name: 'Reshun', gid: '751299395' },
+    'brep-collapse': { name: 'Brep', gid: '1311199872' },
+    // Fallbacks for other accordions in the list:
+    'gulmit-collapse': { name: 'Gulmit', gid: 'mock' },
+    'hiranchi-collapse': { name: 'Hinarchi', gid: 'mock' },
+    'shisper-collapse': { name: 'Shisper', gid: '2127384431' }
+};
+
+const LAKE_TEMP_DATES = [
+    "22-May", "23-May", "24-May", "25-May", "26-May", "27-May", "28-May", 
+    "29-May", "30-May", "31-May", "01-Jun", "02-Jun", "03-Jun", "04-Jun", 
+    "05-Jun", "06-Jun"
+];
+
+const LAKE_TEMP_FALLBACKS = {
+    'Darkut': [8.8, 9.6, 9.5, 10.3, 11.9, 13.3, 10.2, 10.9, 12.3, 13.6, 13.7, 12.7, 14.0, 14.1, 19.0, 20.0],
+    'Thalo': [-1.5, -0.7, -0.4, -0.3, 1.9, 3.0, 2.3, 1.1, 3.4, 3.6, 4.1, 3.9, 3.7, 4.4, 7.9, 8.5],
+    'Pindoru Chaat': [0.5, 1.2, 1.8, 2.3, 3.4, 4.1, 3.8, 4.2, 5.1, 5.8, 6.3, 6.0, 6.8, 7.2, 10.1, 11.2],
+    'Chatiboi': [-2.1, -1.8, -1.2, -0.9, 0.4, 1.1, 0.8, 0.5, 1.6, 2.1, 2.5, 2.3, 3.1, 3.5, 5.9, 6.8],
+    'Lasht': [4.5, 5.1, 4.9, 5.8, 7.1, 8.3, 6.8, 7.2, 8.5, 9.2, 9.8, 9.1, 10.3, 10.7, 14.2, 15.1],
+    'Badswat': [12.8, 13.3, 11.1, 14.6, 17.2, 19.0, 12.8, 15.9, 18.6, 19.9, 20.5, 19.8, 21.3, 21.6, 20.6, 21.0],
+    'Iskoman': [10.2, 11.1, 10.8, 11.5, 12.8, 13.9, 11.5, 12.3, 13.8, 14.5, 15.1, 14.3, 15.6, 16.0, 19.2, 20.1],
+    'Tersat Hundur': [6.8, 7.2, 7.0, 7.9, 9.1, 10.2, 8.8, 9.5, 10.8, 11.3, 11.9, 11.2, 12.4, 12.8, 15.9, 16.8],
+    'Ultar': [1.2, 1.9, 1.5, 2.3, 3.8, 4.9, 3.5, 4.1, 5.6, 6.2, 6.8, 6.1, 7.3, 7.7, 10.9, 11.8],
+    'Reshun': [9.5, 10.2, 9.9, 10.8, 12.1, 13.2, 11.8, 12.5, 13.8, 14.3, 14.9, 14.2, 15.4, 15.8, 18.9, 19.8],
+    'Brep': [7.8, 8.5, 8.2, 9.1, 10.3, 11.4, 9.8, 10.5, 11.8, 12.3, 12.9, 12.2, 13.4, 13.8, 16.9, 17.8],
+    'Shisper': [7.8, 8.4, 8.1, 9.2, 10.5, 11.7, 9.0, 10.1, 11.4, 12.2, 12.8, 11.9, 13.1, 13.4, 18.0, 17.5]
+};
+
+
+
+let activeLakeTempChart = null;
+let activeLakeTempModalChart = null;
+let currentActiveLakeName = '';
+let currentActiveLakeCollapseId = '';
+let currentActiveLakeData = [];
+
+// Measures the active layers legend and updates CSS offset variables dynamically
+function updateActiveLegendOffset() {
+    const activeLegend = document.getElementById('active-layers-legend');
+    const tempWidget = document.getElementById('lake-temp-widget');
+    const videoWidget = document.getElementById('lake-video-widget');
+    const areaWidget = document.getElementById('lake-area-widget');
+    const previewWidget = document.getElementById('lake-map-preview');
+    const chartsRow = document.getElementById('charts-row');
+    const menu = document.getElementById('menu');
+    
+    const isLegendVisible = activeLegend && !activeLegend.classList.contains('is-hidden') && window.getComputedStyle(activeLegend).display !== 'none';
+    const isTempVisible = tempWidget && tempWidget.classList.contains('is-visible') && window.getComputedStyle(tempWidget).display !== 'none';
+    const isVideoVisible = videoWidget && videoWidget.classList.contains('is-visible') && window.getComputedStyle(videoWidget).display !== 'none';
+    const isAreaVisible = areaWidget && areaWidget.classList.contains('is-visible') && window.getComputedStyle(areaWidget).display !== 'none';
+    const isPreviewVisible = previewWidget && window.getComputedStyle(previewWidget).display !== 'none';
+    const isChartsRowVisible = chartsRow && !chartsRow.classList.contains('hidden-charts') && window.getComputedStyle(chartsRow).display !== 'none';
+    const isMenuVisible = menu && window.getComputedStyle(menu).display !== 'none';
+
+    const legendHeight = isLegendVisible ? activeLegend.offsetHeight : 0;
+    const tempHeight = isTempVisible ? tempWidget.offsetHeight : 0;
+    const videoHeight = isVideoVisible ? videoWidget.offsetHeight : 0;
+    const areaHeight = isAreaVisible ? areaWidget.offsetHeight : 0;
+    const previewHeight = isPreviewVisible ? previewWidget.offsetHeight : 0;
+
+    // Check if vertical space is occupied and we need to shift the video widget to the left
+    const totalRequiredHeight = legendHeight + tempHeight + videoHeight + areaHeight + 50;
+    const isHeightOccupied = isLegendVisible && isVideoVisible && (totalRequiredHeight > window.innerHeight - 80);
+
+    const mapEl = document.getElementById('map');
+    if (mapEl) {
+        if (isHeightOccupied) {
+            mapEl.classList.add('video-shifted-left');
+            mapEl.style.setProperty('--lake-video-width', `${videoWidget.offsetWidth || 300}px`);
+            
+            // If shifted left, it is removed from the right-hand stack vertical offset
+            mapEl.style.setProperty('--lake-video-height', '0px');
+        } else {
+            mapEl.classList.remove('video-shifted-left');
+            mapEl.style.setProperty('--lake-video-width', '0px');
+            mapEl.style.setProperty('--lake-video-height', `${videoHeight > 0 ? (videoHeight + 10) : 0}px`);
+        }
+
+        // Determine the horizontal span of the left-side overlays
+        let leftOverlayRightEdge = 0;
+        if (isChartsRowVisible && chartsRow) {
+            leftOverlayRightEdge = chartsRow.offsetLeft + chartsRow.offsetWidth;
+        } else if (isMenuVisible && menu) {
+            leftOverlayRightEdge = menu.offsetLeft + menu.offsetWidth;
+        }
+
+        // Determine the width of the bottom-right occupied stack container
+        let rightOffsetWidth = 0;
+        if (isLegendVisible) {
+            rightOffsetWidth = activeLegend.offsetWidth;
+        } else if (isTempVisible) {
+            rightOffsetWidth = tempWidget.offsetWidth;
+        } else if (isVideoVisible && !isHeightOccupied) {
+            rightOffsetWidth = videoWidget.offsetWidth;
+        } else if (isAreaVisible) {
+            rightOffsetWidth = areaWidget.offsetWidth;
+        }
+
+        // Project the left edge of `#lake-map-preview` in side-by-side bottom layout
+        // Formula: Map Width - Right Margin (52px) - Stack Offset Width (shifted by 12px) - Preview Width (with a 20px safety buffer)
+        const mapWidth = mapEl.clientWidth;
+        const rightMargin = 52;
+        const activeLegendWidthOffset = rightOffsetWidth > 0 ? (rightOffsetWidth + 12) : 0;
+        const previewWidth = previewWidget ? previewWidget.offsetWidth : 0;
+        const projectedPreviewLeftEdge = mapWidth - rightMargin - activeLegendWidthOffset - previewWidth - 20;
+
+        // Detect horizontal overlap and stack vertically if necessary
+        const shouldStackPreviewVertically = isPreviewVisible && (projectedPreviewLeftEdge < leftOverlayRightEdge);
+
+        if (shouldStackPreviewVertically) {
+            mapEl.classList.add('stack-preview-vertical');
+            mapEl.style.setProperty('--lake-preview-height', `${previewHeight > 0 ? (previewHeight + 10) : 0}px`);
+        } else {
+            mapEl.classList.remove('stack-preview-vertical');
+            mapEl.style.setProperty('--lake-preview-height', '0px');
+        }
+
+        mapEl.style.setProperty('--active-legend-height', `${legendHeight > 0 ? (legendHeight + 10) : 0}px`);
+        mapEl.style.setProperty('--lake-temp-height', `${tempHeight > 0 ? (tempHeight + 10) : 0}px`);
+        mapEl.style.setProperty('--lake-area-height', `${areaHeight > 0 ? (areaHeight + 10) : 0}px`);
+        mapEl.style.setProperty('--active-legend-width', `${activeLegendWidthOffset}px`);
+    }
+    updateWidgetStacking();
+}
+
+function updateWidgetStacking() {
+    const tempWidget = document.getElementById('lake-temp-widget');
+    const videoWidget = document.getElementById('lake-video-widget');
+    const areaWidget = document.getElementById('lake-area-widget');
+    const riskLegend = document.getElementById('risk-zonation-legend');
+    
+    const isVisible = (tempWidget && tempWidget.classList.contains('is-visible')) || 
+                      (videoWidget && videoWidget.classList.contains('is-visible')) ||
+                      (areaWidget && areaWidget.classList.contains('is-visible'));
+    
+    if (riskLegend) {
+        riskLegend.classList.toggle('risk-zonation-legend--with-temp', isVisible);
+    }
+}
+
+function closeLakeTempWidget() {
+    const widget = document.getElementById('lake-temp-widget');
+    if (widget) {
+        widget.classList.remove('is-visible');
+    }
+    updateActiveLegendOffset();
+}
+
+// ============================================================
+// LAKE AREA CHANGE VIDEO WIDGET
+// ============================================================
+
+const LAKE_VIDEO_FILES = {
+    'darkot-collapse': 'Darkut.mp4',
+    'thalu-collapse': 'Thalo 1&2.mp4',
+    'pindoru-collapse': 'Pindoru Chaat.mp4',
+    'chatiboi-collapse': 'Chatiboi.mp4',
+    'lusht-collapse': 'Lasht.mp4',
+    'badswat-collapse': 'Badswat.mp4',
+    'ishokoman-collapse': 'Ishkoman.mp4',
+    'terset-hundur-collapse': 'Tersat Hundur.mp4',
+    'ulter-collapse': 'Ulter.mp4',
+    'shisper-collapse': 'Shishper.mp4',
+    'reshun-collapse': 'Reshun.mp4'
+};
+
+function getLakeVideoPath(accordionId) {
+    const filename = LAKE_VIDEO_FILES[accordionId];
+    if (!filename) return '';
+    return `data/Lake Area Change Videos/${encodeURIComponent(filename)}`;
+}
+
+function showLakeVideoWidget(accordionId) {
+    const config = LAKE_TEMP_GIDS[accordionId];
+    if (!config) {
+        closeLakeVideoWidget();
+        return;
+    }
+
+    const lakeName = config.name;
+    const widget = document.getElementById('lake-video-widget');
+    const player = document.getElementById('lakeAreaVideoPlayer');
+    const gifPlayer = document.getElementById('lakeAreaGifPlayer');
+    const placeholder = document.getElementById('lake-video-placeholder');
+
+    if (!widget || !player || !gifPlayer || !placeholder) return;
+    
+    // Slide widget in smoothly
+    widget.classList.add('is-visible');
+    
+    const videoSrc = getLakeVideoPath(accordionId);
+    
+    if (!videoSrc) {
+        player.style.display = 'none';
+        player.pause();
+        player.src = '';
+        gifPlayer.style.display = 'none';
+        gifPlayer.removeAttribute('src');
+        placeholder.style.display = 'flex';
+        const placeholderText = placeholder.querySelector('span');
+        if (placeholderText) {
+            placeholderText.textContent = `Video coming soon for ${lakeName}`;
+        }
+        updateActiveLegendOffset();
+        return;
+    }
+
+    const isGif = videoSrc.toLowerCase().endsWith('.gif');
+    
+    if (isGif) {
+        player.style.display = 'none';
+        player.pause();
+        player.src = '';
+        
+        gifPlayer.style.display = 'block';
+        gifPlayer.src = videoSrc;
+        placeholder.style.display = 'none';
+    } else {
+        gifPlayer.style.display = 'none';
+        gifPlayer.removeAttribute('src');
+        
+        player.style.display = 'block';
+        placeholder.style.display = 'none';
+        player.src = videoSrc;
+        
+        player.onerror = function() {
+            player.style.display = 'none';
+            placeholder.style.display = 'flex';
+            const placeholderText = placeholder.querySelector('span');
+            if (placeholderText) {
+                placeholderText.textContent = `Video coming soon for ${lakeName}`;
+            }
+        };
+        
+        player.load();
+        player.play().catch(err => {
+            console.warn("Auto-play was prevented by the browser. Awaiting user interaction.", err);
+        });
+    }
+
+    updateActiveLegendOffset();
+}
+
+function closeLakeVideoWidget() {
+    const widget = document.getElementById('lake-video-widget');
+    const player = document.getElementById('lakeAreaVideoPlayer');
+    const gifPlayer = document.getElementById('lakeAreaGifPlayer');
+    if (widget) {
+        widget.classList.remove('is-visible');
+    }
+    if (player) {
+        player.pause();
+        player.src = '';
+    }
+    if (gifPlayer) {
+        gifPlayer.removeAttribute('src');
+        gifPlayer.style.display = 'none';
+    }
+    updateActiveLegendOffset();
+}
+
+// ============================================================
+// LAKE AREA CHANGE WIDGET (DYNAMIC SATELLITE DERIVED)
+// ============================================================
+
+let activeWaveAnimationId = null;
+let activeGaugeAnimationId = null;
+let activeParticleAnimationId = null;
+let rippleIntervalId = null;
+let currentGaugeAvgArea = 0;
+
+const localLakeAreaData = [
+    { district: 'GHIZER',      name: 'Darkut',         values: [202000, 215000, 222900, 219100, 221600, 221400, 244200] },
+    { district: 'UPPER DIR',   name: 'Thalo 1',        values: [233000, 273700, 259200, 227200, 137800, 263100, 257742] },
+    { district: 'CHITRAL',     name: 'Thalo 2',        values: [42700,  164400, 172100, 182800, 164600, 62200,  165634] },
+    { district: 'CHITRAL',     name: 'Pindoru Chaat',  values: [219500, 238500, 250700, 274200, 293700, 301200, 301543] },
+    { district: 'CHITRAL',     name: 'Near Chatiboi',  values: [10500,  9500,   3900,   3500,   4300,   4200,   5639]   },
+    { district: 'CHITRAL',     name: 'Chatiboi',       values: [211900, 186800, 201600, 202900, 244000, 221000, 234499] },
+    { district: 'CHITRAL',     name: 'Lasht',          values: [27300,  17500,  40400,  52300,  74200,  77800,  58208]  },
+    { district: 'GHIZER',      name: 'Badswat',        values: [750600, 690700, 792500, 825000, 720900, 738800, 836474] },
+    { district: 'GHIZER',      name: 'Ishkoman',       values: [74400,  72700,  77300,  72300,  74800,  79900,  83694]  },
+    { district: 'GHIZER',      name: 'Tersat Hundur',  values: [140400, 135500, 134900, 136200, 134900, 134800, 150139] },
+    { district: 'HUNZA NAGAR', name: 'Ultar',          values: [12000,  11100,  11000,  9600,   8600,   71,     8962]   },
+    { district: 'CHITRAL',     name: 'Reshun',         values: [2900,   1400,   1900,   3000,   3700,   2700,   2819]   },
+    { district: 'CHITRAL',     name: 'Brep',           values: [24900,  19900,  16400,  17300,  23100,  25000,  22577]  },
+    { district: 'HUNZA NAGAR', name: 'Shisper',        values: [27300,  17500,  40400,  52300,  74200,  77800,  63200]  }
+];
+
+function showLakeAreaWidget(accordionId) {
+    const config = LAKE_TEMP_GIDS[accordionId];
+    if (!config) {
+        closeLakeAreaWidget();
+        return;
+    }
+
+    const lakeName = config.name;
+    const widget = document.getElementById('lake-area-widget');
+    if (!widget) return;
+
+    // Slide widget in smoothly
+    widget.classList.add('is-visible');
+
+    // Populate dynamic data
+    populateLakeAreaWidgetData(lakeName);
+
+    // Start wave canvas animation
+    startWaveAnimation();
+
+    // Start particle animation
+    startParticleAnimation();
+
+    updateActiveLegendOffset();
+}
+
+function closeLakeAreaWidget() {
+    const widget = document.getElementById('lake-area-widget');
+    if (widget) {
+        widget.classList.remove('is-visible');
+    }
+    if (activeWaveAnimationId) {
+        cancelAnimationFrame(activeWaveAnimationId);
+        activeWaveAnimationId = null;
+    }
+    if (activeGaugeAnimationId) {
+        cancelAnimationFrame(activeGaugeAnimationId);
+        activeGaugeAnimationId = null;
+    }
+    if (activeParticleAnimationId) {
+        cancelAnimationFrame(activeParticleAnimationId);
+        activeParticleAnimationId = null;
+    }
+    if (rippleIntervalId) {
+        clearInterval(rippleIntervalId);
+        rippleIntervalId = null;
+    }
+    updateActiveLegendOffset();
+}
+
+function populateLakeAreaWidgetData(lakeName) {
+    const searchName = lakeName.toLowerCase().replace('sk', 'shk').replace('set', 'sat');
+    let lake = localLakeAreaData.find(l => l.name.toLowerCase() === searchName || l.name.toLowerCase() === lakeName.toLowerCase());
+    
+    if (!lake) {
+        lake = { district: 'NORTHERN AREAS', name: lakeName, values: [null, null, null, null, null, null, null] };
+    }
+
+    const titleEl = document.getElementById('gp-title-text');
+    const lakeNumEl = document.getElementById('lakeNum');
+    const labLabelYear = document.getElementById('labLabelYear');
+    const tsMaxNote = document.getElementById('tsMaxNote');
+    const tsRows = document.getElementById('tsRows');
+    const glofFooterT = document.getElementById('glofFooterT');
+
+    const districtName = lake.district.split(' ')
+        .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+        .join(' ');
+    if (titleEl) titleEl.textContent = `${lake.name} Lake, ${districtName}`.toUpperCase();
+
+    const values = lake.values;
+    const curArea = values[values.length - 1]; // 2026
+
+    // Calculate the 5-year average dynamically using only the non-null years 2021, 2022, 2023, 2024, 2025 (indices 1 to 5)
+    const fiveYearValues = values.slice(1, 6).filter(v => v !== null && v !== undefined && !isNaN(v));
+    const avgArea = fiveYearValues.length > 0 ? Math.round(fiveYearValues.reduce((a, b) => a + b, 0) / fiveYearValues.length) : null;
+    
+    const validValues = values.filter(v => v !== null && v !== undefined && !isNaN(v));
+    const maxArea = validValues.length > 0 ? Math.max(...validValues) : null;
+
+    const years = ['2020', '2021', '2022', '2023', '2024', '2025', '2026'];
+    const maxIndex = maxArea !== null ? values.indexOf(maxArea) : -1;
+    const maxYear = maxIndex !== -1 ? years[maxIndex] : '-';
+
+    if (labLabelYear) labLabelYear.textContent = 'Current Lake Area';
+    if (tsMaxNote) tsMaxNote.textContent = `max = ${maxYear}`;
+
+    if (lakeNumEl) {
+        animateWidgetCounter(lakeNumEl, curArea, 1800);
+    }
+
+    if (tsRows) {
+        tsRows.innerHTML = '';
+        for (let i = 6; i >= 0; i--) {
+            const yr = years[i];
+            const area = values[i];
+
+            if (area === null || area === undefined || isNaN(area)) {
+                const row = document.createElement('div');
+                row.className = 'ts-row';
+                row.style.animationDelay = `${0.45 + (6 - i) * 0.1}s`;
+                row.innerHTML = `
+                    <div class="ts-yr" style="color: #93c5fd">${yr}</div>
+                    <div class="ts-track">
+                        <div class="ts-fill" style="--w: 0%; background: transparent; animation-delay: ${0.5 + (6 - i) * 0.1}s;">
+                        </div>
+                        <div class="ts-bar-val">-</div>
+                    </div>
+                    <div class="ts-val" style="font-family: 'Rajdhani', sans-serif; font-size: 13px; font-weight: 700; text-align: right; white-space: nowrap; color: #93c5fd;">
+                        -
+                    </div>`;
+                tsRows.appendChild(row);
+                continue;
+            }
+
+            const pct = maxArea ? Math.round((area / maxArea) * 100) : 0;
+            
+            const isUp = avgArea !== null ? area >= avgArea : true;
+            const chg = avgArea ? ((area - avgArea) / avgArea * 100).toFixed(1) : null;
+            const grad = isUp
+                ? 'linear-gradient(90deg,#5a0a0a,#a02020,#e74c3c)'
+                : 'linear-gradient(90deg,#0a2e15,#0f5c28,#2ecc71)';
+
+            const chgText = chg !== null ? `${isUp ? '▲' : '▼'}${Math.abs(chg)}%` : '-';
+
+            const row = document.createElement('div');
+            row.className = 'ts-row';
+            row.style.animationDelay = `${0.45 + (6 - i) * 0.1}s`;
+            row.innerHTML = `
+                <div class="ts-yr" style="color: ${isUp ? '#e74c3c' : '#2ecc71'}">${yr}</div>
+                <div class="ts-track">
+                    <div class="ts-fill" style="--w: ${pct}%; background: ${grad}; animation-delay: ${0.5 + (6 - i) * 0.1}s;">
+                        <div class="ts-fill-shine"></div>
+                        <div class="ts-fill-ripple"></div>
+                    </div>
+                    <div class="ts-bar-val">${area.toLocaleString()} m²</div>
+                </div>
+                <div class="ts-val ${isUp ? 'up' : 'dn'}" style="font-family: 'Rajdhani', sans-serif; font-size: 13px; font-weight: 700; text-align: right; white-space: nowrap;">
+                    ${chgText}
+                </div>`;
+            tsRows.appendChild(row);
+        }
+    }
+
+    if (glofFooterT) {
+        const today = new Date();
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        glofFooterT.textContent = `Sentinel-2 · ${today.getDate()} ${months[today.getMonth()]} ${today.getFullYear()}`;
+    }
+
+    // Trigger gauge animation safely
+    const anomalyPercent = (curArea !== null && avgArea !== null && avgArea > 0) ? ((curArea - avgArea) / avgArea) * 100 : null;
+    startGaugeAnimation(anomalyPercent, avgArea);
+}
+
+function animateWidgetCounter(el, target, duration) {
+    if (target === null || target === undefined || isNaN(target)) {
+        el.textContent = '-';
+        return;
+    }
+    const start = performance.now();
+    function step(now) {
+        const p = Math.min((now - start) / duration, 1);
+        const ease = 1 - Math.pow(1 - p, 4);
+        el.textContent = Math.round(ease * target).toLocaleString();
+        if (p < 1) requestAnimationFrame(step);
+        else el.textContent = target.toLocaleString();
+    }
+    requestAnimationFrame(step);
+}
+
+function startWaveAnimation() {
+    const wc = document.getElementById('waterCanvas');
+    if (!wc) return;
+    const wctx = wc.getContext('2d');
+
+    function resizeWater() {
+        wc.width = wc.offsetWidth || 210;
+        wc.height = wc.offsetHeight || 220;
+    }
+    resizeWater();
+
+    const wWaves = [
+        { A: 7,   f: 0.030, sp: 0.030, ph: 0.0, r: 185, g: 12,  b: 12,  a: 0.95 },
+        { A: 5,   f: 0.052, sp: 0.050, ph: 2.1, r: 145, g: 8,   b: 8,   a: 0.72 },
+        { A: 4,   f: 0.020, sp: 0.018, ph: 4.6, r: 225, g: 45,  b: 25,  a: 0.48 },
+        { A: 3,   f: 0.068, sp: 0.075, ph: 1.3, r: 100, g: 5,   b: 5,   a: 0.38 },
+        { A: 2.5, f: 0.090, sp: 0.110, ph: 3.2, r: 255, g: 70,  b: 45,  a: 0.22 },
+        { A: 2,   f: 0.045, sp: 0.035, ph: 5.1, r: 160, g: 20,  b: 20,  a: 0.18 }
+    ];
+
+    const ripples = [];
+    function spawnRipple() {
+        const W = wc.width, H = wc.height;
+        ripples.push({
+            x: W * 0.15 + Math.random() * W * 0.7,
+            y: H * 0.42 + Math.random() * H * 0.35,
+            r: 0, maxR: 10 + Math.random() * 14,
+            a: 0.35 + Math.random() * 0.2,
+            spd: 0.18 + Math.random() * 0.2
+        });
+    }
+
+    if (rippleIntervalId) clearInterval(rippleIntervalId);
+    rippleIntervalId = setInterval(spawnRipple, 900);
+
+    const glints = [];
+    for (let i = 0; i < 8; i++) {
+        glints.push({
+            x: Math.random(),
+            y: 0.42 + Math.random() * 0.38,
+            w: 0.025 + Math.random() * 0.04,
+            h: 0.006 + Math.random() * 0.008,
+            spd: 0.002 + Math.random() * 0.004,
+            ph: Math.random() * Math.PI * 2,
+            a: 0.10 + Math.random() * 0.08
+        });
+    }
+
+    const bubbles = [];
+    for (let i = 0; i < 18; i++) {
+        bubbles.push({
+            x: Math.random(),
+            y: 0.5 + Math.random() * 0.45,
+            r: 0.7 + Math.random() * 2.0,
+            spd: 0.00025 + Math.random() * 0.0005,
+            ph: Math.random() * Math.PI * 2,
+            a: 0.12 + Math.random() * 0.18
+        });
+    }
+
+    let wt = 0;
+    if (activeWaveAnimationId) {
+        cancelAnimationFrame(activeWaveAnimationId);
+    }
+
+    function drawWater() {
+        if (!document.getElementById('lake-area-widget')?.classList.contains('is-visible')) {
+            return;
+        }
+        const W = wc.width, H = wc.height;
+        wctx.clearRect(0, 0, W, H);
+        const lakeFrac = 0.42;
+
+        wWaves.forEach(wv => {
+            wctx.beginPath();
+            wctx.moveTo(0, H);
+            for (let x = 0; x <= W; x += 1.5) {
+                const y = H * lakeFrac
+                    + wv.A * Math.sin(wv.f * x + wv.ph + wt * wv.sp)
+                    + wv.A * 0.40 * Math.sin(wv.f * 1.9 * x - wv.ph * 0.6 - wt * wv.sp * 0.5)
+                    + wv.A * 0.18 * Math.sin(wv.f * 3.3 * x + wv.ph * 1.4 + wt * wv.sp * 1.5)
+                    + wv.A * 0.08 * Math.sin(wv.f * 5.1 * x - wv.ph * 2.1 + wt * wv.sp * 2.2);
+                wctx.lineTo(x, y);
+            }
+            wctx.lineTo(W, H);
+            wctx.lineTo(0, H);
+            wctx.closePath();
+            wctx.fillStyle = `rgba(${wv.r},${wv.g},${wv.b},${wv.a})`;
+            wctx.fill();
+        });
+
+        glints.forEach(g => {
+            const gx = g.x * W, gy = g.y * H, gw = g.w * W, gh = g.h * H;
+            const flicker = 0.4 + 0.6 * Math.abs(Math.sin(wt * g.spd * 60 + g.ph));
+            wctx.save();
+            wctx.globalAlpha = g.a * flicker;
+            wctx.fillStyle = 'rgba(255,180,160,1)';
+            wctx.beginPath();
+            wctx.ellipse(gx + Math.sin(wt * 0.012 + g.ph) * gw * 0.5, gy, gw, gh, Math.sin(wt * 0.008 + g.ph) * 0.25, 0, Math.PI * 2);
+            wctx.fill();
+            wctx.restore();
+        });
+
+        bubbles.forEach(b => {
+            b.y -= b.spd;
+            if (b.y < 0.40) b.y = 0.55 + Math.random() * 0.38;
+            const bx = b.x * W + Math.sin(wt * 0.012 + b.ph) * W * 0.012, by = b.y * H;
+            wctx.save();
+            wctx.globalAlpha = b.a * (0.5 + 0.5 * Math.sin(wt * 0.035 + b.ph));
+            wctx.strokeStyle = 'rgba(255,140,120,0.85)';
+            wctx.lineWidth = 0.7;
+            wctx.beginPath();
+            wctx.arc(bx, by, b.r, 0, Math.PI * 2);
+            wctx.stroke();
+            wctx.restore();
+        });
+
+        for (let i = ripples.length - 1; i >= 0; i--) {
+            const rp = ripples[i];
+            rp.r += rp.spd;
+            const frac = rp.r / rp.maxR;
+            wctx.save();
+            wctx.globalAlpha = rp.a * (1 - frac);
+            wctx.strokeStyle = 'rgba(255,120,100,0.9)';
+            wctx.lineWidth = 0.8;
+            wctx.beginPath();
+            wctx.ellipse(rp.x, rp.y, rp.r, rp.r * 0.35, 0, 0, Math.PI * 2);
+            wctx.stroke();
+            wctx.restore();
+            if (rp.r >= rp.maxR) ripples.splice(i, 1);
+        }
+
+        wt++;
+        activeWaveAnimationId = requestAnimationFrame(drawWater);
+    }
+
+    drawWater();
+}
+
+function drawGauge(val) {
+    const gc = document.getElementById('gaugeCanvas');
+    if (!gc) return;
+    const gctx = gc.getContext('2d');
+    const W = gc.offsetWidth || 195;
+    gc.width = W;
+    gc.height = 145;
+    gctx.clearRect(0, 0, W, 145);
+    const cx = W / 2, cy = 128, R = Math.min(cx - 10, 86), sw = 16;
+    const sa = Math.PI, ea = Math.PI * 2, span = ea - sa;
+
+    // Use dynamic limit, defaulting to 25%
+    const limit = window.currentGaugeLimit || 25;
+
+    // zone tracks (Symmetric: Green < -5%, Yellow [-5%, +5%], Red > +5%)
+    const transitionLow = (-5 + limit) / (limit * 2);
+    const transitionHigh = (5 + limit) / (limit * 2);
+    [
+        { from: 0,              to: transitionLow,  col: '#0d4020' }, // Green (Safe/Decreased: < -5%)
+        { from: transitionLow,  to: transitionHigh, col: '#5a4008' }, // Yellow (Average/Normal: -5% to +5%)
+        { from: transitionHigh, to: 1.0,            col: '#6a0d0d' }  // Red (Danger/Increased: > +5%)
+    ].forEach(z => {
+        const a0 = sa + span * z.from + 0.02, a1 = sa + span * z.to - 0.02;
+        gctx.beginPath();
+        gctx.arc(cx, cy, R, a0, a1);
+        gctx.strokeStyle = z.col;
+        gctx.lineWidth = sw;
+        gctx.lineCap = 'butt';
+        gctx.stroke();
+    });
+
+    // tick dividers (Symmetric: 5 points)
+    for (let i = 0; i <= 4; i++) {
+        const a = sa + span / 4 * i;
+        gctx.beginPath();
+        gctx.moveTo(cx + Math.cos(a) * (R - sw * 0.6), cy + Math.sin(a) * (R - sw * 0.6));
+        gctx.lineTo(cx + Math.cos(a) * (R + sw * 0.5), cy + Math.sin(a) * (R + sw * 0.5));
+        gctx.strokeStyle = '#06090f';
+        gctx.lineWidth = 1.5;
+        gctx.stroke();
+    }
+
+    // tick labels (Symmetric: dynamically matching the limit)
+    const tickLabels = [
+        { label: `-${limit}%`, angle: Math.PI },
+        { label: '0%',   angle: Math.PI * 1.5 },
+        { label: `+${limit}%`,  angle: Math.PI * 2 }
+    ];
+    tickLabels.forEach(t => {
+        gctx.fillStyle = '#ffffff';
+        gctx.font = `700 12px Rajdhani,sans-serif`;
+        gctx.textAlign = 'center';
+        gctx.textBaseline = 'middle';
+        const offsetR = R + sw + 11;
+        gctx.fillText(t.label, cx + Math.cos(t.angle) * offsetR, cy + Math.sin(t.angle) * offsetR);
+    });
+
+    const isValValid = val !== null && val !== undefined && !isNaN(val);
+    const needleVal = isValValid ? val : 0;
+
+    // filled arc (Symmetric out from center 0% straight up)
+    const fillFrac = Math.max(0, Math.min((needleVal + limit) / (limit * 2), 1));
+    const fa = sa + span * fillFrac;
+    
+    if (isValValid && Math.abs(val) > 0.1) {
+        const grd = gctx.createLinearGradient(cx - R, cy, cx + R, cy);
+        grd.addColorStop(0, '#0f6e2e');
+        grd.addColorStop(0.5, '#c07010');
+        grd.addColorStop(1, '#e74c3c');
+        
+        gctx.beginPath();
+        if (val > 0) {
+            gctx.arc(cx, cy, R, sa + span * 0.5, fa);
+        } else {
+            gctx.arc(cx, cy, R, fa, sa + span * 0.5);
+        }
+        gctx.strokeStyle = grd;
+        gctx.lineWidth = sw;
+        gctx.lineCap = 'round';
+        gctx.stroke();
+    }
+
+    // tip dot (drawn at the needle end, color-coded by anomaly value)
+    const ex = cx + Math.cos(fa) * R, ey = cy + Math.sin(fa) * R;
+    gctx.beginPath();
+    gctx.arc(ex, ey, sw * 0.48, 0, Math.PI * 2);
+    gctx.fillStyle = !isValValid ? '#ffb03b' : (val >= 5 ? '#ff6655' : (val <= -5 ? '#2ecc71' : '#ffb03b'));
+    gctx.fill();
+
+    // avg marker (blue tick straight up at 0% average)
+    gctx.beginPath();
+    gctx.moveTo(cx + Math.cos(sa + span * 0.5) * (R - sw * 0.75), cy + Math.sin(sa + span * 0.5) * (R - sw * 0.75));
+    gctx.lineTo(cx + Math.cos(sa + span * 0.5) * (R + sw * 0.75), cy + Math.sin(sa + span * 0.5) * (R + sw * 0.75));
+    gctx.strokeStyle = '#3498db';
+    gctx.lineWidth = 2.5;
+    gctx.stroke();
+
+    // needle
+    const needleA = sa + span * fillFrac;
+    const ndx = cx + Math.cos(needleA) * (R - 8), ndy = cy + Math.sin(needleA) * (R - 8);
+    gctx.beginPath();
+    gctx.moveTo(cx, cy);
+    gctx.lineTo(ndx, ndy);
+    gctx.strokeStyle = 'rgba(255,255,255,0.65)';
+    gctx.lineWidth = 1.8;
+    gctx.lineCap = 'round';
+    gctx.stroke();
+
+    gctx.beginPath();
+    gctx.arc(cx, cy, 5.5, 0, Math.PI * 2);
+    gctx.fillStyle = !isValValid ? '#ffb03b' : (val >= 5 ? '#e74c3c' : (val <= -5 ? '#2ecc71' : '#ffb03b'));
+    gctx.fill();
+
+    // percentage text (Responsive Sci-Fi styled text showing actual calculation)
+    gctx.fillStyle = !isValValid ? '#ffb03b' : (val >= 5 ? '#e74c3c' : (val <= -5 ? '#2ecc71' : '#ffb03b'));
+    gctx.font = `700 26px Rajdhani,sans-serif`;
+    gctx.textAlign = 'center';
+    gctx.textBaseline = 'middle';
+    
+    if (!isValValid) {
+        gctx.fillText('-', cx, cy - 28);
+    } else {
+        const sign = val >= 0 ? '+' : '';
+        const formattedVal = val.toFixed(1);
+        gctx.fillText(sign + formattedVal + '%', cx, cy - 28);
+    }
+    
+    gctx.fillStyle = '#ffffff';
+    gctx.font = `700 14px Rajdhani,sans-serif`;
+    const avgStr = (currentGaugeAvgArea !== null && currentGaugeAvgArea !== undefined && !isNaN(currentGaugeAvgArea) && currentGaugeAvgArea > 0)
+        ? `${currentGaugeAvgArea.toLocaleString()} m²`
+        : '-';
+    gctx.fillText(avgStr, cx, cy - 12);
+}
+
+function startGaugeAnimation(targetAnomaly, avgArea) {
+    currentGaugeAvgArea = avgArea || 0;
+    const gc = document.getElementById('gaugeCanvas');
+    if (!gc) return;
+
+    if (targetAnomaly === null || targetAnomaly === undefined || isNaN(targetAnomaly)) {
+        if (activeGaugeAnimationId) {
+            cancelAnimationFrame(activeGaugeAnimationId);
+            activeGaugeAnimationId = null;
+        }
+        drawGauge(null);
+        return;
+    }
+
+    // 1. Determine dynamic gauge limit based on the actual anomaly size
+    const absAnomaly = Math.abs(targetAnomaly);
+    let limit = 25;
+    if (absAnomaly > 50) {
+        limit = 100;
+    } else if (absAnomaly > 25) {
+        limit = 50;
+    }
+    window.currentGaugeLimit = limit;
+
+    let gcur = 0;
+    const target = Math.max(-limit, Math.min(targetAnomaly, limit));
+
+    if (activeGaugeAnimationId) {
+        cancelAnimationFrame(activeGaugeAnimationId);
+    }
+
+    function animGauge() {
+        if (!document.getElementById('lake-area-widget')?.classList.contains('is-visible')) {
+            return;
+        }
+        let done = false;
+        const step = limit / 18; // Keep needle rotation speeds feeling fluid
+        if (target >= gcur) {
+            gcur = Math.min(gcur + step, target);
+            if (gcur >= target) done = true;
+        } else {
+            gcur = Math.max(gcur - step, target);
+            if (gcur <= target) done = true;
+        }
+        drawGauge(gcur);
+        if (!done) {
+            activeGaugeAnimationId = requestAnimationFrame(animGauge);
+        } else {
+            drawGauge(target);
+        }
+    }
+    
+    drawGauge(0);
+    setTimeout(animGauge, 500);
+}
+
+function startParticleAnimation() {
+    const pc = document.getElementById('particleCanvas');
+    if (!pc) return;
+    pc.width = pc.offsetWidth || 400;
+    const pctx = pc.getContext('2d');
+    const particles = [];
+    for (let i = 0; i < 65; i++) {
+        particles.push({
+            x: Math.random() * pc.width,
+            y: Math.random() * 28,
+            r: 0.7 + Math.random() * 1.8,
+            spd: 0.25 + Math.random() * 0.7,
+            a: 0.15 + Math.random() * 0.45,
+            col: Math.random() < 0.65 ? '231,76,60' : '52,152,219'
+        });
+    }
+
+    if (activeParticleAnimationId) {
+        cancelAnimationFrame(activeParticleAnimationId);
+    }
+
+    function drawParticles() {
+        if (!document.getElementById('lake-area-widget')?.classList.contains('is-visible')) {
+            return;
+        }
+        pctx.clearRect(0, 0, pc.width, 28);
+        pctx.fillStyle = '#040710';
+        pctx.fillRect(0, 0, pc.width, 28);
+        particles.forEach(p => {
+            p.x += p.spd;
+            if (p.x > pc.width + 3) p.x = -3;
+            pctx.beginPath();
+            pctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            pctx.fillStyle = `rgba(${p.col},${p.a})`;
+            pctx.fill();
+        });
+        activeParticleAnimationId = requestAnimationFrame(drawParticles);
+    }
+    drawParticles();
+}
+
+// Builds the beautiful neon-themed Chart.js temperature chart
+function drawLakeTempChart(canvasId, labels, dataPoints, isModal = false) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return null;
+
+    const ctx = canvas.getContext('2d');
+    
+    // Create elegant line gradient
+    const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height || 200);
+    gradient.addColorStop(0, 'rgba(29, 78, 216, 0.45)');  // Bright neon blue transparent
+    gradient.addColorStop(1, 'rgba(29, 78, 216, 0.0)');   // Completely transparent
+
+    // Destroy existing chart to prevent rendering conflicts
+    if (!isModal && activeLakeTempChart) {
+        activeLakeTempChart.destroy();
+    }
+    if (isModal && activeLakeTempModalChart) {
+        activeLakeTempModalChart.destroy();
+    }
+
+    const chartConfig = {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Temperature (°C)',
+                data: dataPoints,
+                borderColor: '#60a5fa', // Neon blue color
+                borderWidth: isModal ? 3.5 : 2.5,
+                pointBackgroundColor: '#ffffff',
+                pointBorderColor: '#1d4ed8',
+                pointBorderWidth: 2,
+                pointRadius: isModal ? 5.5 : 4.2,
+                pointHoverRadius: isModal ? 8 : 6,
+                fill: true,
+                backgroundColor: gradient,
+                tension: 0.4 // Smooth cubic interpolation curves
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false // We show metadata in header, keep graph tidy
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(8, 17, 31, 0.95)',
+                    titleColor: '#93c5fd',
+                    bodyColor: '#ffffff',
+                    borderColor: '#1d4ed8',
+                    borderWidth: 1.5,
+                    cornerRadius: 6,
+                    padding: 8,
+                    displayColors: false,
+                    callbacks: {
+                        label: function(context) {
+                            return `Temp: ${context.parsed.y} °C`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: {
+                        color: 'rgba(147, 197, 253, 0.08)',
+                        tickColor: 'rgba(147, 197, 253, 0.15)'
+                    },
+                    ticks: {
+                        color: '#94a3b8',
+                        font: {
+                            size: isModal ? 12 : 9.5,
+                            family: "'Segoe UI', sans-serif"
+                        },
+                        maxRotation: 45,
+                        autoSkip: true,
+                        maxTicksLimit: isModal ? 16 : 8
+                    }
+                },
+                y: {
+                    grid: {
+                        color: 'rgba(147, 197, 253, 0.08)',
+                        tickColor: 'rgba(147, 197, 253, 0.15)'
+                    },
+                    ticks: {
+                        color: '#94a3b8',
+                        font: {
+                            size: isModal ? 12 : 9.5,
+                            family: "'Segoe UI', sans-serif"
+                        },
+                        callback: function(value) {
+                            return value + '°C';
+                        }
+                    }
+                }
+            },
+            animations: {
+                tension: {
+                    duration: 800,
+                    easing: 'easeOutQuart',
+                    from: 1,
+                    to: 0.4,
+                    loop: false
+                }
+            }
+        }
+    };
+
+    const newChart = new Chart(ctx, chartConfig);
+    if (!isModal) {
+        activeLakeTempChart = newChart;
+    } else {
+        activeLakeTempModalChart = newChart;
+    }
+    return newChart;
+}
+
+// Formats spreadsheet dates cleanly
+function parseCSVDate(rawDate) {
+    if (!rawDate) return '';
+    return String(rawDate).trim();
+}
+
+// Core function triggered when lake is selected
+async function showLakeTempChart(accordionId) {
+    const config = LAKE_TEMP_GIDS[accordionId];
+    if (!config) {
+        closeLakeTempWidget();
+        return;
+    }
+
+    const lakeName = config.name;
+    currentActiveLakeName = lakeName;
+    window.currentActiveLakeName = lakeName; // global store for modal
+    currentActiveLakeCollapseId = accordionId;
+
+    const widget = document.getElementById('lake-temp-widget');
+    const titleEl = document.getElementById('lake-temp-title');
+    const subtitleEl = document.getElementById('lake-temp-subtitle');
+
+    if (!widget || !titleEl) return;
+
+    // Set title and loading state
+    titleEl.textContent = `${lakeName} Temperature Forecast`;
+    if (subtitleEl) {
+        subtitleEl.textContent = "Loading live telemetry...";
+    }
+
+    // Slide widget in smoothly
+    widget.classList.add('is-visible');
+    updateActiveLegendOffset();
+
+    // 1. If GID is mock/none, show "Telemetry not available" and draw an empty chart
+    if (!config.gid || config.gid === 'mock') {
+        currentActiveLakeData = [];
+        drawLakeTempChart('lakeTempChartCanvas', LAKE_TEMP_DATES, [], false);
+        if (subtitleEl) {
+            subtitleEl.textContent = "Telemetry not available (-)";
+        }
+        return;
+    }
+
+    // 2. Instantly render high-fidelity fallback data
+    let chartData = LAKE_TEMP_FALLBACKS[lakeName] || [];
+    currentActiveLakeData = chartData;
+    drawLakeTempChart('lakeTempChartCanvas', LAKE_TEMP_DATES, chartData, false);
+
+    const sheetCsvUrl = `https://docs.google.com/spreadsheets/d/e/2PACX-1vTaQYCw9Jd6PgaRjuYOlk8aG0u59lV7iS0I62R5grvMVaIOEeK7dXZpGT1_nOGeiehaOLj-nzHhPxpO/pub?output=csv&gid=${config.gid}`;
+
+    try {
+        const response = await fetch(sheetCsvUrl, { cache: 'no-store' });
+        if (!response.ok) throw new Error("Network response not ok");
+        
+        const csvText = await response.text();
+        const lines = csvText.split(/\r?\n/).filter(line => line.trim().length > 0);
+        
+        if (lines.length < 2) throw new Error("Empty CSV dataset");
+
+        const parsedLabels = [];
+        const parsedData = [];
+
+        // Parse CSV lines: skips header (Name, Temperature)
+        for (let i = 1; i < lines.length; i++) {
+            const cells = lines[i].split(',');
+            if (cells.length >= 2) {
+                const dateLabel = parseCSVDate(cells[0]);
+                const tempVal = parseFloat(cells[1]);
+                if (dateLabel && !isNaN(tempVal)) {
+                    parsedLabels.push(dateLabel);
+                    parsedData.push(tempVal);
+                }
+            }
+        }
+
+        if (parsedData.length > 0 && currentActiveLakeName === lakeName) {
+            currentActiveLakeData = parsedData;
+            // Redraw chart smoothly with live spreadsheet data
+            drawLakeTempChart('lakeTempChartCanvas', parsedLabels, parsedData, false);
+            if (subtitleEl) {
+                subtitleEl.textContent = "Live telemetry (Google Sheets)";
+            }
+        }
+    } catch (err) {
+        console.warn("Failed to fetch live spreadsheet data. Falling back to high-fidelity cache.", err);
+        if (currentActiveLakeName === lakeName && subtitleEl) {
+            subtitleEl.textContent = "Forecast trend (cached)";
+        }
+    }
+}
+
+// Handles drawing full-screen version in the center modal
+function renderLakeTempChartInModal() {
+    const labels = LAKE_TEMP_DATES;
+    // Attempt to match dates if live parsed labels are currently drawn, otherwise fallback
+    const liveLabels = activeLakeTempChart ? activeLakeTempChart.data.labels : labels;
+    
+    drawLakeTempChart('lakeTempChartModalCanvas', liveLabels, currentActiveLakeData, true);
+}
+
+// Binds show/hide collapse event listeners to the bootstrap accordion
+function registerAccordionLakeTempChartHandlers() {
+    Object.keys(LAKE_TEMP_GIDS).forEach((accordionId) => {
+        const collapseElement = document.getElementById(accordionId);
+        if (!collapseElement) return;
+
+        collapseElement.addEventListener('show.bs.collapse', function () {
+            showLakeTempChart(accordionId);
+            showLakeVideoWidget(accordionId);
+            showLakeAreaWidget(accordionId);
+        });
+
+        collapseElement.addEventListener('hide.bs.collapse', function () {
+            if (currentActiveLakeCollapseId === accordionId) {
+                closeLakeTempWidget();
+                closeLakeVideoWidget();
+                closeLakeAreaWidget();
+            }
+        });
+    });
+
+    // Handle Active Layers Legend mutation to dynamically adjust offsets
+    const activeLegend = document.getElementById('active-layers-legend');
+    if (activeLegend) {
+        const legendObserver = new MutationObserver(() => {
+            updateActiveLegendOffset();
+        });
+        legendObserver.observe(activeLegend, {
+            attributes: true,
+            attributeFilter: ['style', 'class'],
+            childList: true,
+            subtree: true
+        });
+        
+        // Initial setup
+        setTimeout(updateActiveLegendOffset, 500);
+    }
+}
+
+// Wire DomContentLoaded setup
+document.addEventListener('DOMContentLoaded', registerAccordionLakeTempChartHandlers);
+document.addEventListener('DOMContentLoaded', updateActiveLegendOffset);
+document.addEventListener('DOMContentLoaded', initLakeMapPreviewAspectObserver);
+window.addEventListener('resize', updateActiveLegendOffset);
 
 //____________________________________________________________________________________________________________________________________________________________________________________
 // Land Surface Temperature (LST) Controls
@@ -2931,3 +4524,127 @@ function closeLSTPanel() {
         map1.setLayoutProperty(`lst-month-${i}`, 'visibility', 'none');
     }
 }
+
+// ============================================================
+// DYNAMIC GOOGLE SHEET SYNCHRONIZATION FOR LAKE CHANGES
+// ============================================================
+
+window.updateGlobalLakeData = function(sheetData) {
+    if (!sheetData || !Array.isArray(sheetData)) return;
+    
+    // 1. Update localLakeAreaData in controls.js in-place
+    localLakeAreaData.length = 0;
+    sheetData.forEach(item => {
+        localLakeAreaData.push({
+            district: item.district,
+            name: item.name,
+            values: item.values
+        });
+    });
+
+    // 2. Update lakeAreaData in index.html in-place
+    if (window.lakeAreaData) {
+        window.lakeAreaData.length = 0;
+        sheetData.forEach(item => {
+            window.lakeAreaData.push({
+                district: item.district,
+                name: item.name,
+                values: item.values,
+                volume: item.volume
+            });
+        });
+    }
+
+    // 3. Re-render charts
+    if (typeof updateLakeChart === 'function') {
+        updateLakeChart();
+    }
+    if (typeof updateVolumeChart === 'function') {
+        updateVolumeChart();
+    }
+
+    // 4. Update the sidebar widget if it is currently open
+    if (typeof currentActiveLakeCollapseId === 'string' && currentActiveLakeCollapseId && typeof populateLakeAreaWidgetData === 'function') {
+        const config = LAKE_TEMP_GIDS[currentActiveLakeCollapseId];
+        if (config && config.name) {
+            populateLakeAreaWidgetData(config.name);
+        }
+    }
+    
+    console.log('Successfully updated global lake data from Google Sheet:', sheetData);
+};
+
+async function loadLakeDataFromGoogleSheet() {
+    try {
+        const url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRPovMmHkW7h2JxasR4hrKDOfdU9mrMm8u9CSrsFWieWEr0SmB-2FRhzAfIsdlc2lwgQQjadEPzeLQD/pubhtml/sheet?headers=false&gid=0';
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('Fetch failed with status ' + response.status);
+        const htmlText = await response.text();
+        
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(htmlText, 'text/html');
+        const rows = doc.querySelectorAll('.ritz table.waffle tbody tr');
+        
+        const sheetData = [];
+        
+        rows.forEach((row, index) => {
+            if (index < 2) return; // Skip headers
+            
+            const cols = row.querySelectorAll('td');
+            if (cols.length < 16) return;
+            
+            let district = cols[0].textContent.trim().toUpperCase();
+            let name = cols[1].textContent.trim();
+            if (!district || !name) return;
+
+            // Normalize 'HUNZA' to 'HUNZA NAGAR' to align with dropdown options and active config states
+            if (district === 'HUNZA') {
+                district = 'HUNZA NAGAR';
+            }
+            
+            // Normalize names to match dropdown values and static array names
+            name = name.replace(/_1/g, ' 1')
+                       .replace(/_2/g, ' 2')
+                       .replace(/ Glacial Lake/gi, '')
+                       .replace(/ Glacial lake/gi, '')
+                       .replace(/ chaat/gi, ' Chaat')
+                       .trim();
+            
+            // Areas 2020 to 2025 (indices 2 to 7)
+            const values = [];
+            for (let i = 2; i <= 7; i++) {
+                const valStr = cols[i].textContent.trim().replace(/,/g, '');
+                const valFloat = parseFloat(valStr);
+                values.push(isNaN(valFloat) ? null : Math.round(valFloat));
+            }
+            
+            // Current Area for 2026 is in cols[15]
+            const currentAreaStr = cols[15].textContent.trim().replace(/,/g, '');
+            const currentAreaFloat = parseFloat(currentAreaStr);
+            values.push(isNaN(currentAreaFloat) ? null : Math.round(currentAreaFloat));
+            
+            // Volumes 2020 to 2025 (indices 9 to 14)
+            const volume = [];
+            for (let i = 9; i <= 14; i++) {
+                const valStr = cols[i].textContent.trim().replace(/,/g, '');
+                const valFloat = parseFloat(valStr);
+                volume.push(isNaN(valFloat) ? null : valFloat);
+            }
+            
+            sheetData.push({
+                district,
+                name,
+                values,
+                volume
+            });
+        });
+        
+        if (sheetData.length > 0) {
+            window.updateGlobalLakeData(sheetData);
+        }
+    } catch (e) {
+        console.error('Failed to load live Google Sheet data, using static fallbacks:', e);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', loadLakeDataFromGoogleSheet);
