@@ -14,47 +14,7 @@ const map1 = new mapboxgl.Map({
     style: 'mapbox://styles/mapbox/satellite-streets-v12',
 });
 
-const fullscreenContainer = document.body;
 
-function updateFullscreenToggleButtonState() {
-    const fullscreenToggle = document.getElementById('fullscreenToggle');
-    if (!fullscreenToggle) {
-        return;
-    }
-
-    const isFullscreen = document.fullscreenElement === fullscreenContainer;
-    fullscreenToggle.setAttribute('aria-pressed', String(isFullscreen));
-    fullscreenToggle.title = isFullscreen ? 'Exit map fullscreen' : 'Enter map fullscreen';
-    fullscreenToggle.innerHTML = isFullscreen
-        ? '<svg xmlns="http://www.w3.org/2000/svg" class="fullscreen-icon" viewBox="0 0 16 16" fill="white" aria-hidden="true"><path d="M5 1v2H3v2H1V1h4zm6 0h4v4h-2V3h-2V1zM1 11h2v2h2v2H1v-4zm12 0h2v4h-4v-2h2v-2z"/></svg>'
-        : '<svg xmlns="http://www.w3.org/2000/svg" class="fullscreen-icon" viewBox="0 0 16 16" fill="white" aria-hidden="true"><path d="M1 1h5v2H3v3H1V1zm10 0h4v5h-2V3h-2V1zM1 10h2v3h3v2H1v-5zm12 0h2v5h-5v-2h3v-3z"/></svg>';
-
-    if (map1) {
-        window.requestAnimationFrame(() => {
-            map1.resize();
-        });
-    }
-}
-
-async function toggleMapFullscreen() {
-    if (!fullscreenContainer) {
-        return;
-    }
-
-    if (document.fullscreenElement === fullscreenContainer) {
-        if (document.exitFullscreen) {
-            await document.exitFullscreen();
-        }
-        return;
-    }
-
-    if (fullscreenContainer.requestFullscreen) {
-        await fullscreenContainer.requestFullscreen();
-    }
-}
-
-document.addEventListener('fullscreenchange', updateFullscreenToggleButtonState);
-updateFullscreenToggleButtonState();
 
 // Custom 3D / 2D toggle control
 class PitchToggleControl {
@@ -85,6 +45,40 @@ class PitchToggleControl {
     onRemove() {
         this._container.parentNode.removeChild(this._container);
         this._map = undefined;
+    }
+}
+
+function toggleContainerVisibility(targetId, btn) {
+    const target = document.getElementById(targetId);
+    if (!target) return;
+    
+    if (targetId === 'top_video') {
+        const warningChart = document.getElementById('top_video_warning_chart');
+        const isWarningVisible = warningChart && window.getComputedStyle(warningChart).display !== 'none';
+        const isVideoVisible = window.getComputedStyle(target).display !== 'none';
+        
+        if (isWarningVisible || isVideoVisible) {
+            target.style.display = 'none';
+            if (warningChart) warningChart.style.display = 'none';
+            btn.classList.add('widget-hidden');
+        } else {
+            const tempWarningToggle = document.getElementById('quick-high-temp-2026-toggle');
+            if (tempWarningToggle && tempWarningToggle.checked && warningChart) {
+                warningChart.style.display = 'block';
+            } else {
+                target.style.display = 'block';
+            }
+            btn.classList.remove('widget-hidden');
+        }
+    } else {
+        const isVisible = window.getComputedStyle(target).display !== 'none';
+        if (isVisible) {
+            target.style.display = 'none';
+            btn.classList.add('widget-hidden');
+        } else {
+            target.style.display = 'block';
+            btn.classList.remove('widget-hidden');
+        }
     }
 }
 
@@ -155,6 +149,38 @@ class DashboardWidgetsTogglesControl {
                 targetId: 'active-layers-legend',
                 hiddenClass: 'hidden-widget',
                 startHidden: false
+            },
+            {
+                id: 'toggle-glof-event',
+                title: 'Toggle GLOF Event Video',
+                icon: 'fas fa-film',
+                targetId: 'top_video',
+                startHidden: true,
+                isContainerToggle: true
+            },
+            {
+                id: 'toggle-badswat-lake',
+                title: 'Toggle Badswat Lake Video',
+                icon: 'fas fa-video',
+                targetId: 'bot_video',
+                startHidden: true,
+                isContainerToggle: true
+            },
+            {
+                id: 'toggle-monitoring-chart',
+                title: 'Toggle Monitoring Chart',
+                icon: 'fas fa-chart-line',
+                targetId: 'controlChart',
+                startHidden: true,
+                isContainerToggle: true
+            },
+            {
+                id: 'toggle-glaciers-stats',
+                title: 'Toggle Glaciers Stats',
+                icon: 'fas fa-snowflake',
+                targetId: 'glaciersDataContainer',
+                startHidden: true,
+                isContainerToggle: true
             }
         ];
 
@@ -166,18 +192,22 @@ class DashboardWidgetsTogglesControl {
             btn.innerHTML = `<i class="${t.icon}" style="font-size: 11px;"></i>`;
             
             btn.onclick = () => {
-                const target = document.getElementById(t.targetId);
-                if (target) {
-                    const isHidden = target.classList.toggle(t.hiddenClass);
-                    btn.classList.toggle('widget-hidden', isHidden);
-                    
-                    // Trigger dynamic offset updates in controls.js
-                    if (typeof updateActiveLegendOffset === 'function') {
-                        updateActiveLegendOffset();
-                    }
-                    
-                    if (t.onToggle) {
-                        t.onToggle(isHidden);
+                if (t.isContainerToggle) {
+                    toggleContainerVisibility(t.targetId, btn);
+                } else {
+                    const target = document.getElementById(t.targetId);
+                    if (target) {
+                        const isHidden = target.classList.toggle(t.hiddenClass);
+                        btn.classList.toggle('widget-hidden', isHidden);
+                        
+                        // Trigger dynamic offset updates in controls.js
+                        if (typeof updateActiveLegendOffset === 'function') {
+                            updateActiveLegendOffset();
+                        }
+                        
+                        if (t.onToggle) {
+                            t.onToggle(isHidden);
+                        }
                     }
                 }
             };
@@ -517,7 +547,6 @@ try {
 } catch (err) {
     console.warn('Mapbox Geocoder not available or failed to initialize.', err);
 }
-map1.addControl(new mapboxgl.FullscreenControl({ container: fullscreenContainer }), 'top-right');
 map1.addControl(new mapboxgl.NavigationControl(), 'top-right');
 map1.addControl(
     new mapboxgl.GeolocateControl({

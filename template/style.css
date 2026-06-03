@@ -9,21 +9,51 @@ body {
    BORDER GLOW ANIMATION
 ============================================================ */
 @keyframes borderGlow {
-  0%   { box-shadow: 0 0 4px 1px rgba(29,78,216,0.6),  0 0 0px  0px rgba(96,165,250,0);   }
-  50%  { box-shadow: 0 0 18px 6px rgba(59,130,246,1),  0 0 30px 8px rgba(96,165,250,0.5); }
-  100% { box-shadow: 0 0 4px 1px rgba(29,78,216,0.6),  0 0 0px  0px rgba(96,165,250,0);   }
+  0%   { box-shadow: 0 0 2px 1px rgba(29,78,216,0.4); }
+  50%  { box-shadow: 0 0 6px 1px rgba(59,130,246,0.8), 0 0 10px 2px rgba(96,165,250,0.4); }
+  100% { box-shadow: 0 0 2px 1px rgba(29,78,216,0.4); }
 }
 @keyframes outlineGlow {
-  0%   { box-shadow: 0 0 4px 1px rgba(29,78,216,0.6),  0 0 0px  0px rgba(96,165,250,0);   }
-  50%  { box-shadow: 0 0 18px 6px rgba(59,130,246,1),  0 0 30px 8px rgba(96,165,250,0.5); }
-  100% { box-shadow: 0 0 4px 1px rgba(29,78,216,0.6),  0 0 0px  0px rgba(96,165,250,0);   }
+  0%   { box-shadow: 0 0 2px 1px rgba(29,78,216,0.4); }
+  50%  { box-shadow: 0 0 6px 1px rgba(59,130,246,0.8), 0 0 10px 2px rgba(96,165,250,0.4); }
+  100% { box-shadow: 0 0 2px 1px rgba(29,78,216,0.4); }
 }
 @keyframes redOutlineGlow {
-  0%   { box-shadow: 0 0 4px 1px rgba(231,76,60,0.6),  0 0 0px  0px rgba(231,76,60,0);   }
-  50%  { box-shadow: 0 0 18px 6px rgba(231,76,60,1),  0 0 30px 8px rgba(231,76,60,0.5); }
-  100% { box-shadow: 0 0 4px 1px rgba(231,76,60,0.6),  0 0 0px  0px rgba(231,76,60,0);   }
+  0%   { box-shadow: 0 0 2px 1px rgba(231,76,60,0.4); }
+  50%  { box-shadow: 0 0 6px 1px rgba(231,76,60,0.8), 0 0 10px 2px rgba(231,76,60,0.4); }
+  100% { box-shadow: 0 0 2px 1px rgba(231,76,60,0.4); }
 }
 /* ___________________________________________________Navbar Properties____________________________________________________ */
+.navbar {
+  position: relative;
+  z-index: 100;
+}
+.navbar::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: #1d4ed8;
+  box-shadow: 0 0 2px rgba(29, 78, 216, 0.3);
+  animation: navbarGlowAnimation 2.5s ease-in-out infinite;
+  z-index: 101;
+}
+@keyframes navbarGlowAnimation {
+  0% {
+    box-shadow: 0 0 2px rgba(29, 78, 216, 0.3);
+    opacity: 0.5;
+  }
+  50% {
+    box-shadow: 0 0 6px 1px rgba(59, 130, 246, 0.8), 0 0 10px 2px rgba(96, 165, 250, 0.4);
+    opacity: 1;
+  }
+  100% {
+    box-shadow: 0 0 2px rgba(29, 78, 216, 0.3);
+    opacity: 0.5;
+  }
+}
 .navbar-light h1 {
     color: rgb(255, 255, 255);
     font-size: 2.2vw;
@@ -61,19 +91,25 @@ h1 {
   left: 0vw;
   width: 100%;
 }
+#top_video,
+#top_video_warning_chart,
+#bot_video,
+#controlChart,
+#glaciersDataContainer {
+  transition: top 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), right 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
 #top_video{
   position: absolute;
-  top: 4.4vw;
-  right: 0.6vw;
   width:22%;
   border: #1d4ed8 solid 5px;
   border-radius: 4px;
+  display: none;
   animation: borderGlow 2.5s ease-in-out infinite;
+  z-index: 10;
 }
 #top_video_warning_chart {
   position: absolute;
-  top: 4.4vw;
-  right: 0.6vw;
   width: 22%;
   height: 12vw;
   border: #1d4ed8 solid 5px;
@@ -83,6 +119,7 @@ h1 {
   color: #fff;
   display: none;
   animation: borderGlow 2.5s ease-in-out infinite;
+  z-index: 10;
 }
 #top_warning_wrap {
   position: absolute;
@@ -102,28 +139,29 @@ h1 {
 }
 #bot_video{
   position: absolute;
-  top: 17.6vw;
-  right: 0.6vw;
   width:22%;
   border: #1d4ed8 solid 5px;
   border-radius: 4px;
+  display: none;
   animation: borderGlow 2.5s ease-in-out infinite 0.5s;
+  z-index: 10;
 }
 #controlChart{
   position: absolute;
-  top: 30.8vw;
-  right: 0.6vw;
   width: 22%;
   height: 12vw;
   border-radius: 4px;
   border: #1d4ed8 solid 5px;
   overflow: hidden;
   background: #0d1b2a;
+  display: none;
   animation: borderGlow 2.5s ease-in-out infinite 1s;
+  z-index: 10;
 }
 #controlChart,
 #glaciersDataContainer {
   position: absolute;
+  z-index: 10;
 }
 #flourish-wrap {
   position: absolute;
@@ -142,14 +180,16 @@ h1 {
 }
 #glaciersDataContainer{
   position: absolute;
-  top: 43.5vw;
-  right: 0.6vw;
+  top: calc(12px + 39.1vw);
+  right: 52px;
   width: 22%;
   border-radius: 4px;
   border: #1d4ed8 solid 5px;
   overflow: hidden;
   background: #0d1b2a;
+  display: none;
   animation: borderGlow 2.5s ease-in-out infinite 1.5s;
+  z-index: 10;
 }
 #glaciersDataImg{
   width: 100%;
@@ -256,44 +296,14 @@ h1 {
 /* ____________________________________________________________________________________________________________________________________ */
 #map {
     position: absolute;
-    top: 4.4vw;
-    left: 0.6vw;
-    width: 76%;
-    bottom: 6px;
-    border-radius: 4px;
-    border: #1d4ed8 solid 5px;
-    animation: borderGlow 2.5s ease-in-out infinite;
+    top: 70px;
+    left: 0;
+    width: 100%;
+    bottom: 0;
+    border-radius: 0;
+    border: none;
     --station-forecast-offset: 0px;
-}
-
-body:fullscreen {
-  overflow: hidden;
-}
-
-body:fullscreen > :not(nav):not(#map):not(#menu) {
-  display: none !important;
-}
-
-body:fullscreen #map {
-  position: fixed;
-  top: 70px;
-  left: 0;
-  width: 100vw;
-  height: calc(100vh - 70px);
-  border-radius: 0;
-  margin: 0;
-  z-index: 1;
-}
-
-body:fullscreen #menu {
-  display: block !important;
-  position: fixed;
-  top: 82px;
-  left: 0.6vw;
-  height: calc(100vh - 92px);
-  max-height: calc(100vh - 92px);
-  margin: 0;
-  z-index: 4000;
+    --right-widget-offset: calc(22% + 68px);
 }
 
 #map.station-forecast-active {
@@ -302,7 +312,7 @@ body:fullscreen #menu {
 
 #lake-map-preview {
   position: absolute;
-  right: calc(52px + var(--active-legend-width, 0px));
+  right: calc(var(--right-widget-offset, 52px) + var(--active-legend-width, 0px));
   bottom: calc(0.6vw + var(--station-forecast-offset, 0px));
   width: clamp(230px, 18vw, 320px);
   height: clamp(190px, 24vh, 260px);
@@ -318,7 +328,7 @@ body:fullscreen #menu {
 
 /* Vertical Stacking for Map Preview Widget to Prevent Overlaps */
 #map.stack-preview-vertical #lake-map-preview {
-  right: 52px;
+  right: var(--right-widget-offset, 52px);
   bottom: calc(0.6vw + var(--station-forecast-offset, 0px) + var(--active-legend-height, 0px) + var(--lake-temp-height, 0px));
   width: clamp(280px, 22vw, 380px);
 }
@@ -359,7 +369,7 @@ body:fullscreen #menu {
 
 #risk-zonation-legend {
   position: absolute;
-  right: 52px;
+  right: var(--right-widget-offset, 52px);
   bottom: calc(0.6vw + var(--station-forecast-offset));
   min-width: clamp(180px, 15vw, 220px);
   max-width: clamp(220px, 18vw, 340px);
@@ -370,7 +380,7 @@ body:fullscreen #menu {
   padding: 0.45vw 0.5vw;
   z-index: 9;
   display: none;
-  transition: bottom 220ms ease;
+  transition: bottom 220ms ease, right 220ms ease;
 }
 
 #risk-zonation-legend.risk-zonation-legend--with-preview {
@@ -379,7 +389,7 @@ body:fullscreen #menu {
 
 #active-layers-legend {
   position: absolute;
-  right: 52px;
+  right: var(--right-widget-offset, 52px);
   bottom: calc(0.6vw + var(--station-forecast-offset));
   width: clamp(280px, 22vw, 380px);
   max-height: min(33vh, 300px);
@@ -390,6 +400,7 @@ body:fullscreen #menu {
   padding: 0.45vw 0.5vw;
   z-index: 10;
   display: block;
+  transition: bottom 220ms ease, right 220ms ease;
 }
 
 #active-layers-legend.is-hidden {
@@ -682,7 +693,7 @@ body:fullscreen #menu {
 
 #station-forecast-widget {
   position: absolute;
-  right: 52px;
+  right: var(--right-widget-offset, 52px);
   bottom: 0.6vw;
   width: clamp(300px, 32vw, 540px);
   height: clamp(190px, 27vh, 290px);
@@ -779,7 +790,7 @@ body:fullscreen #menu {
    ============================================================ */
 #lake-temp-widget {
   position: absolute;
-  right: 52px;
+  right: var(--right-widget-offset, 52px);
   bottom: calc(0.6vw + var(--station-forecast-offset, 0px) + var(--active-legend-height, 0px));
   width: clamp(280px, 22vw, 380px);
   height: clamp(190px, 24vh, 260px);
@@ -795,7 +806,7 @@ body:fullscreen #menu {
   visibility: hidden;
   pointer-events: none;
   transform: translateY(14px);
-  transition: opacity 240ms ease, transform 240ms ease, bottom 220ms ease, visibility 0ms linear 240ms;
+  transition: opacity 240ms ease, transform 240ms ease, bottom 220ms ease, right 220ms ease, visibility 0ms linear 240ms;
   animation: borderGlow 2.5s ease-in-out infinite;
 }
 
@@ -804,7 +815,7 @@ body:fullscreen #menu {
   visibility: visible;
   pointer-events: auto;
   transform: translateY(0);
-  transition: opacity 240ms ease, transform 240ms ease, bottom 220ms ease;
+  transition: opacity 240ms ease, transform 240ms ease, bottom 220ms ease, right 220ms ease;
 }
 
 #lake-temp-header {
@@ -887,7 +898,7 @@ body:fullscreen #menu {
    ============================================================ */
 #lake-area-widget.gp {
   position: absolute;
-  right: 52px;
+  right: var(--right-widget-offset, 52px);
   bottom: calc(0.6vw + var(--station-forecast-offset, 0px) + var(--active-legend-height, 0px) + var(--lake-temp-height, 0px) + var(--lake-video-height, 0px));
   width: clamp(280px, 22vw, 380px);
   background: #06090f;
@@ -903,7 +914,7 @@ body:fullscreen #menu {
   visibility: hidden;
   pointer-events: none;
   transform: translateY(14px);
-  transition: opacity 240ms ease, transform 240ms ease, bottom 220ms ease, visibility 0ms linear 240ms;
+  transition: opacity 240ms ease, transform 240ms ease, bottom 220ms ease, right 220ms ease, visibility 0ms linear 240ms;
   outline: solid 5px #e74c3c;
   animation: redOutlineGlow 2.5s ease-in-out infinite 0.25s;
 }
@@ -913,7 +924,7 @@ body:fullscreen #menu {
   visibility: visible;
   pointer-events: auto;
   transform: translateY(0);
-  transition: opacity 240ms ease, transform 240ms ease, bottom 220ms ease;
+  transition: opacity 240ms ease, transform 240ms ease, bottom 220ms ease, right 220ms ease;
 }
 
 #lake-area-widget .gp-header {
@@ -1316,7 +1327,7 @@ body:fullscreen #menu {
    ============================================================ */
 #lake-video-widget {
   position: absolute;
-  right: 52px;
+  right: var(--right-widget-offset, 52px);
   bottom: calc(0.6vw + var(--station-forecast-offset, 0px) + var(--active-legend-height, 0px) + var(--lake-temp-height, 0px));
   width: clamp(280px, 22vw, 380px);
   border: 3px solid #1d4ed8;
@@ -1689,25 +1700,29 @@ body:fullscreen #menu {
 /* ___________________________________________________Menubar Properties_______________________________________________________________*/
 
 #menu {
-    position: relative;
-    top: 2vw;
-    left: 2vw;
-    height: 77vh;
+    position: absolute;
+    top: 82px;
+    left: 12px;
+    bottom: 10px;
     width: 16vw;
     background: linear-gradient(180deg, #1e293b 0%, #0d1b2a 100%);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
-    display:block;
     color: white;
     opacity: 0.95;
-    /* animation: crazyAirplaneFlight 1000ms ease-in-out; */
-    overflow-y:auto;
+    overflow-y: auto;
     outline: solid 5px #1d4ed8;
     border-radius: 4px;
     display: none;
     overflow-x: hidden;
     animation: outlineGlow 2.5s ease-in-out infinite 0.25s;
-  }
+    transition: bottom 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    z-index: 4000;
+}
+
+body:has(#charts-row:not(.hidden-charts)) #menu {
+    bottom: calc(20px + clamp(190px, 24vh, 260px));
+}
 
   #label{
     position: absolute ;
@@ -1763,28 +1778,7 @@ body:fullscreen #menu {
     border-radius: 4px
   }
 
-  .fullscreen-button {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    right: 188px;
-    background: rgb(0, 0, 0);
-    border: none;
-    cursor: pointer;
-    z-index: 2;
-    outline: solid white 1px;
-    border-radius: 4px;
-  }
 
-  .fullscreen-icon {
-    width: 1vw;
-    height: 1vw;
-    transition: transform 0.3s ease-in-out;
-  }
-
-  .fullscreen-button:hover .fullscreen-icon {
-    transform: scale(1.8);
-  }
   
   .menu-icon {
     width: 1vw;
@@ -2757,10 +2751,6 @@ body:fullscreen #menu {
     visibility: hidden;
 }
 
-#charts-row.menu-open,
-body:fullscreen #charts-row {
-    left: calc(16.6vw + 15px);
-}
 
 .chart-card {
     flex: 1;
@@ -3353,17 +3343,25 @@ body:fullscreen #charts-row {
    RESPONSIVE LAYOUT SHIFT (WHEN HEIGHT OCCUPIED IN STACK)
    ============================================================ */
 #map.video-shifted-left #lake-video-widget {
-  right: calc(52px + var(--active-legend-width, 0px));
+  right: calc(var(--right-widget-offset, 52px) + var(--active-legend-width, 0px));
   bottom: calc(0.6vw + var(--station-forecast-offset, 0px));
 }
 
 #map.video-shifted-left #lake-map-preview {
-  right: calc(52px + var(--active-legend-width, 0px) + var(--lake-video-width, 0px) + 12px);
+  right: calc(var(--right-widget-offset, 52px) + var(--active-legend-width, 0px) + var(--lake-video-width, 0px) + 12px);
 }
 
 /* ============================================================
    PREMIUM OVERRIDES FOR MAPBOX ZOOM & CONTROL BUTTONS
    ============================================================ */
+.mapboxgl-ctrl-top-right {
+  right: 0px !important;
+}
+
+.mapboxgl-ctrl-top-right .mapboxgl-ctrl {
+  margin-right: 10px !important;
+}
+
 .mapboxgl-ctrl-group {
     background: #ffffff !important;
     border: 1px solid rgba(0, 0, 0, 0.08) !important;
@@ -3438,7 +3436,7 @@ body:fullscreen #charts-row {
     color: #ffffff !important;
     font-size: 11px;
     font-weight: 700;
-    font-family: 'Segoi UI', sans-serif;
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
     box-shadow: 0 0 10px rgba(0,0,0,0.5), inset 0 0 6px rgba(255,255,255,0.3);
     border: 2px solid #ffffff;
     text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
@@ -3476,7 +3474,7 @@ body:fullscreen #charts-row {
     padding: 10px 14px !important;
     width: 200px !important;
     backdrop-filter: blur(8px) !important;
-    font-family: 'Segoi UI', sans-serif;
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
 }
 
 .weather-marker-popup .mapboxgl-popup-close-button {

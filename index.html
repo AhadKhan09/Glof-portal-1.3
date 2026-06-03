@@ -24,19 +24,14 @@
 
 <body>
     <video id="bg_video" src="data/bg_video.mp4" autoplay loop muted></video>
-    <nav class="navbar navbar-light" style="background-color:#002060; outline: solid rgb(0, 0, 0) 2px; margin: 0; padding: 0; width: 100%; height: 70px;">
+    <nav class="navbar navbar-light" style="background-color:#002060; margin: 0; padding: 0; width: 100%; height: 70px;">
         <img class="logo" src="data/ndma_logo.webp" alt="NDMA Logo">
         <div class="flex-1 text-center heading-container">
             <div class="bg-glass">
                 N-2
             </div>
-            <span class="text-white text-5xl font-semibold text-shadow" style="font-family: 'Segoi UI', sans-serif !important; font-weight: 700;">National GLOF Watch</span>
+            <span class="text-white text-5xl font-semibold text-shadow" style="font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif !important; font-weight: 700;">National GLOF Watch</span>
         </div>
-        <button class="fullscreen-button" id="fullscreenToggle" type="button" onclick="toggleMapFullscreen()" aria-label="Toggle map fullscreen" title="Toggle map fullscreen">
-            <svg xmlns="http://www.w3.org/2000/svg" class="fullscreen-icon" viewBox="0 0 16 16" fill="white" aria-hidden="true">
-                <path d="M1 1h5v2H3v3H1V1zm10 0h4v5h-2V3h-2V1zM1 10h2v3h3v2H1v-5zm12 0h2v5h-5v-2h3v-3z"/>
-            </svg>
-        </button>
         <button class="menu-button" id="menuToggle">
             <svg xmlns="http://www.w3.org/2000/svg" class="menu-icon" viewBox="0 0 16 16" fill="white">
               <path
@@ -261,6 +256,44 @@
             </div>
 
         </div>
+
+        <!-- Floating panels on the right side overlaying the map -->
+        <video id="top_video" src="data/badswat1.mp4" autoplay loop muted controls></video>
+        <div id="top_video_warning_chart">
+            <button class="panel-expand-btn" type="button" onclick="openPanelModal('top_video_warning_chart')" title="Open high temp warning in modal view" aria-label="Open high temp warning in modal view">
+                <i class="fas fa-up-right-and-down-left-from-center"></i>
+            </button>
+            <div id="top_warning_wrap">
+                <iframe src="https://flo.uri.sh/visualisation/28273388/embed#theme=dark" frameborder="0" allowfullscreen scrolling="no"></iframe>
+            </div>
+        </div>
+        <video id="bot_video" src="data/badswat2.mp4" autoplay loop muted controls></video>
+
+        <div id="controlChart">
+            <button class="panel-expand-btn" type="button" onclick="openPanelModal('controlChart')" title="Open chart in modal view" aria-label="Open control chart in modal view">
+                <i class="fas fa-up-right-and-down-left-from-center"></i>
+            </button>
+            <div id="flourish-wrap">
+                <iframe src="https://flo.uri.sh/visualisation/27852382/embed" frameborder="0" allowfullscreen scrolling="no"></iframe>
+            </div>
+        </div>
+
+        <div id="glaciersDataContainer">
+            <button class="panel-expand-btn" type="button" onclick="openPanelModal('glaciersDataContainer')" title="Open image in modal view" aria-label="Open glaciers data in modal view">
+                <i class="fas fa-up-right-and-down-left-from-center"></i>
+            </button>
+            <img src="data/basemap-icons/Glaciers_data.png" alt="Glaciers Data" id="glaciersDataImg">
+        </div>
+
+        <div id="panelModal" class="panel-modal" onclick="handlePanelModalBackdrop(event)">
+            <div class="panel-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="panelModalTitle">
+                <button class="panel-modal-close" type="button" onclick="closePanelModal()" aria-label="Close modal view">&times;</button>
+                <div class="panel-modal-header">
+                    <h3 id="panelModalTitle"></h3>
+                </div>
+                <div id="panelModalBody" class="panel-modal-body"></div>
+            </div>
+        </div>
     </div>
 
     <!-- LST Floating Control Panel -->
@@ -291,43 +324,6 @@
     </div>
 
     <!-- ======== CHARTS ROW MOVED INSIDE MAP VIEWPORT ======== -->
-
-    <div id="controlChart">
-        <button class="panel-expand-btn" type="button" onclick="openPanelModal('controlChart')" title="Open chart in modal view" aria-label="Open control chart in modal view">
-            <i class="fas fa-up-right-and-down-left-from-center"></i>
-        </button>
-        <div id="flourish-wrap">
-            <iframe src="https://flo.uri.sh/visualisation/27852382/embed" frameborder="0" allowfullscreen scrolling="no"></iframe>
-        </div>
-    </div>
-
-    <div id="glaciersDataContainer">
-        <button class="panel-expand-btn" type="button" onclick="openPanelModal('glaciersDataContainer')" title="Open image in modal view" aria-label="Open glaciers data in modal view">
-            <i class="fas fa-up-right-and-down-left-from-center"></i>
-        </button>
-        <img src="data/basemap-icons/Glaciers_data.png" alt="Glaciers Data" id="glaciersDataImg">
-    </div>
-
-    <div id="panelModal" class="panel-modal" onclick="handlePanelModalBackdrop(event)">
-        <div class="panel-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="panelModalTitle">
-            <button class="panel-modal-close" type="button" onclick="closePanelModal()" aria-label="Close modal view">&times;</button>
-            <div class="panel-modal-header">
-                <h3 id="panelModalTitle"></h3>
-            </div>
-            <div id="panelModalBody" class="panel-modal-body"></div>
-        </div>
-    </div>
-
-    <video id="top_video" src="data/badswat1.mp4" autoplay loop muted controls></video>
-    <div id="top_video_warning_chart">
-        <button class="panel-expand-btn" type="button" onclick="openPanelModal('top_video_warning_chart')" title="Open high temp warning in modal view" aria-label="Open high temp warning in modal view">
-            <i class="fas fa-up-right-and-down-left-from-center"></i>
-        </button>
-        <div id="top_warning_wrap">
-            <iframe src="https://flo.uri.sh/visualisation/28273388/embed#theme=dark" frameborder="0" allowfullscreen scrolling="no"></iframe>
-        </div>
-    </div>
-    <video id="bot_video" src="data/badswat2.mp4" autoplay loop muted controls></video>
 
     <!-- _____________________________________________________________________________________________________________________________________________________________ -->
 <div id="menu">

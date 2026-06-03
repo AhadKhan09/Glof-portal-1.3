@@ -2138,14 +2138,11 @@ function showHighTempWarning(forceVisible = null) {
 
 document.getElementById("menuToggle").addEventListener("click", function() {
     var menu = document.getElementById("menu");
-    var chartsRow = document.getElementById("charts-row");
     
     if (menu.style.display === "none" || menu.style.display === "") {
       menu.style.display = "block"; // Show menu
-      if (chartsRow) chartsRow.classList.add("menu-open");
     } else {
       menu.style.display = "none"; // Hide menu
-      if (chartsRow) chartsRow.classList.remove("menu-open");
     }
   });
 
@@ -3382,92 +3379,16 @@ let currentActiveLakeName = '';
 let currentActiveLakeCollapseId = '';
 let currentActiveLakeData = [];
 
+function isRightContainerVisible() {
+    const ids = ['top_video', 'top_video_warning_chart', 'bot_video', 'controlChart', 'glaciersDataContainer'];
+    return ids.some(id => {
+        const el = document.getElementById(id);
+        return el && window.getComputedStyle(el).display !== 'none';
+    });
+}
+
 // Measures the active layers legend and updates CSS offset variables dynamically
 function updateActiveLegendOffset() {
-    const activeLegend = document.getElementById('active-layers-legend');
-    const tempWidget = document.getElementById('lake-temp-widget');
-    const videoWidget = document.getElementById('lake-video-widget');
-    const areaWidget = document.getElementById('lake-area-widget');
-    const previewWidget = document.getElementById('lake-map-preview');
-    const chartsRow = document.getElementById('charts-row');
-    const menu = document.getElementById('menu');
-    
-    const isLegendVisible = activeLegend && !activeLegend.classList.contains('is-hidden') && window.getComputedStyle(activeLegend).display !== 'none';
-    const isTempVisible = tempWidget && tempWidget.classList.contains('is-visible') && window.getComputedStyle(tempWidget).display !== 'none';
-    const isVideoVisible = videoWidget && videoWidget.classList.contains('is-visible') && window.getComputedStyle(videoWidget).display !== 'none';
-    const isAreaVisible = areaWidget && areaWidget.classList.contains('is-visible') && window.getComputedStyle(areaWidget).display !== 'none';
-    const isPreviewVisible = previewWidget && window.getComputedStyle(previewWidget).display !== 'none';
-    const isChartsRowVisible = chartsRow && !chartsRow.classList.contains('hidden-charts') && window.getComputedStyle(chartsRow).display !== 'none';
-    const isMenuVisible = menu && window.getComputedStyle(menu).display !== 'none';
-
-    const legendHeight = isLegendVisible ? activeLegend.offsetHeight : 0;
-    const tempHeight = isTempVisible ? tempWidget.offsetHeight : 0;
-    const videoHeight = isVideoVisible ? videoWidget.offsetHeight : 0;
-    const areaHeight = isAreaVisible ? areaWidget.offsetHeight : 0;
-    const previewHeight = isPreviewVisible ? previewWidget.offsetHeight : 0;
-
-    // Check if vertical space is occupied and we need to shift the video widget to the left
-    const totalRequiredHeight = legendHeight + tempHeight + videoHeight + areaHeight + 50;
-    const isHeightOccupied = isLegendVisible && isVideoVisible && (totalRequiredHeight > window.innerHeight - 80);
-
-    const mapEl = document.getElementById('map');
-    if (mapEl) {
-        if (isHeightOccupied) {
-            mapEl.classList.add('video-shifted-left');
-            mapEl.style.setProperty('--lake-video-width', `${videoWidget.offsetWidth || 300}px`);
-            
-            // If shifted left, it is removed from the right-hand stack vertical offset
-            mapEl.style.setProperty('--lake-video-height', '0px');
-        } else {
-            mapEl.classList.remove('video-shifted-left');
-            mapEl.style.setProperty('--lake-video-width', '0px');
-            mapEl.style.setProperty('--lake-video-height', `${videoHeight > 0 ? (videoHeight + 10) : 0}px`);
-        }
-
-        // Determine the horizontal span of the left-side overlays
-        let leftOverlayRightEdge = 0;
-        if (isChartsRowVisible && chartsRow) {
-            leftOverlayRightEdge = chartsRow.offsetLeft + chartsRow.offsetWidth;
-        } else if (isMenuVisible && menu) {
-            leftOverlayRightEdge = menu.offsetLeft + menu.offsetWidth;
-        }
-
-        // Determine the width of the bottom-right occupied stack container
-        let rightOffsetWidth = 0;
-        if (isLegendVisible) {
-            rightOffsetWidth = activeLegend.offsetWidth;
-        } else if (isTempVisible) {
-            rightOffsetWidth = tempWidget.offsetWidth;
-        } else if (isVideoVisible && !isHeightOccupied) {
-            rightOffsetWidth = videoWidget.offsetWidth;
-        } else if (isAreaVisible) {
-            rightOffsetWidth = areaWidget.offsetWidth;
-        }
-
-        // Project the left edge of `#lake-map-preview` in side-by-side bottom layout
-        // Formula: Map Width - Right Margin (52px) - Stack Offset Width (shifted by 12px) - Preview Width (with a 20px safety buffer)
-        const mapWidth = mapEl.clientWidth;
-        const rightMargin = 52;
-        const activeLegendWidthOffset = rightOffsetWidth > 0 ? (rightOffsetWidth + 12) : 0;
-        const previewWidth = previewWidget ? previewWidget.offsetWidth : 0;
-        const projectedPreviewLeftEdge = mapWidth - rightMargin - activeLegendWidthOffset - previewWidth - 20;
-
-        // Detect horizontal overlap and stack vertically if necessary
-        const shouldStackPreviewVertically = isPreviewVisible && (projectedPreviewLeftEdge < leftOverlayRightEdge);
-
-        if (shouldStackPreviewVertically) {
-            mapEl.classList.add('stack-preview-vertical');
-            mapEl.style.setProperty('--lake-preview-height', `${previewHeight > 0 ? (previewHeight + 10) : 0}px`);
-        } else {
-            mapEl.classList.remove('stack-preview-vertical');
-            mapEl.style.setProperty('--lake-preview-height', '0px');
-        }
-
-        mapEl.style.setProperty('--active-legend-height', `${legendHeight > 0 ? (legendHeight + 10) : 0}px`);
-        mapEl.style.setProperty('--lake-temp-height', `${tempHeight > 0 ? (tempHeight + 10) : 0}px`);
-        mapEl.style.setProperty('--lake-area-height', `${areaHeight > 0 ? (areaHeight + 10) : 0}px`);
-        mapEl.style.setProperty('--active-legend-width', `${activeLegendWidthOffset}px`);
-    }
     updateWidgetStacking();
 }
 
@@ -4648,3 +4569,190 @@ async function loadLakeDataFromGoogleSheet() {
 }
 
 document.addEventListener('DOMContentLoaded', loadLakeDataFromGoogleSheet);
+
+// Dynamic Container Repositioning Mechanism based on visibility and slot preferences
+let containerObserver = null;
+
+function isWidgetVisible(el) {
+    if (!el) return false;
+    const style = window.getComputedStyle(el);
+    return style.display !== 'none' && style.visibility !== 'hidden' && parseFloat(style.opacity || '1') > 0;
+}
+
+function repositionContainers() {
+    if (containerObserver) {
+        containerObserver.disconnect();
+    }
+
+    const widgets = [
+        { id: 'glaciersDataContainer', isLegend: true, height: 1, order: 0 },
+        { id: 'lake-area-widget', isLegend: false, height: 2, order: 1 },
+        { id: 'lake-temp-widget', isLegend: false, height: 1, order: 2 },
+        { id: 'lake-video-widget', isLegend: false, height: 1, order: 3 },
+        { id: 'lake-map-preview', isLegend: false, height: 1, order: 4 },
+        { id: 'risk-zonation-legend', isLegend: false, height: 1, order: 5 },
+        { id: 'active-layers-legend', isLegend: false, height: 1, order: 6 },
+        { id: 'controlChart', isLegend: false, height: 1, order: 7 },
+        { id: 'bot_video', isLegend: false, height: 1, order: 8 },
+        { id: 'top_video', isLegend: false, height: 1, order: 9 }
+    ];
+
+    const active = [];
+    widgets.forEach(w => {
+        const el = document.getElementById(w.id);
+        if (!el) return;
+
+        let isVisible = isWidgetVisible(el);
+
+        if (w.id === 'top_video') {
+            const warningEl = document.getElementById('top_video_warning_chart');
+            const isWarningVisible = isWidgetVisible(warningEl);
+            if (isVisible || isWarningVisible) {
+                active.push({
+                    id: w.id,
+                    el: el,
+                    warningEl: warningEl,
+                    isLegend: w.isLegend,
+                    height: w.height,
+                    order: w.order
+                });
+            }
+        } else if (isVisible) {
+            active.push({
+                id: w.id,
+                el: el,
+                isLegend: w.isLegend,
+                height: w.height,
+                order: w.order
+            });
+        }
+    });
+
+    // Sort: Legend (glaciersDataContainer) always first (Slot 1), others by default order
+    active.sort((a, b) => {
+        if (a.isLegend && !b.isLegend) return -1;
+        if (!a.isLegend && b.isLegend) return 1;
+        return a.order - b.order;
+    });
+
+    // Initialize a 3x4 grid representation
+    // grid[col][row] holds boolean occupied state
+    const grid = [
+        [false, false, false, false], // Col 0 (Column 1 - right)
+        [false, false, false, false], // Col 1 (Column 2 - middle)
+        [false, false, false, false]  // Col 2 (Column 3 - left)
+    ];
+
+    // Order of cells to try: Col 0 (0..3), Col 1 (0..3), Col 2 (0..3)
+    const cellOrder = [];
+    for (let c = 0; c < 3; c++) {
+        for (let r = 0; r < 4; r++) {
+            cellOrder.push({ col: c, row: r });
+        }
+    }
+
+    // Helper to check if a block can fit at (c, r) with height H
+    function canFit(col, row, height) {
+        if (row + height > 4) return false;
+        for (let h = 0; h < height; h++) {
+            if (grid[col][row + h]) return false;
+        }
+        return true;
+    }
+
+    // Helper to occupy cells
+    function occupy(col, row, height) {
+        for (let h = 0; h < height; h++) {
+            grid[col][row + h] = true;
+        }
+    }
+
+    // Reposition active elements inside their assigned slots
+    active.forEach(w => {
+        // Preference: if it's the Legend, it MUST be at Slot 1 (Col 0, Row 0)
+        if (w.isLegend) {
+            if (w.el.style.right !== '52px') w.el.style.right = '52px';
+            if (w.el.style.top !== 'calc(12px + 39.1vw)') w.el.style.top = 'calc(12px + 39.1vw)';
+            if (w.el.style.bottom !== 'auto') w.el.style.bottom = 'auto';
+            occupy(0, 0, 1);
+            return;
+        }
+
+        // For other widgets, find the first available cell in cellOrder that fits
+        let placed = false;
+        for (let i = 0; i < cellOrder.length; i++) {
+            const cell = cellOrder[i];
+            if (canFit(cell.col, cell.row, w.height)) {
+                // Determine CSS positions
+                const right = `calc(52px + ${cell.col} * (22% + 16px))`;
+                let top = '';
+                if (cell.row === 0) {
+                    top = 'calc(12px + 39.1vw)';
+                } else {
+                    top = `calc(12px + ${3 - cell.row} * 13.2vw)`;
+                }
+
+                // Set style
+                if (w.el.style.right !== right) w.el.style.right = right;
+                if (w.el.style.top !== top) w.el.style.top = top;
+                if (w.el.style.bottom !== 'auto') w.el.style.bottom = 'auto';
+                
+                if (w.id === 'top_video' && w.warningEl) {
+                    if (w.warningEl.style.right !== right) w.warningEl.style.right = right;
+                    if (w.warningEl.style.top !== top) w.warningEl.style.top = top;
+                    if (w.warningEl.style.bottom !== 'auto') w.warningEl.style.bottom = 'auto';
+                }
+
+                occupy(cell.col, cell.row, w.height);
+                placed = true;
+                break;
+            }
+        }
+        if (!placed) {
+            console.warn(`Could not find a slot for widget ${w.id}`);
+        }
+    });
+
+    if (containerObserver) {
+        const containerIds = widgets.map(w => w.id);
+        containerIds.push('top_video_warning_chart');
+        
+        containerIds.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                containerObserver.observe(el, { attributes: true, attributeFilter: ['style', 'class'] });
+            }
+        });
+    }
+}
+
+function initContainerObserver() {
+    containerObserver = new MutationObserver(() => {
+        repositionContainers();
+    });
+
+    const widgets = [
+        { id: 'glaciersDataContainer' },
+        { id: 'lake-area-widget' },
+        { id: 'lake-temp-widget' },
+        { id: 'lake-video-widget' },
+        { id: 'lake-map-preview' },
+        { id: 'risk-zonation-legend' },
+        { id: 'active-layers-legend' },
+        { id: 'controlChart' },
+        { id: 'bot_video' },
+        { id: 'top_video' },
+        { id: 'top_video_warning_chart' }
+    ];
+
+    widgets.forEach(w => {
+        const el = document.getElementById(w.id);
+        if (el) {
+            containerObserver.observe(el, { attributes: true, attributeFilter: ['style', 'class'] });
+        }
+    });
+
+    repositionContainers();
+}
+
+document.addEventListener('DOMContentLoaded', initContainerObserver);
