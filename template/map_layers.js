@@ -1,14 +1,14 @@
 const pakNationalBoundarySource = {
     type: 'geojson',
-    data: 'http://172.18.1.85:8080/geoserver/Pak_Boundaries/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=Pak_Boundaries%3ANational_Boundary&outputFormat=application%2Fjson'
+    data: CONFIG.GEOSERVER_BASE_URL + '/Pak_Boundaries/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=Pak_Boundaries%3ANational_Boundary&outputFormat=application%2Fjson'
 };
 const pakProvincialBoundarySource = {
     type: 'geojson',
-    data: 'http://172.18.1.85:8080/geoserver/Pak_Boundaries/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=Pak_Boundaries%3AProvincial_Boundary&outputFormat=application%2Fjson'
+    data: CONFIG.GEOSERVER_BASE_URL + '/Pak_Boundaries/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=Pak_Boundaries%3AProvincial_Boundary&outputFormat=application%2Fjson'
 };
 const pakDistrictBoundarySource = {
     type: 'geojson',
-    data: 'http://172.18.1.85:8080/geoserver/Pak_Boundaries/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=Pak_Boundaries%3ADistrict_Boundary_Updated&outputFormat=application%2Fjson'
+    data: CONFIG.GEOSERVER_BASE_URL + '/Pak_Boundaries/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=Pak_Boundaries%3ADistrict_Boundary_Updated&outputFormat=application%2Fjson'
 };
 
 const vulSitesSrc = {
@@ -25,35 +25,35 @@ const incidentSrc = {
 }
 const glacialLakesInventorySource = {
     type: 'geojson',
-    data: 'http://172.18.1.85:8080/geoserver/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3AHKH_PK&outputFormat=application%2Fjson'
+    data: CONFIG.GEOSERVER_BASE_URL + '/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3AHKH_PK&outputFormat=application%2Fjson'
 }
 const akahInfrastructureSource = {
     type: 'geojson',
-    data: 'http://172.18.1.85:8080/geoserver/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3AAKAHP_Infrastructure_Data_Final&outputFormat=application%2Fjson'
+    data: CONFIG.GEOSERVER_BASE_URL + '/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3AAKAHP_Infrastructure_Data_Final&outputFormat=application%2Fjson'
 }
 const populatedPlacesSource = {
     type: 'geojson',
-    data: 'http://172.18.1.85:8080/geoserver/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3APopulated-Points-North&outputFormat=application%2Fjson',
+    data: CONFIG.GEOSERVER_BASE_URL + '/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3APopulated-Points-North&outputFormat=application%2Fjson',
     promoteId: 'OBJECTID'
 }
 const gmrcWapdaSource = {
     type: 'geojson',
-    data: 'http://172.18.1.85:8080/geoserver/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3AGMRC_Points&outputFormat=application%2Fjson'
+    data: CONFIG.GEOSERVER_BASE_URL + '/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3AGMRC_Points&outputFormat=application%2Fjson'
 }
 const glofIISource = {
     type: 'geojson',
-    data: 'http://172.18.1.85:8080/geoserver/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3Astations&outputFormat=application%2Fjson'
+    data: CONFIG.GEOSERVER_BASE_URL + '/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3Astations&outputFormat=application%2Fjson'
 }
 const glofIIDamagedStationsSource = {
     type: 'geojson',
-    data: 'http://172.18.1.85:8080/geoserver/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3ADamage_Stations&outputFormat=application%2Fjson'
+    data: CONFIG.GEOSERVER_BASE_URL + '/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3ADamage_Stations&outputFormat=application%2Fjson'
 }
 const AKAH_STATIONS_XLSX_URL = 'data/WMP%20AWS%20EWS.xlsx';
 const UNDP_ALL_SENSORS_CSV_URL = 'data/279_EWS_List_GLOF-II.csv';
 const BRI_FF_SENSORS_CSV_URL = 'data/EWS%20Station%20Location%20under%20ECARE%20Project%20in%20GB.csv';
 const pdmaKpSource = {
     type: 'geojson',
-    data: 'http://172.18.1.85:8080/geoserver/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3AGLOF_vul_Lakes_KP&outputFormat=application%2Fjson'
+    data: CONFIG.GEOSERVER_BASE_URL + '/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3AGLOF_vul_Lakes_KP&outputFormat=application%2Fjson'
 };
 const evk2cnrSource = {
     type: 'geojson',
@@ -130,32 +130,6 @@ function buildAkahStationsFeatureCollection(rows) {
     };
 }
 
-function splitCsvRow(rowText) {
-    const fields = [];
-    let currentField = '';
-    let inQuotes = false;
-
-    for (let index = 0; index < rowText.length; index += 1) {
-        const character = rowText[index];
-
-        if (character === '"') {
-            if (inQuotes && rowText[index + 1] === '"') {
-                currentField += '"';
-                index += 1;
-            } else {
-                inQuotes = !inQuotes;
-            }
-        } else if (character === ',' && !inQuotes) {
-            fields.push(currentField);
-            currentField = '';
-        } else {
-            currentField += character;
-        }
-    }
-
-    fields.push(currentField);
-    return fields;
-}
 
 function parseNumericValue(rawValue) {
     const cleanedValue = String(rawValue ?? '').replace(/[^0-9.+-]/g, '');
@@ -314,13 +288,13 @@ function buildBriFfSensorsFeatureCollection(csvText) {
 const floodSusceptibilityRasterSource = {
     type: 'raster',
     tiles: [
-        'http://172.18.1.85:8080/geoserver/GLOF/wms?service=WMS&version=1.1.0&request=GetMap&layers=GLOF:glof_susceptibility&bbox={bbox-epsg-3857}&width=256&height=256&srs=EPSG:3857&styles=&format=image/png&transparent=true'
+        CONFIG.GEOSERVER_BASE_URL + '/GLOF/wms?service=WMS&version=1.1.0&request=GetMap&layers=GLOF:glof_susceptibility&bbox={bbox-epsg-3857}&width=256&height=256&srs=EPSG:3857&styles=&format=image/png&transparent=true'
     ],
     tileSize: 256
 }
 const akahHazardExposureSource = {
     type: 'geojson',
-    data: 'http://172.18.1.85:8080/geoserver/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3AAKAHP_HazardExposure_Final&outputFormat=application%2Fjson'
+    data: CONFIG.GEOSERVER_BASE_URL + '/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3AAKAHP_HazardExposure_Final&outputFormat=application%2Fjson'
 }
 const highTempWarningSrc = {
     type: 'geojson',
@@ -416,75 +390,75 @@ const reshunRiskZonationSource = {
 }
 const tersetHundurLakeSource = {
     type: 'geojson',
-    data: 'http://172.18.1.85:8080/geoserver/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3Alakes_THundur&outputFormat=application%2Fjson'
+    data: CONFIG.GEOSERVER_BASE_URL + '/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3Alakes_THundur&outputFormat=application%2Fjson'
 };
 const tersetHundurRiverSource = {
     type: 'geojson',
-    data: 'http://172.18.1.85:8080/geoserver/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3ARiver_THundur&outputFormat=application%2Fjson'
+    data: CONFIG.GEOSERVER_BASE_URL + '/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3ARiver_THundur&outputFormat=application%2Fjson'
 };
 const tersetHundurRiskHighSource = {
     type: 'geojson',
-    data: 'http://172.18.1.85:8080/geoserver/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3AHigh_THundur&outputFormat=application%2Fjson'
+    data: CONFIG.GEOSERVER_BASE_URL + '/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3AHigh_THundur&outputFormat=application%2Fjson'
 };
 const tersetHundurRiskMediumSource = {
     type: 'geojson',
-    data: 'http://172.18.1.85:8080/geoserver/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3AMedium_THundur&outputFormat=application%2Fjson'
+    data: CONFIG.GEOSERVER_BASE_URL + '/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3AMedium_THundur&outputFormat=application%2Fjson'
 };
 const tersetHundurRiskLowSource = {
     type: 'geojson',
-    data: 'http://172.18.1.85:8080/geoserver/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3ALow_THundur&outputFormat=application%2Fjson'
+    data: CONFIG.GEOSERVER_BASE_URL + '/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3ALow_THundur&outputFormat=application%2Fjson'
 };
 const ishokomanRiskHighSource = {
     type: 'geojson',
-    data: 'http://172.18.1.85:8080/geoserver/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3AIshokoman_High&outputFormat=application%2Fjson'
+    data: CONFIG.GEOSERVER_BASE_URL + '/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3AIshokoman_High&outputFormat=application%2Fjson'
 };
 const ishokomanRiskMediumSource = {
     type: 'geojson',
-    data: 'http://172.18.1.85:8080/geoserver/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3AIshokoman_Medium&outputFormat=application%2Fjson'
+    data: CONFIG.GEOSERVER_BASE_URL + '/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3AIshokoman_Medium&outputFormat=application%2Fjson'
 };
 const ishokomanRiskLowSource = {
     type: 'geojson',
-    data: 'http://172.18.1.85:8080/geoserver/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3AIshokoman_Low&outputFormat=application%2Fjson'
+    data: CONFIG.GEOSERVER_BASE_URL + '/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3AIshokoman_Low&outputFormat=application%2Fjson'
 };
 const lushtRiskHighSource = {
     type: 'geojson',
-    data: 'http://172.18.1.85:8080/geoserver/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3ALusht_High&outputFormat=application%2Fjson'
+    data: CONFIG.GEOSERVER_BASE_URL + '/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3ALusht_High&outputFormat=application%2Fjson'
 };
 const lushtRiskMediumSource = {
     type: 'geojson',
-    data: 'http://172.18.1.85:8080/geoserver/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3ALusht_Medium&outputFormat=application%2Fjson'
+    data: CONFIG.GEOSERVER_BASE_URL + '/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3ALusht_Medium&outputFormat=application%2Fjson'
 };
 const lushtRiskLowSource = {
     type: 'geojson',
-    data: 'http://172.18.1.85:8080/geoserver/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3ALusht_Low&outputFormat=application%2Fjson'
+    data: CONFIG.GEOSERVER_BASE_URL + '/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3ALusht_Low&outputFormat=application%2Fjson'
 };
 const ulterRiskHighSource = {
     type: 'geojson',
-    data: 'http://172.18.1.85:8080/geoserver/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3AHigh_Risk_Ultar_Lake&outputFormat=application%2Fjson'
+    data: CONFIG.GEOSERVER_BASE_URL + '/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3AHigh_Risk_Ultar_Lake&outputFormat=application%2Fjson'
 };
 const ulterRiskMediumSource = {
     type: 'geojson',
-    data: 'http://172.18.1.85:8080/geoserver/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3AMedium_Risk_Ultar_Lake&outputFormat=application%2Fjson'
+    data: CONFIG.GEOSERVER_BASE_URL + '/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3AMedium_Risk_Ultar_Lake&outputFormat=application%2Fjson'
 };
 const ulterRiskLowSource = {
     type: 'geojson',
-    data: 'http://172.18.1.85:8080/geoserver/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3ALow_Risk_Ultar_Lake&outputFormat=application%2Fjson'
+    data: CONFIG.GEOSERVER_BASE_URL + '/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3ALow_Risk_Ultar_Lake&outputFormat=application%2Fjson'
 };
 const shisperRiskHighSource = {
     type: 'geojson',
-    data: 'http://172.18.1.85:8080/geoserver/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3AShisper_High&outputFormat=application%2Fjson'
+    data: CONFIG.GEOSERVER_BASE_URL + '/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3AShisper_High&outputFormat=application%2Fjson'
 };
 const shisperRiskMediumSource = {
     type: 'geojson',
-    data: 'http://172.18.1.85:8080/geoserver/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3AShisper_Medium&outputFormat=application%2Fjson'
+    data: CONFIG.GEOSERVER_BASE_URL + '/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3AShisper_Medium&outputFormat=application%2Fjson'
 };
 const shisperRiskLowSource = {
     type: 'geojson',
-    data: 'http://172.18.1.85:8080/geoserver/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3AShisper_Low&outputFormat=application%2Fjson'
+    data: CONFIG.GEOSERVER_BASE_URL + '/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3AShisper_Low&outputFormat=application%2Fjson'
 };
 const shisperLakeSource = {
     type: 'geojson',
-    data: 'http://172.18.1.85:8080/geoserver/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3AShisper_Lake&outputFormat=application%2Fjson'
+    data: CONFIG.GEOSERVER_BASE_URL + '/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3AShisper_Lake&outputFormat=application%2Fjson'
 };
 const brep_zonationSource = {
     type: 'geojson',
@@ -848,7 +822,7 @@ map1.on('style.load', () => {
 
             // Vulnerable Melting Points Count
             try {
-                const resp = await fetch('http://172.18.1.85:8080/geoserver/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3AVul_Melt_Zones&outputFormat=application%2Fjson');
+                const resp = await fetch(CONFIG.GEOSERVER_BASE_URL + '/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3AVul_Melt_Zones&outputFormat=application%2Fjson');
                 if (resp.ok) {
                     const json = await resp.json();
                     window.layerFeatureCounts['vulnerable-melting-points-layer'] = Array.isArray(json.features) ? json.features.length : 0;
@@ -869,12 +843,12 @@ map1.on('style.load', () => {
     // Add source for Vulnerable Melting Glaciers
     map1.addSource('vulnerableMeltingGlaciers', {
         type: 'geojson',
-        data: 'http://172.18.1.85:8080/geoserver/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3Amelt_glac_vul2&outputFormat=application%2Fjson'
+        data: CONFIG.GEOSERVER_BASE_URL + '/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3Amelt_glac_vul2&outputFormat=application%2Fjson'
     });
     // Add source for Vulnerable Melting Points
     map1.addSource('vulnerableMeltingPoints', {
         type: 'geojson',
-        data: 'http://172.18.1.85:8080/geoserver/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3AVul_Melt_Zones&outputFormat=application%2Fjson'
+        data: CONFIG.GEOSERVER_BASE_URL + '/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3AVul_Melt_Zones&outputFormat=application%2Fjson'
     });
     map1.addSource('floodSusceptibilityRaster', floodSusceptibilityRasterSource);
     map1.addSource('akahHazardExposure', akahHazardExposureSource);
@@ -2822,19 +2796,19 @@ map1.on('style.load', () => {
     //Pindoru Chaat Sources
     map1.addSource('pindoru-lake-src', {
         type: 'geojson',
-        data: 'http://172.18.1.85:8080/geoserver/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3APindoru_Chaat_Lake&outputFormat=application%2Fjson'
+        data: CONFIG.GEOSERVER_BASE_URL + '/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3APindoru_Chaat_Lake&outputFormat=application%2Fjson'
     });
     map1.addSource('pindoru-rz-high-src', {
         type: 'geojson',
-        data: 'http://172.18.1.85:8080/geoserver/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3APindoru_Chaat_High_Risk&outputFormat=application%2Fjson'
+        data: CONFIG.GEOSERVER_BASE_URL + '/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3APindoru_Chaat_High_Risk&outputFormat=application%2Fjson'
     });
     map1.addSource('pindoru-rz-medium-src', {
         type: 'geojson',
-        data: 'http://172.18.1.85:8080/geoserver/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3APindoru_Chaat_Medium_Risk&outputFormat=application%2Fjson'
+        data: CONFIG.GEOSERVER_BASE_URL + '/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3APindoru_Chaat_Medium_Risk&outputFormat=application%2Fjson'
     });
     map1.addSource('pindoru-rz-low-src', {
         type: 'geojson',
-        data: 'http://172.18.1.85:8080/geoserver/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3APindoru_Chaat_Low_Risk&outputFormat=application%2Fjson'
+        data: CONFIG.GEOSERVER_BASE_URL + '/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3APindoru_Chaat_Low_Risk&outputFormat=application%2Fjson'
     });
     //__________________________________________________________________________________________________
     //Pindoru Chaat Layers
@@ -3540,7 +3514,7 @@ map1.on('style.load', () => {
     // Vulnerable Sites 2026 — use old Vulnerable Lakes 2026 pin style
     map1.addSource('vul-sites-2026', {
         type: 'geojson',
-        data: 'http://172.18.1.85:8080/geoserver/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3ALakes_glof_2&outputFormat=application%2Fjson'
+        data: CONFIG.GEOSERVER_BASE_URL + '/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3ALakes_glof_2&outputFormat=application%2Fjson'
     });
     map1.addLayer({
         id: 'vul-sites-2026-layer',
@@ -3564,7 +3538,7 @@ map1.on('style.load', () => {
     // Vulnerable Lakes 2026 — Glacial lake polygons from GeoServer WFS
     map1.addSource('glof-lakes', {
         type: 'geojson',
-        data: 'http://172.18.1.85:8080/geoserver/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3Aglacial_lakes&outputFormat=application%2Fjson'
+        data: CONFIG.GEOSERVER_BASE_URL + '/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3Aglacial_lakes&outputFormat=application%2Fjson'
     });
     map1.addLayer({
         id: 'glof-lakes-fill',
@@ -3654,7 +3628,7 @@ map1.on('style.load', () => {
     // Chatiboi Lake — polygon from GeoServer WFS
     map1.addSource('chatiboi-lake', {
         type: 'geojson',
-        data: 'http://172.18.1.85:8080/geoserver/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3AChatiboi_Lake&maxFeatures=50&outputFormat=application%2Fjson'
+        data: CONFIG.GEOSERVER_BASE_URL + '/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3AChatiboi_Lake&maxFeatures=50&outputFormat=application%2Fjson'
     });
     map1.addLayer({
         id: 'chatiboi-lake-fill',
@@ -3673,7 +3647,7 @@ map1.on('style.load', () => {
 
     map1.addSource('chatiboi-runoff', {
         type: 'geojson',
-        data: 'http://172.18.1.85:8080/geoserver/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3AChatiboi_Run_Off&outputFormat=application%2Fjson'
+        data: CONFIG.GEOSERVER_BASE_URL + '/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3AChatiboi_Run_Off&outputFormat=application%2Fjson'
     });
     map1.addLayer({
         id: 'chatiboi-runoff-layer',
@@ -3689,15 +3663,15 @@ map1.on('style.load', () => {
 
     map1.addSource('chatiboi-risk-high', {
         type: 'geojson',
-        data: 'http://172.18.1.85:8080/geoserver/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3AHigh_Risk_Chatiboi&outputFormat=application%2Fjson'
+        data: CONFIG.GEOSERVER_BASE_URL + '/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3AHigh_Risk_Chatiboi&outputFormat=application%2Fjson'
     });
     map1.addSource('chatiboi-risk-medium', {
         type: 'geojson',
-        data: 'http://172.18.1.85:8080/geoserver/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3AMedium_Risk_Zonation&outputFormat=application%2Fjson'
+        data: CONFIG.GEOSERVER_BASE_URL + '/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3AMedium_Risk_Zonation&outputFormat=application%2Fjson'
     });
     map1.addSource('chatiboi-risk-low', {
         type: 'geojson',
-        data: 'http://172.18.1.85:8080/geoserver/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3ALow_Risk_Chatiboi&outputFormat=application%2Fjson'
+        data: CONFIG.GEOSERVER_BASE_URL + '/GLOF/ows?service=WFS&version=1.0.0&request=GetFeature&typeName=GLOF%3ALow_Risk_Chatiboi&outputFormat=application%2Fjson'
     });
 
     map1.addLayer({
@@ -3735,7 +3709,7 @@ map1.on('style.load', () => {
         map1.addSource(`lst-month-${month}`, {
             type: 'raster',
             tiles: [
-                `http://172.18.1.85:8080/geoserver/LST/wms?service=WMS&version=1.1.0&request=GetMap&layers=LST:LST_Pakistan_2025_Month_${month}&bbox={bbox-epsg-3857}&width=768&height=558&srs=EPSG:3857&styles=&format=image/png&transparent=true`
+                `${CONFIG.GEOSERVER_BASE_URL}/LST/wms?service=WMS&version=1.1.0&request=GetMap&layers=LST:LST_Pakistan_2025_Month_${month}&bbox={bbox-epsg-3857}&width=768&height=558&srs=EPSG:3857&styles=&format=image/png&transparent=true`
             ],
             tileSize: 256
         });

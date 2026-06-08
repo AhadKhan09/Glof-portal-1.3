@@ -48,6 +48,58 @@ class PitchToggleControl {
     }
 }
 
+class BasemapToggleControl {
+    onAdd(map) {
+        this._map = map;
+        this._container = document.createElement('div');
+        this._container.className = 'mapboxgl-ctrl mapboxgl-ctrl-group';
+        
+        this._btn = document.createElement('button');
+        this._btn.className = 'basemap-toggle-btn widget-hidden';
+        this._btn.type = 'button';
+        this._btn.title = 'Toggle Basemaps Grid';
+        this._btn.innerHTML = '<i class="fas fa-layer-group"></i>';
+        
+        this._btn.onclick = (e) => {
+            e.stopPropagation();
+            toggleContainerVisibility('basemapbtn-div', this._btn);
+        };
+        
+        this._container.appendChild(this._btn);
+        
+        // Stop clicks inside basemap list from bubbling up
+        setTimeout(() => {
+            const grid = document.getElementById('basemapbtn-div');
+            if (grid) {
+                grid.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                });
+            }
+        }, 100);
+
+        // Click outside listener to auto-close the basemap menu
+        this._onDocumentClick = (e) => {
+            const grid = document.getElementById('basemapbtn-div');
+            if (grid && grid.style.display !== 'none') {
+                if (!grid.contains(e.target) && !this._btn.contains(e.target)) {
+                    grid.style.display = 'none';
+                    this._btn.classList.add('widget-hidden');
+                }
+            }
+        };
+        document.addEventListener('click', this._onDocumentClick);
+        
+        return this._container;
+    }
+    onRemove() {
+        if (this._onDocumentClick) {
+            document.removeEventListener('click', this._onDocumentClick);
+        }
+        this._container.parentNode.removeChild(this._container);
+        this._map = undefined;
+    }
+}
+
 function toggleContainerVisibility(targetId, btn) {
     const target = document.getElementById(targetId);
     if (!target) return;
@@ -76,8 +128,15 @@ function toggleContainerVisibility(targetId, btn) {
             target.style.display = 'none';
             btn.classList.add('widget-hidden');
         } else {
-            target.style.display = 'block';
+            target.style.display = targetId === 'basemapbtn-div' ? 'flex' : 'block';
             btn.classList.remove('widget-hidden');
+            
+            // Dynamically position next to the button
+            if (targetId === 'basemapbtn-div') {
+                const btnRect = btn.getBoundingClientRect();
+                target.style.top = `${btnRect.top}px`;
+                target.style.right = `${window.innerWidth - btnRect.left + 8}px`;
+            }
         }
     }
 }
@@ -547,6 +606,7 @@ try {
 } catch (err) {
     console.warn('Mapbox Geocoder not available or failed to initialize.', err);
 }
+map1.addControl(new BasemapToggleControl(), 'top-right');
 map1.addControl(new mapboxgl.NavigationControl(), 'top-right');
 map1.addControl(
     new mapboxgl.GeolocateControl({

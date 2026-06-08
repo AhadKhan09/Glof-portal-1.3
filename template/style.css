@@ -104,7 +104,7 @@ h1 {
   top: 12px;
   right: 52px;
   width:22%;
-  height: 12vw;
+  height: 12.5vw;
   border: #1d4ed8 solid 5px;
   border-radius: 4px;
   color: #fff;
@@ -117,7 +117,7 @@ h1 {
   top: 12px;
   right: 52px;
   width: 22%;
-  height: 12vw;
+  height: 12.5vw;
   border: #1d4ed8 solid 5px;
   border-radius: 4px;
   overflow: hidden;
@@ -145,7 +145,7 @@ h1 {
 }
 #bot_video{
   position: absolute;
-  top: calc(12px + 13.2vw);
+  top: calc(12px + 12.9vw);
   right: 52px;
   width:22%;
   border: #1d4ed8 solid 5px;
@@ -156,10 +156,10 @@ h1 {
 }
 #controlChart{
   position: absolute;
-  top: calc(12px + 26.4vw);
+  top: calc(12px + 25.8vw);
   right: 52px;
   width: 22%;
-  height: 12vw;
+  height: 12.5vw;
   border-radius: 4px;
   border: #1d4ed8 solid 5px;
   overflow: hidden;
@@ -190,7 +190,7 @@ h1 {
 }
 #glaciersDataContainer{
   position: absolute;
-  top: calc(12px + 39.1vw);
+  top: calc(12px + 38.7vw);
   right: 52px;
   width: 22%;
   border-radius: 4px;
@@ -236,7 +236,7 @@ h1 {
   background: rgba(3, 8, 18, 0.82);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  z-index: 3000;
+  z-index: 5000;
   padding: 24px;
 }
 .panel-modal.is-open {
@@ -1714,7 +1714,7 @@ h1 {
     top: 82px;
     left: 12px;
     bottom: 10px;
-    width: 16vw;
+    width: clamp(280px, 18vw, 360px);
     background: linear-gradient(180deg, #1e293b 0%, #0d1b2a 100%);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
@@ -2002,6 +2002,8 @@ body:has(#charts-row:not(.hidden-charts)) #menu {
   .form-switch {
     display: flex;
     align-items: center;
+    padding-left: 0 !important;
+    gap: 0.8vw;
   }
   
   .form-check-label {
@@ -2014,6 +2016,7 @@ body:has(#charts-row:not(.hidden-charts)) #menu {
   .form-switch .form-check-input {
     height: 1vh;
     outline: solid 1px white;
+    margin-left: 0 !important;
   }
   
   .form-check-input:checked {
@@ -2094,12 +2097,84 @@ body:has(#charts-row:not(.hidden-charts)) #menu {
   .basemapbtn-option img:hover{
     outline: solid #3b82f6 3px;
   }
-  #basemapbtn-div{
-    position: absolute;
-    margin-top: 6vh;
-    background-color: #0d1b2a;
-    width: 100%;
-    outline: solid #1d4ed8 2px;
+  #basemapbtn-div {
+    position: fixed;
+    z-index: 4500;
+    display: none;
+    flex-direction: column;
+    width: 140px;
+    background: rgba(13, 27, 42, 0.95);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 3px solid #1d4ed8;
+    border-radius: 6px;
+    padding: 8px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
+    gap: 8px;
+    box-sizing: border-box;
+    animation: borderGlow 2.5s ease-in-out infinite;
+  }
+  
+  .basemap-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 4px;
+    transition: background-color 0.2s, transform 0.15s ease;
+  }
+  
+  .basemap-row:hover {
+    background: rgba(29, 78, 216, 0.25);
+  }
+  
+  .basemap-row.active {
+    background: rgba(29, 78, 216, 0.45);
+    border: 1px solid rgba(59, 130, 246, 0.4);
+  }
+  
+  .basemap-row img {
+    width: 36px;
+    height: 36px;
+    border-radius: 4px;
+    border: 2px solid rgba(255, 255, 255, 0.85);
+    object-fit: cover;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  
+  .basemap-row:hover img {
+    transform: scale(1.05);
+    border-color: #3b82f6;
+  }
+  
+  .basemap-row.active img {
+    border-color: #60a5fa;
+    transform: scale(1.05);
+  }
+  
+  .basemap-row span {
+    font-size: 12px;
+    font-weight: 700;
+    color: #ffffff;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+    transition: color 0.2s;
+  }
+  
+  .basemap-row.active span {
+    color: #60a5fa;
+  }
+
+  .basemap-toggle-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.25s ease, color 0.25s ease !important;
+  }
+
+  .basemap-toggle-btn:not(.widget-hidden) {
+    color: #1d4ed8 !important;
+    background-color: rgba(29, 78, 216, 0.15) !important;
   }
   /* ______________________________________________________________________________________________________________________________________________ */
   .imgbtns {

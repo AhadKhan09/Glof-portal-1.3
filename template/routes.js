@@ -56,8 +56,15 @@ async function toggleRoute(routeName, isChecked) {
 
     // If GeoJSON is cached but not on the map (e.g. after a basemap change), re-add it
     if (loadedRoutes[routeName]) {
-        addRouteToMap(routeName, sourceId, lineLayerId, pointLayerId, labelLayerId, loadedRoutes[routeName]);
-        flyToGeoJSON(loadedRoutes[routeName]);
+        const applyRoute = () => {
+            addRouteToMap(routeName, sourceId, lineLayerId, pointLayerId, labelLayerId, loadedRoutes[routeName]);
+            flyToGeoJSON(loadedRoutes[routeName]);
+        };
+        if (!map1.isStyleLoaded()) {
+            map1.once('style.load', applyRoute);
+        } else {
+            applyRoute();
+        }
         return;
     }
 
@@ -85,8 +92,15 @@ async function toggleRoute(routeName, isChecked) {
         loadedRoutes[routeName] = geojson;
 
         // Render on map
-        addRouteToMap(routeName, sourceId, lineLayerId, pointLayerId, labelLayerId, geojson);
-        flyToGeoJSON(geojson);
+        const applyRoute = () => {
+            addRouteToMap(routeName, sourceId, lineLayerId, pointLayerId, labelLayerId, geojson);
+            flyToGeoJSON(geojson);
+        };
+        if (!map1.isStyleLoaded()) {
+            map1.once('style.load', applyRoute);
+        } else {
+            applyRoute();
+        }
 
     } catch (err) {
         console.error(`Error loading or parsing KMZ file for ${routeName}:`, err);

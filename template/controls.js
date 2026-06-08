@@ -143,7 +143,7 @@ function recreatePinIcon(imageName, baseColor) {
     }
 }
 
-window.originalLayerSizes = window.originalLayerSizes || {};
+window.glofOriginalLayerSizes = window.glofOriginalLayerSizes || {};
 
 function normalizeScaleValue(rawValue, fallbackValue = 1) {
     const parsedValue = parseFloat(rawValue);
@@ -151,14 +151,46 @@ function normalizeScaleValue(rawValue, fallbackValue = 1) {
 }
 
 function buildScaledIconSize(layerId, scaleValue) {
-    const baseSize = window.originalLayerSizes[layerId];
+    const baseSize = window.glofOriginalLayerSizes[layerId];
 
-    if (Array.isArray(baseSize)) {
-        return ['*', baseSize, scaleValue];
+    if (baseSize === undefined || baseSize === null) {
+        return scaleValue;
     }
 
-    if (Number.isFinite(baseSize)) {
+    if (Array.isArray(baseSize)) {
+        try {
+            return ['*', baseSize, scaleValue];
+        } catch (e) {
+            return scaleValue;
+        }
+    }
+
+    if (typeof baseSize === 'number' && Number.isFinite(baseSize)) {
         return baseSize * scaleValue;
+    }
+
+    if (typeof baseSize === 'object') {
+        try {
+            if (baseSize.stops && Array.isArray(baseSize.stops)) {
+                const scaledStops = baseSize.stops.map(stop => {
+                    if (Array.isArray(stop) && stop.length === 2 && typeof stop[1] === 'number') {
+                        return [stop[0], stop[1] * scaleValue];
+                    }
+                    return stop;
+                });
+                return Object.assign({}, baseSize, { stops: scaledStops });
+            }
+            return baseSize;
+        } catch (e) {
+            return baseSize;
+        }
+    }
+
+    if (typeof baseSize === 'string') {
+        const parsed = parseFloat(baseSize);
+        if (Number.isFinite(parsed)) {
+            return parsed * scaleValue;
+        }
     }
 
     return scaleValue;
@@ -183,9 +215,9 @@ function applyCustomization(layerIds, color, size, opacity, iconElement) {
                 const imageName = layoutIconImg;
                 recreatePinIcon(imageName, color);
                 
-                if (!window.originalLayerSizes[layerId]) {
+                if (!window.glofOriginalLayerSizes[layerId]) {
                     const currentSize = map1.getLayoutProperty(layerId, 'icon-size');
-                    window.originalLayerSizes[layerId] = currentSize || 1;
+                    window.glofOriginalLayerSizes[layerId] = currentSize || 1;
                 }
                 const scaleValue = normalizeScaleValue(size, 1);
                 const scaledIconSize = buildScaledIconSize(layerId, scaleValue);
@@ -202,9 +234,9 @@ function applyCustomization(layerIds, color, size, opacity, iconElement) {
             // It's a circle layer
             map1.setPaintProperty(layerId, 'circle-color', color);
             
-            if (!window.originalLayerSizes[layerId]) {
+            if (!window.glofOriginalLayerSizes[layerId]) {
                 const currentSize = map1.getPaintProperty(layerId, 'circle-radius');
-                window.originalLayerSizes[layerId] = currentSize || 6;
+                window.glofOriginalLayerSizes[layerId] = currentSize || 6;
             }
             
             const scaleValue = normalizeScaleValue(size, 1);
@@ -226,9 +258,9 @@ function applyCustomization(layerIds, color, size, opacity, iconElement) {
             // It's a line layer
             map1.setPaintProperty(layerId, 'line-color', color);
             
-            if (!window.originalLayerSizes[layerId]) {
+            if (!window.glofOriginalLayerSizes[layerId]) {
                 const currentSize = map1.getPaintProperty(layerId, 'line-width');
-                window.originalLayerSizes[layerId] = currentSize || 2;
+                window.glofOriginalLayerSizes[layerId] = currentSize || 2;
             }
             
             const scaleValue = normalizeScaleValue(size, 1);
@@ -1526,7 +1558,8 @@ function runStationAnimationFrame(timestamp) {
         stationAnimationLastFrameTs = timestamp;
     }
 
-    const elapsedSeconds = Math.max(0, (timestamp - stationAnimationLastFrameTs) / 1000);
+    // Clamp elapsedSeconds to maximum 0.1s to avoid huge animation jumps or browser hangs from inactive tabs
+    const elapsedSeconds = Math.min(0.1, Math.max(0, (timestamp - stationAnimationLastFrameTs) / 1000));
     stationAnimationLastFrameTs = timestamp;
 
     const maxPosition = Math.max(0, stationForecastTimeline.length - 1);
@@ -1543,6 +1576,13 @@ function runStationAnimationFrame(timestamp) {
     applyStationPointAnimationFrame(nextPosition);
     stationAnimationPlayRafId = requestAnimationFrame(runStationAnimationFrame);
 }
+
+// Reset frame timestamp on tab focus/visibility changes to prevent jump skips
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+        stationAnimationLastFrameTs = 0;
+    }
+});
 
 function startStationAnimationPlayback() {
     if (stationAnimationPlayRafId !== null || !stationForecastTimeline.length) {
@@ -3219,6 +3259,18 @@ function changeBasemap(type) {
     
     console.log("Selected Basemap:", type);
     window.currentBasemapType = type;
+
+    // Update active class in basemap selector rows
+    const basemapRows = document.querySelectorAll('.basemap-row');
+    if (basemapRows.length > 0) {
+        basemapRows.forEach(row => {
+            if (row.getAttribute('data-basemap') === type) {
+                row.classList.add('active');
+            } else {
+                row.classList.remove('active');
+            }
+        });
+    }
     
     if (!map1) {
         console.error("Map instance is not available.");
@@ -4728,8 +4780,8 @@ let containerObserver = null;
         // Dynamic, responsive sizes matching GLOF portal
         const vw = window.innerWidth / 100;
         const COL_W = Math.round(22 * vw);
-        const SLOT_H = Math.round(12 * vw) + 10;
-        const SLOT_GAP = Math.round(1.2 * vw);
+        const SLOT_H = Math.round(12.5 * vw);
+        const SLOT_GAP = Math.max(6, Math.round(0.4 * vw));
         
         // Reset actual placed columns
         REGISTRY.forEach(def => { def.actualCol = null; });
