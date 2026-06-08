@@ -162,10 +162,6 @@
                 <div class="ts-rows" id="tsRows"></div>
             </div>
 
-            <!-- PARTICLE STRIP -->
-            <div class="particle-row">
-                <canvas class="particle-canvas" id="particleCanvas" height="28"></canvas>
-            </div>
         </div>
 
         <!-- ======== CHARTS ROW — moved inside map container as overlays ======== -->
@@ -283,6 +279,29 @@
                 <i class="fas fa-up-right-and-down-left-from-center"></i>
             </button>
             <img src="data/basemap-icons/Glaciers_data.png" alt="Glaciers Data" id="glaciersDataImg">
+        </div>
+
+        <!-- Hisper Images Telemetry Widget -->
+        <div id="hisper-images-widget" aria-live="polite" aria-label="Hisper automatic weather station telemetry charts">
+            <div id="hisper-images-header">
+                <span id="hisper-images-title">Hisper-Hopper Telemetry Charts</span>
+                <button id="hisper-images-close" type="button" onclick="closeHisperImagesWidget()" aria-label="Close telemetry images">&times;</button>
+            </div>
+            <div id="hisper-images-body">
+                <!-- Image Cards -->
+                <div class="hisper-img-card" onclick="zoomHisperImage('data/Hisper/Hisper-Hopper_ARG_1 - Air Temperature - 2026-06-08.png', 'Hisper-Hopper_ARG_1 - Air Temperature')">
+                    <img src="data/Hisper/Hisper-Hopper_ARG_1 - Air Temperature - 2026-06-08.png" alt="ARG_1 - Air Temperature">
+                    <div class="hisper-img-label">ARG_1 - Air Temp</div>
+                </div>
+                <div class="hisper-img-card" onclick="zoomHisperImage('data/Hisper/Hisper-Hopper_ARG_3 - Air Temperature - 2026-06-08.png', 'Hisper-Hopper_ARG_3 - Air Temperature')">
+                    <img src="data/Hisper/Hisper-Hopper_ARG_3 - Air Temperature - 2026-06-08.png" alt="ARG_3 - Air Temperature">
+                    <div class="hisper-img-label">ARG_3 - Air Temp</div>
+                </div>
+                <div class="hisper-img-card" onclick="zoomHisperImage('data/Hisper/Hisper-Hopper_ARG_5 - Air Temperature - 2026-06-08.png', 'Hisper-Hopper_ARG_5 - Air Temperature')">
+                    <img src="data/Hisper/Hisper-Hopper_ARG_5 - Air Temperature - 2026-06-08.png" alt="ARG_5 - Air Temperature">
+                    <div class="hisper-img-label">ARG_5 - Air Temp</div>
+                </div>
+            </div>
         </div>
 
         <div id="panelModal" class="panel-modal" onclick="handlePanelModalBackdrop(event)">
@@ -419,6 +438,10 @@
                     <label class="form-check-label" for="quick-station-points-toggle">Station Points</label>
                 </div>
                 <div class="form-check form-switch quick-toggle-item">
+                    <input class="form-check-input" type="checkbox" role="switch" id="quick-hisper-incident-toggle" onchange="toggleHisperIncident(this.checked)">
+                    <label class="form-check-label" for="quick-hisper-incident-toggle">Hisper Incident</label>
+                </div>
+                <div class="form-check form-switch quick-toggle-item">
                     <input class="form-check-input" type="checkbox" role="switch" id="quick-high-temp-2026-toggle" onchange="showHighTempWarning(this.checked)">
                     <label class="form-check-label" for="quick-high-temp-2026-toggle">High Temp Warning</label>
                 </div>
@@ -429,6 +452,15 @@
                     </div>
                     <button id="refresh-weather-btn" onclick="refreshWeatherData(event)" title="Refresh weather from OpenWeatherMap" style="background: none; border: none; color: #93c5fd; cursor: pointer; transition: transform 0.2s; padding: 0; outline: none; display: flex; align-items: center;">
                         <i class="fas fa-sync-alt" id="refresh-weather-icon"></i>
+                    </button>
+                </div>
+                <div class="form-check form-switch quick-toggle-item d-flex align-items-center justify-content-between" style="padding-right: 8px;">
+                    <div>
+                        <input class="form-check-input" type="checkbox" role="switch" id="quick-precipitation-toggle" onchange="togglePrecipitationLayer(this.checked)">
+                        <label class="form-check-label" for="quick-precipitation-toggle" style="margin-left: 8px;">Precipitation</label>
+                    </div>
+                    <button id="refresh-precipitation-btn" onclick="refreshPrecipitationData(event)" title="Refresh precipitation from OpenWeatherMap" style="background: none; border: none; color: #93c5fd; cursor: pointer; transition: transform 0.2s; padding: 0; outline: none; display: flex; align-items: center;">
+                        <i class="fas fa-sync-alt" id="refresh-precipitation-icon"></i>
                     </button>
                 </div>
             </div>
@@ -1129,6 +1161,7 @@
     <script src="template/map_layers.js"></script>
     <script src="template/map_layer_legends.js"></script>
     <script src="template/routes.js"></script>
+    <script src="template/hisper_incident.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>

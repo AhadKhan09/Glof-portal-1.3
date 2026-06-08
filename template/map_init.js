@@ -579,6 +579,7 @@ map1.on('style.load', () => {
 
 const OWM_API_KEY = CONFIG.OWM_API_KEY;
 window.weatherMarkers = [];
+window.precipMarkers = [];
 
 // Determine color and class for temperature value
 function getWeatherColorAndClass(temp) {
@@ -601,6 +602,27 @@ function getWeatherColorAndClass(temp) {
     return { color, isBlinking };
 }
 
+// Determine color and class for precipitation value
+function getPrecipColorAndClass(precip) {
+    let color = "#94a3b8"; // Gray fallback for 0 or negative
+    let isBlinking = false;
+    
+    if (precip <= 0) {
+        color = "#94a3b8"; // Gray / no rain
+    } else if (precip > 0 && precip <= 2) {
+        color = "#06b6d4"; // Cyan / light rain
+    } else if (precip > 2 && precip <= 5) {
+        color = "#3b82f6"; // Blue / moderate rain
+    } else if (precip > 5 && precip <= 10) {
+        color = "#1d4ed8"; // Dark blue / heavy rain
+    } else if (precip > 10) {
+        color = "#7c3aed"; // Violet / extremely heavy rain (blinking)
+        isBlinking = true;
+    }
+    
+    return { color, isBlinking };
+}
+
 // Function to render weather markers on the map
 function renderWeatherMarkers(weatherData) {
     // Clear existing markers
@@ -608,6 +630,7 @@ function renderWeatherMarkers(weatherData) {
 
     weatherData.forEach(item => {
         const { color, isBlinking } = getWeatherColorAndClass(item.temp);
+        const precipVal = typeof item.precipitation === 'number' ? item.precipitation : 0.0;
         
         // Create custom HTML element for marker
         const el = document.createElement('div');
@@ -618,8 +641,8 @@ function renderWeatherMarkers(weatherData) {
 
         // Create Mapbox popup
         const popup = new mapboxgl.Popup({
-            offset: [0, -20],
-            closeButton: true,
+            offset: [0, -15],
+            closeButton: false,
             closeOnClick: false,
             className: 'weather-marker-popup'
         }).setHTML(`
@@ -629,8 +652,9 @@ function renderWeatherMarkers(weatherData) {
             </div>
             <div class="weather-popup-body" style="font-size: 12px; line-height: 1.4;">
                 <p style="margin: 2px 0;"><strong>Temperature:</strong> <span style="font-size: 14px; font-weight: 700; color: #ffffff;">${item.temp.toFixed(1)}°C</span></p>
+                <p style="margin: 2px 0;"><strong>Precipitation:</strong> <span style="font-size: 14px; font-weight: 700; color: #ffffff;">${precipVal.toFixed(1)} mm</span></p>
                 <p style="margin: 2px 0; color: #94a3b8; font-size: 11px;"><strong>Coordinates:</strong> ${item.lat.toFixed(5)}°N, ${item.lon.toFixed(5)}°E</p>
-                <p style="margin: 4px 0 0 0; color: #a1a1aa; font-size: 9.5px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 4px;">Last Refreshed:<br>${item.last_updated}</p>
+                <p style="margin: 4px 0 0 0; color: #a1a1aa; font-size: 9.5px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 4px;">Fetched At: ${item.last_updated}</p>
             </div>
         `);
 
@@ -640,10 +664,86 @@ function renderWeatherMarkers(weatherData) {
             anchor: 'center'
         })
         .setLngLat([item.lon, item.lat])
-        .setPopup(popup)
         .addTo(map1);
 
+        // Bind hover events
+        el.addEventListener('mouseenter', () => {
+            popup.setLngLat([item.lon, item.lat]).addTo(map1);
+        });
+        el.addEventListener('mouseleave', () => {
+            popup.remove();
+        });
+
+        // Clean up popup if marker is removed
+        const originalRemove = marker.remove;
+        marker.remove = function() {
+            popup.remove();
+            originalRemove.apply(marker, arguments);
+        };
+
         window.weatherMarkers.push(marker);
+    });
+}
+
+// Function to render precipitation markers on the map
+function renderPrecipMarkers(weatherData) {
+    // Clear existing markers
+    clearPrecipMarkers();
+
+    weatherData.forEach(item => {
+        const precipVal = typeof item.precipitation === 'number' ? item.precipitation : 0.0;
+        const { color, isBlinking } = getPrecipColorAndClass(precipVal);
+        
+        // Create custom HTML element for marker
+        const el = document.createElement('div');
+        el.className = `weather-circle-marker ${isBlinking ? 'blink' : ''}`;
+        el.style.backgroundColor = color;
+        el.style.borderColor = shadeColor(color, -20);
+        el.textContent = `${precipVal.toFixed(1)}`;
+
+        // Create Mapbox popup
+        const popup = new mapboxgl.Popup({
+            offset: [0, -15],
+            closeButton: false,
+            closeOnClick: false,
+            className: 'weather-marker-popup'
+        }).setHTML(`
+            <div class="weather-popup-header" style="border-bottom: 1px solid rgba(255,255,255,0.15); padding-bottom: 4px; margin-bottom: 6px;">
+                <h4 style="margin: 0; font-size: 14px; font-weight: 700; color: #93c5fd;">${item.name}</h4>
+                <span style="font-size: 10px; color: #bfdbfe; text-transform: uppercase;">${item.type} EWS</span>
+            </div>
+            <div class="weather-popup-body" style="font-size: 12px; line-height: 1.4;">
+                <p style="margin: 2px 0;"><strong>Temperature:</strong> <span style="font-size: 14px; font-weight: 700; color: #ffffff;">${item.temp.toFixed(1)}°C</span></p>
+                <p style="margin: 2px 0;"><strong>Precipitation:</strong> <span style="font-size: 14px; font-weight: 700; color: #ffffff;">${precipVal.toFixed(1)} mm</span></p>
+                <p style="margin: 2px 0; color: #94a3b8; font-size: 11px;"><strong>Coordinates:</strong> ${item.lat.toFixed(5)}°N, ${item.lon.toFixed(5)}°E</p>
+                <p style="margin: 4px 0 0 0; color: #a1a1aa; font-size: 9.5px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 4px;">Fetched At: ${item.last_updated}</p>
+            </div>
+        `);
+
+        // Create Mapbox marker and add to map
+        const marker = new mapboxgl.Marker({
+            element: el,
+            anchor: 'center'
+        })
+        .setLngLat([item.lon, item.lat])
+        .addTo(map1);
+
+        // Bind hover events
+        el.addEventListener('mouseenter', () => {
+            popup.setLngLat([item.lon, item.lat]).addTo(map1);
+        });
+        el.addEventListener('mouseleave', () => {
+            popup.remove();
+        });
+
+        // Clean up popup if marker is removed
+        const originalRemove = marker.remove;
+        marker.remove = function() {
+            popup.remove();
+            originalRemove.apply(marker, arguments);
+        };
+
+        window.precipMarkers.push(marker);
     });
 }
 
@@ -655,17 +755,38 @@ function clearWeatherMarkers() {
     window.weatherMarkers = [];
 }
 
+// Clear precipitation markers from map
+function clearPrecipMarkers() {
+    if (window.precipMarkers) {
+        window.precipMarkers.forEach(marker => marker.remove());
+    }
+    window.precipMarkers = [];
+}
+
 // Toggle Temperature Layer on/off
 async function toggleTemperatureLayer(visible) {
     if (visible) {
+        // Uncheck precipitation toggle if active
+        const precipToggle = document.getElementById('quick-precipitation-toggle');
+        if (precipToggle && precipToggle.checked) {
+            precipToggle.checked = false;
+            clearPrecipMarkers();
+        }
+
         // Load data from localStorage or fetch from openweathermap.json
         let storedData = localStorage.getItem('openweathermap_data');
         if (storedData) {
             try {
                 const weatherData = JSON.parse(storedData);
+                // Validate cache integrity for newly added fields/coordinates
+                const hasHispar = weatherData.some(item => item.id === 'hispar_valley');
+                const hasPrecip = weatherData.some(item => 'precipitation' in item);
+                if (!hasHispar || !hasPrecip) {
+                    throw new Error("Stale weather cache");
+                }
                 renderWeatherMarkers(weatherData);
             } catch (e) {
-                console.error("Error parsing stored weather data, fetching default:", e);
+                console.warn("Stale or invalid weather cache, refetching defaults:", e);
                 await fetchAndLoadDefaultWeather();
             }
         } else {
@@ -676,6 +797,41 @@ async function toggleTemperatureLayer(visible) {
     }
 }
 window.toggleTemperatureLayer = toggleTemperatureLayer;
+
+// Toggle Precipitation Layer on/off
+async function togglePrecipitationLayer(visible) {
+    if (visible) {
+        // Uncheck temperature toggle if active
+        const tempToggle = document.getElementById('quick-temperature-toggle');
+        if (tempToggle && tempToggle.checked) {
+            tempToggle.checked = false;
+            clearWeatherMarkers();
+        }
+
+        // Load data from localStorage or fetch from openweathermap.json
+        let storedData = localStorage.getItem('openweathermap_data');
+        if (storedData) {
+            try {
+                const weatherData = JSON.parse(storedData);
+                // Validate cache integrity for newly added fields/coordinates
+                const hasHispar = weatherData.some(item => item.id === 'hispar_valley');
+                const hasPrecip = weatherData.some(item => 'precipitation' in item);
+                if (!hasHispar || !hasPrecip) {
+                    throw new Error("Stale weather cache");
+                }
+                renderPrecipMarkers(weatherData);
+            } catch (e) {
+                console.warn("Stale or invalid weather cache, refetching defaults:", e);
+                await fetchAndLoadDefaultPrecip();
+            }
+        } else {
+            await fetchAndLoadDefaultPrecip();
+        }
+    } else {
+        clearPrecipMarkers();
+    }
+}
+window.togglePrecipitationLayer = togglePrecipitationLayer;
 
 // Fetch and load default JSON data
 async function fetchAndLoadDefaultWeather() {
@@ -690,17 +846,38 @@ async function fetchAndLoadDefaultWeather() {
     }
 }
 
-// Refresh weather data from OpenWeatherMap API
-async function refreshWeatherData(event) {
+// Fetch and load default JSON data for precipitation
+async function fetchAndLoadDefaultPrecip() {
+    try {
+        const response = await fetch('data/openweathermap.json');
+        if (!response.ok) throw new Error("Failed to fetch openweathermap.json");
+        const weatherData = await response.json();
+        localStorage.setItem('openweathermap_data', JSON.stringify(weatherData));
+        renderPrecipMarkers(weatherData);
+    } catch (err) {
+        console.error("Error loading openweathermap.json default data for precipitation:", err);
+    }
+}
+
+// Shared function to refresh all weather telemetry
+async function refreshAllWeatherData(activeType, event) {
     if (event) {
         event.stopPropagation();
         event.preventDefault();
     }
 
-    const refreshIcon = document.getElementById('refresh-weather-icon');
-    const refreshBtn = document.getElementById('refresh-weather-btn');
-    if (refreshIcon) refreshIcon.classList.add('fa-spin');
-    if (refreshBtn) refreshBtn.disabled = true;
+    const tempIcon = document.getElementById('refresh-weather-icon');
+    const tempBtn = document.getElementById('refresh-weather-btn');
+    const precipIcon = document.getElementById('refresh-precipitation-icon');
+    const precipBtn = document.getElementById('refresh-precipitation-btn');
+
+    if (activeType === 'temp') {
+        if (tempIcon) tempIcon.classList.add('fa-spin');
+        if (tempBtn) tempBtn.disabled = true;
+    } else {
+        if (precipIcon) precipIcon.classList.add('fa-spin');
+        if (precipBtn) precipBtn.disabled = true;
+    }
 
     try {
         // Load current data array (we need coordinate information)
@@ -722,16 +899,29 @@ async function refreshWeatherData(event) {
                           String(now.getMinutes()).padStart(2, '0') + ':' + 
                           String(now.getSeconds()).padStart(2, '0');
 
-        // Fetch new data for each coordinate in parallel using sequential fallback if rates limit
+        // Fetch new data for each coordinate in parallel
         const fetchPromises = currentData.map(async (item) => {
             try {
                 const apiResponse = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${item.lat}&lon=${item.lon}&appid=${OWM_API_KEY}&units=metric`);
                 if (!apiResponse.ok) throw new Error(`HTTP Error ${apiResponse.status}`);
                 const data = await apiResponse.json();
+                
+                // Fetch Temperature
                 if (data && data.main && typeof data.main.temp === 'number') {
                     item.temp = data.main.temp;
-                    item.last_updated = timestamp;
                 }
+
+                // Fetch Precipitation
+                let precip = 0.0;
+                if (data && data.rain) {
+                    precip += (data.rain['1h'] || data.rain['3h'] || 0.0);
+                }
+                if (data && data.snow) {
+                    precip += (data.snow['1h'] || data.snow['3h'] || 0.0);
+                }
+                item.precipitation = precip;
+
+                item.last_updated = timestamp;
             } catch (err) {
                 console.warn(`Could not refresh weather for ${item.name}:`, err);
             }
@@ -743,25 +933,47 @@ async function refreshWeatherData(event) {
         // Save to localStorage
         localStorage.setItem('openweathermap_data', JSON.stringify(updatedData));
 
-        // Re-render markers if the layer is active (toggle is checked)
-        const toggleCheckbox = document.getElementById('quick-temperature-toggle');
-        if (toggleCheckbox && toggleCheckbox.checked) {
+        // Re-render Temperature markers if active
+        const tempCheckbox = document.getElementById('quick-temperature-toggle');
+        if (tempCheckbox && tempCheckbox.checked) {
             renderWeatherMarkers(updatedData);
         }
 
-        // Simple visual feedback: flash refresh button green briefly
-        if (refreshBtn) {
-            refreshBtn.style.color = "#22c55e";
-            setTimeout(() => { refreshBtn.style.color = "#93c5fd"; }, 1500);
+        // Re-render Precipitation markers if active
+        const precipCheckbox = document.getElementById('quick-precipitation-toggle');
+        if (precipCheckbox && precipCheckbox.checked) {
+            renderPrecipMarkers(updatedData);
+        }
+
+        // Visual feedback
+        if (activeType === 'temp' && tempBtn) {
+            tempBtn.style.color = "#22c55e";
+            setTimeout(() => { tempBtn.style.color = "#93c5fd"; }, 1500);
+        } else if (activeType === 'precip' && precipBtn) {
+            precipBtn.style.color = "#22c55e";
+            setTimeout(() => { precipBtn.style.color = "#93c5fd"; }, 1500);
         }
     } catch (err) {
         console.error("Failed to refresh weather data:", err);
     } finally {
-        if (refreshIcon) refreshIcon.classList.remove('fa-spin');
-        if (refreshBtn) refreshBtn.disabled = false;
+        if (tempIcon) tempIcon.classList.remove('fa-spin');
+        if (tempBtn) tempBtn.disabled = false;
+        if (precipIcon) precipIcon.classList.remove('fa-spin');
+        if (precipBtn) precipBtn.disabled = false;
     }
 }
+
+// Refresh temperature weather data
+async function refreshWeatherData(event) {
+    await refreshAllWeatherData('temp', event);
+}
 window.refreshWeatherData = refreshWeatherData;
+
+// Refresh precipitation weather data
+async function refreshPrecipitationData(event) {
+    await refreshAllWeatherData('precip', event);
+}
+window.refreshPrecipitationData = refreshPrecipitationData;
 
 
 

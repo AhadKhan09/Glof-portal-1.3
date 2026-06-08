@@ -2955,40 +2955,56 @@ function hidevideo(videoDivId) {
     }
 }
 
-function restoreDefaultVideos() {
-    showvideo('top_video');
-    showvideo('bot_video');
-    changeVideo1(DEFAULT_TOP_VIDEO);
-    changeVideo2(DEFAULT_BOTTOM_VIDEO);
+function changeVideoSourceOnly(videoId, newPath) {
+    const videoElement = document.getElementById(videoId);
+    if (!videoElement) return;
+
+    if (newPath) {
+        const urlPath = new URL(newPath, window.location.href).href;
+        if (videoElement.src !== urlPath) {
+            videoElement.src = newPath;
+            videoElement.load();
+            videoElement.play().catch(err => {
+                console.warn("Playback prevented or interrupted: ", err);
+            });
+        }
+    } else {
+        videoElement.src = "";
+        videoElement.load();
+    }
+}
+
+function restoreDefaultVideosSourceOnly() {
+    changeVideoSourceOnly('top_video', DEFAULT_TOP_VIDEO);
+    changeVideoSourceOnly('bot_video', DEFAULT_BOTTOM_VIDEO);
 }
 
 function applyAccordionVideoState(accordionId) {
     const state = accordionVideoStates[accordionId];
 
     if (!state) {
-        restoreDefaultVideos();
+        restoreDefaultVideosSourceOnly();
         return;
     }
 
-    showvideo('top_video');
     if (state.topVideo) {
-        changeVideo1(state.topVideo);
+        changeVideoSourceOnly('top_video', state.topVideo);
+    } else {
+        changeVideoSourceOnly('top_video', DEFAULT_TOP_VIDEO);
     }
 
     if (state.hideBottom) {
-        hidevideo('bot_video');
-        return;
+        changeVideoSourceOnly('bot_video', "");
+    } else {
+        changeVideoSourceOnly('bot_video', state.bottomVideo || DEFAULT_BOTTOM_VIDEO);
     }
-
-    showvideo('bot_video');
-    changeVideo2(state.bottomVideo || DEFAULT_BOTTOM_VIDEO);
 }
 
 function syncAccordionVideos() {
     const activeAccordionId = accordionVideoStack[accordionVideoStack.length - 1];
 
     if (!activeAccordionId) {
-        restoreDefaultVideos();
+        restoreDefaultVideosSourceOnly();
         return;
     }
 
@@ -3347,13 +3363,14 @@ const LAKE_TEMP_GIDS = {
     // Fallbacks for other accordions in the list:
     'gulmit-collapse': { name: 'Gulmit', gid: 'mock' },
     'hiranchi-collapse': { name: 'Hinarchi', gid: 'mock' },
-    'shisper-collapse': { name: 'Shisper', gid: '2127384431' }
+    'shisper-collapse': { name: 'Shisper', gid: '2127384431' },
+    'hisper-incident': { name: 'Hisper', gid: '8512550' }
 };
 
 const LAKE_TEMP_DATES = [
-    "22-May", "23-May", "24-May", "25-May", "26-May", "27-May", "28-May", 
-    "29-May", "30-May", "31-May", "01-Jun", "02-Jun", "03-Jun", "04-Jun", 
-    "05-Jun", "06-Jun"
+    "8-June", "9-June", "10-June", "11-June", "12-June", "13-June", "14-June", 
+    "15-June", "16-June", "17-June", "18-Jun", "19-Jun", "20-Jun", "21-Jun", 
+    "22-Jun", "23-Jun"
 ];
 
 const LAKE_TEMP_FALLBACKS = {
@@ -3368,7 +3385,8 @@ const LAKE_TEMP_FALLBACKS = {
     'Ultar': [1.2, 1.9, 1.5, 2.3, 3.8, 4.9, 3.5, 4.1, 5.6, 6.2, 6.8, 6.1, 7.3, 7.7, 10.9, 11.8],
     'Reshun': [9.5, 10.2, 9.9, 10.8, 12.1, 13.2, 11.8, 12.5, 13.8, 14.3, 14.9, 14.2, 15.4, 15.8, 18.9, 19.8],
     'Brep': [7.8, 8.5, 8.2, 9.1, 10.3, 11.4, 9.8, 10.5, 11.8, 12.3, 12.9, 12.2, 13.4, 13.8, 16.9, 17.8],
-    'Shisper': [7.8, 8.4, 8.1, 9.2, 10.5, 11.7, 9.0, 10.1, 11.4, 12.2, 12.8, 11.9, 13.1, 13.4, 18.0, 17.5]
+    'Shisper': [7.8, 8.4, 8.1, 9.2, 10.5, 11.7, 9.0, 10.1, 11.4, 12.2, 12.8, 11.9, 13.1, 13.4, 18.0, 17.5],
+    'Hisper': [2.6, 3.9, 4.1, 3.4, 5.0, 4.8, 5.3, 5.1, 5.2, 5.9, 6.4, 5.6, 5.6, 5.8, 13.4, 15.5]
 };
 
 
@@ -3387,9 +3405,10 @@ function isRightContainerVisible() {
     });
 }
 
-// Measures the active layers legend and updates CSS offset variables dynamically
 function updateActiveLegendOffset() {
-    updateWidgetStacking();
+    if (window.ContainerManager) {
+        window.ContainerManager.scheduleLayout();
+    }
 }
 
 function updateWidgetStacking() {
@@ -3434,6 +3453,9 @@ const LAKE_VIDEO_FILES = {
 };
 
 function getLakeVideoPath(accordionId) {
+    if (accordionId === 'hisper-incident') {
+        return 'data/Hisper/Hisper GLOF 7th Jun.mp4';
+    }
     const filename = LAKE_VIDEO_FILES[accordionId];
     if (!filename) return '';
     return `data/Lake Area Change Videos/${encodeURIComponent(filename)}`;
@@ -4573,186 +4595,457 @@ document.addEventListener('DOMContentLoaded', loadLakeDataFromGoogleSheet);
 // Dynamic Container Repositioning Mechanism based on visibility and slot preferences
 let containerObserver = null;
 
-function isWidgetVisible(el) {
-    if (!el) return false;
-    const style = window.getComputedStyle(el);
-    return style.display !== 'none' && style.visibility !== 'hidden' && parseFloat(style.opacity || '1') > 0;
-}
+// ============================================================
+// SLOT-BASED CONTAINER STACK MANAGER
+// ============================================================
+// Layout model:
+//
+//  [col 0 - center-right]  [col 1 - rightmost]
+//  ┌──────────────┐         ┌──────────────┐
+//  │  lake-area   │ s2      │  top_video   │ s3  ← top slot
+//  │   widget     │ s1 ←span2             │
+//  ├──────────────┤         ├──────────────┤
+//  │  lake-temp   │ s0      │  bot_video   │ s2
+//  └──────────────┘         ├──────────────┤
+//                           │  ctrl chart  │ s1
+//                           ├──────────────┤
+//                           │    legend    │ s0  ← ALWAYS pinned bottom-right
+//                           └──────────────┘
+//
+// Rules:
+//  1. Legend is ALWAYS slot 0 col 1 (bottom-right corner). Pinned.
+//  2. Each column has SLOT_COUNT vertical slots of SLOT_H px.
+//  3. `span:2` containers occupy 2 consecutive slots (lake-area widget etc).
+//  4. Containers try their preferred col first, overflow to next col if full.
+//  5. All movement is CSS-transition animated (no jumping).
+// ============================================================
 
-function repositionContainers() {
-    if (containerObserver) {
-        containerObserver.disconnect();
-    }
+(function () {
+    'use strict';
 
-    const widgets = [
-        { id: 'glaciersDataContainer', isLegend: true, height: 1, order: 0 },
-        { id: 'lake-area-widget', isLegend: false, height: 2, order: 1 },
-        { id: 'lake-temp-widget', isLegend: false, height: 1, order: 2 },
-        { id: 'lake-video-widget', isLegend: false, height: 1, order: 3 },
-        { id: 'lake-map-preview', isLegend: false, height: 1, order: 4 },
-        { id: 'risk-zonation-legend', isLegend: false, height: 1, order: 5 },
-        { id: 'active-layers-legend', isLegend: false, height: 1, order: 6 },
-        { id: 'controlChart', isLegend: false, height: 1, order: 7 },
-        { id: 'bot_video', isLegend: false, height: 1, order: 8 },
-        { id: 'top_video', isLegend: false, height: 1, order: 9 }
+    // ── Tuneable constants ────────────────────────────────────
+    const COL_GAP    = 16;         // px — horizontal gap between columns
+    const RIGHT_EDGE = 52;         // px — from right viewport edge (toggle rail)
+    const BOTTOM_EDGE = 12;        // px — from bottom viewport edge
+    const EASE       = '0.28s cubic-bezier(0.4, 0, 0.2, 1)';
+
+    // ── Container registry ────────────────────────────────────
+    // col  : 1 = rightmost column, 0 = one left, 2 = two left
+    // span : number of slots this container occupies vertically
+    // pinned : forces the container to slot 0 of its column (bottom anchor)
+    const REGISTRY = [
+        // Legend — pinned to bottom of right column, always
+        { id: 'active-layers-legend',    col: 1, span: 1, pinned: true,  z: 15 },
+        { id: 'risk-zonation-legend',    col: 1, span: 1, pinned: true,  z: 15 },
+
+        // Right column standard containers (col 1)
+        { id: 'top_video',               col: 1, span: 1, pinned: false, z: 10 },
+        { id: 'top_video_warning_chart', col: 1, span: 1, pinned: false, z: 10 },
+        { id: 'bot_video',               col: 1, span: 1, pinned: false, z: 10 },
+        { id: 'controlChart',            col: 1, span: 1, pinned: false, z: 10 },
+        { id: 'glaciersDataContainer',   col: 1, span: 1, pinned: false, z: 10 },
+
+        // Lake widgets — preferred col 0, lake-area spans 2 slots
+        { id: 'lake-area-widget',        col: 0, span: 2, pinned: false, z: 11 },
+        { id: 'lake-temp-widget',        col: 0, span: 1, pinned: false, z: 11 },
+        { id: 'lake-video-widget',       col: 0, span: 1, pinned: false, z: 11 },
+        { id: 'lake-map-preview',        col: 0, span: 1, pinned: false, z: 11 },
     ];
 
-    const active = [];
-    widgets.forEach(w => {
-        const el = document.getElementById(w.id);
-        if (!el) return;
+    // ── Helpers ───────────────────────────────────────────────
 
-        let isVisible = isWidgetVisible(el);
+    function isVisible(id) {
+        const el = document.getElementById(id);
+        if (!el) return false;
+        const cs = window.getComputedStyle(el);
+        return cs.display !== 'none'
+            && cs.visibility !== 'hidden'
+            && el.offsetParent !== null;
+    }
 
-        if (w.id === 'top_video') {
-            const warningEl = document.getElementById('top_video_warning_chart');
-            const isWarningVisible = isWidgetVisible(warningEl);
-            if (isVisible || isWarningVisible) {
-                active.push({
-                    id: w.id,
-                    el: el,
-                    warningEl: warningEl,
-                    isLegend: w.isLegend,
-                    height: w.height,
-                    order: w.order
-                });
+    // slotMap[colIdx][slotIdx] = true if occupied
+    function makeSlotMap() {
+        return { 0: [], 1: [], 2: [] };
+    }
+
+    function occupySlots(slotMap, colIdx, start, span) {
+        for (let i = start; i < start + span; i++) {
+            slotMap[colIdx][i] = true;
+        }
+    }
+
+    function findFreeSlot(slotMap, colIdx, span, minSlot, SLOT_COUNT, SLOT_H, SLOT_GAP, col1Offset, viewportHeight, activeLegendId) {
+        function getSlotBottom(sIdx) {
+            if (colIdx === 1 && activeLegendId) {
+                return col1Offset + (sIdx - 1) * (SLOT_H + SLOT_GAP);
             }
-        } else if (isVisible) {
-            active.push({
-                id: w.id,
-                el: el,
-                isLegend: w.isLegend,
-                height: w.height,
-                order: w.order
-            });
-        }
-    });
-
-    // Sort: Legend (glaciersDataContainer) always first (Slot 1), others by default order
-    active.sort((a, b) => {
-        if (a.isLegend && !b.isLegend) return -1;
-        if (!a.isLegend && b.isLegend) return 1;
-        return a.order - b.order;
-    });
-
-    // Initialize a 3x4 grid representation
-    // grid[col][row] holds boolean occupied state
-    const grid = [
-        [false, false, false, false], // Col 0 (Column 1 - right)
-        [false, false, false, false], // Col 1 (Column 2 - middle)
-        [false, false, false, false]  // Col 2 (Column 3 - left)
-    ];
-
-    // Order of cells to try: Col 0 (0..3), Col 1 (0..3), Col 2 (0..3)
-    const cellOrder = [];
-    for (let c = 0; c < 3; c++) {
-        for (let r = 0; r < 4; r++) {
-            cellOrder.push({ col: c, row: r });
-        }
-    }
-
-    // Helper to check if a block can fit at (c, r) with height H
-    function canFit(col, row, height) {
-        if (row + height > 4) return false;
-        for (let h = 0; h < height; h++) {
-            if (grid[col][row + h]) return false;
-        }
-        return true;
-    }
-
-    // Helper to occupy cells
-    function occupy(col, row, height) {
-        for (let h = 0; h < height; h++) {
-            grid[col][row + h] = true;
-        }
-    }
-
-    // Reposition active elements inside their assigned slots
-    active.forEach(w => {
-        // Preference: if it's the Legend, it MUST be at Slot 1 (Col 0, Row 0)
-        if (w.isLegend) {
-            if (w.el.style.right !== '52px') w.el.style.right = '52px';
-            if (w.el.style.top !== 'calc(12px + 39.1vw)') w.el.style.top = 'calc(12px + 39.1vw)';
-            if (w.el.style.bottom !== 'auto') w.el.style.bottom = 'auto';
-            occupy(0, 0, 1);
-            return;
+            return BOTTOM_EDGE + sIdx * (SLOT_H + SLOT_GAP);
         }
 
-        // For other widgets, find the first available cell in cellOrder that fits
-        let placed = false;
-        for (let i = 0; i < cellOrder.length; i++) {
-            const cell = cellOrder[i];
-            if (canFit(cell.col, cell.row, w.height)) {
-                // Determine CSS positions
-                const right = `calc(52px + ${cell.col} * (22% + 16px))`;
-                let top = '';
-                if (cell.row === 0) {
-                    top = 'calc(12px + 39.1vw)';
-                } else {
-                    top = `calc(12px + ${3 - cell.row} * 13.2vw)`;
-                }
+        for (let start = minSlot; start <= SLOT_COUNT - span; start++) {
+            let free = true;
+            for (let i = start; i < start + span; i++) {
+                if (slotMap[colIdx][i]) { free = false; break; }
+            }
+            if (!free) continue;
 
-                // Set style
-                if (w.el.style.right !== right) w.el.style.right = right;
-                if (w.el.style.top !== top) w.el.style.top = top;
-                if (w.el.style.bottom !== 'auto') w.el.style.bottom = 'auto';
-                
-                if (w.id === 'top_video' && w.warningEl) {
-                    if (w.warningEl.style.right !== right) w.warningEl.style.right = right;
-                    if (w.warningEl.style.top !== top) w.warningEl.style.top = top;
-                    if (w.warningEl.style.bottom !== 'auto') w.warningEl.style.bottom = 'auto';
-                }
-
-                occupy(cell.col, cell.row, w.height);
-                placed = true;
+            // Check if it fits within the viewport vertically
+            const bottom = getSlotBottom(start);
+            const topEdge = bottom + (span * SLOT_H + (span - 1) * SLOT_GAP);
+            if (topEdge <= viewportHeight - 12) {
+                return start;
+            } else {
                 break;
             }
         }
-        if (!placed) {
-            console.warn(`Could not find a slot for widget ${w.id}`);
-        }
-    });
+        return -1;
+    }
 
-    if (containerObserver) {
-        const containerIds = widgets.map(w => w.id);
-        containerIds.push('top_video_warning_chart');
-        
-        containerIds.forEach(id => {
-            const el = document.getElementById(id);
-            if (el) {
-                containerObserver.observe(el, { attributes: true, attributeFilter: ['style', 'class'] });
+    function getRightContainersMaxColumn() {
+        let maxCol = 0; // 0: none, 1: col 1, 2: col 2, 3: col 3
+        REGISTRY.forEach(def => {
+            if (def.id !== 'active-layers-legend' && def.id !== 'risk-zonation-legend' && isVisible(def.id)) {
+                if (def.actualCol === 2) {
+                    maxCol = Math.max(maxCol, 3);
+                } else if (def.actualCol === 0) {
+                    maxCol = Math.max(maxCol, 2);
+                } else if (def.actualCol === 1) {
+                    maxCol = Math.max(maxCol, 1);
+                }
             }
         });
+        return maxCol;
     }
-}
 
-function initContainerObserver() {
-    containerObserver = new MutationObserver(() => {
-        repositionContainers();
-    });
+    // ── Layout pass ───────────────────────────────────────────
 
-    const widgets = [
-        { id: 'glaciersDataContainer' },
-        { id: 'lake-area-widget' },
-        { id: 'lake-temp-widget' },
-        { id: 'lake-video-widget' },
-        { id: 'lake-map-preview' },
-        { id: 'risk-zonation-legend' },
-        { id: 'active-layers-legend' },
-        { id: 'controlChart' },
-        { id: 'bot_video' },
-        { id: 'top_video' },
-        { id: 'top_video_warning_chart' }
-    ];
+    function layout() {
+        if (_obs) _obs.disconnect();
 
-    widgets.forEach(w => {
-        const el = document.getElementById(w.id);
-        if (el) {
-            containerObserver.observe(el, { attributes: true, attributeFilter: ['style', 'class'] });
+        const mapEl = document.getElementById('map');
+        const viewportHeight = mapEl ? mapEl.clientHeight : window.innerHeight;
+
+        // Dynamic, responsive sizes matching GLOF portal
+        const vw = window.innerWidth / 100;
+        const COL_W = Math.round(22 * vw);
+        const SLOT_H = Math.round(12 * vw) + 10;
+        const SLOT_GAP = Math.round(1.2 * vw);
+        
+        // Reset actual placed columns
+        REGISTRY.forEach(def => { def.actualCol = null; });
+
+        const slotMap = makeSlotMap();
+
+        const activeLayersLegend = document.getElementById('active-layers-legend');
+        const riskZonationLegend = document.getElementById('risk-zonation-legend');
+        
+        const isActiveLayersVisible = activeLayersLegend && !activeLayersLegend.classList.contains('is-hidden') && window.getComputedStyle(activeLayersLegend).display !== 'none';
+        const isRiskZonationVisible = riskZonationLegend && window.getComputedStyle(riskZonationLegend).display !== 'none';
+        
+        let legendHeight = 0;
+        let activeLegendId = null;
+        if (isActiveLayersVisible) {
+            legendHeight = activeLayersLegend.offsetHeight;
+            activeLegendId = 'active-layers-legend';
+        } else if (isRiskZonationVisible) {
+            legendHeight = riskZonationLegend.offsetHeight;
+            activeLegendId = 'risk-zonation-legend';
         }
-    });
 
-    repositionContainers();
-}
+        // Adjust lake widgets preferred column based on whether standard persistent containers are visible
+        const persistentIds = ['top_video', 'top_video_warning_chart', 'bot_video', 'controlChart', 'glaciersDataContainer'];
+        const hasPersistentVisible = persistentIds.some(id => isVisible(id));
+        const lakeWidgetIds = ['lake-area-widget', 'lake-temp-widget', 'lake-video-widget', 'lake-map-preview'];
+        REGISTRY.forEach(def => {
+            if (lakeWidgetIds.includes(def.id)) {
+                def.col = hasPersistentVisible ? 0 : 1;
+            }
+        });
 
-document.addEventListener('DOMContentLoaded', initContainerObserver);
+        // Set gap between legend and first container to 24px, fall back to BOTTOM_EDGE (12px) if no legend
+        const col1Offset = legendHeight > 0 ? (legendHeight + 24) : BOTTOM_EDGE;
+
+        function colRight(colIdx) {
+            const order = colIdx === 1 ? 0 : colIdx === 0 ? 1 : 2;
+            return RIGHT_EDGE + order * (COL_W + COL_GAP);
+        }
+
+        function slotBottom(slotIdx, colIdx) {
+            if (colIdx === 1 && activeLegendId) {
+                if (slotIdx === 0) {
+                    return BOTTOM_EDGE;
+                } else {
+                    return col1Offset + (slotIdx - 1) * (SLOT_H + SLOT_GAP);
+                }
+            }
+            return BOTTOM_EDGE + slotIdx * (SLOT_H + SLOT_GAP);
+        }
+
+        function applyPos(el, bottom, right, span, isLegend) {
+            el.style.position   = 'absolute';
+            el.style.bottom     = bottom + 'px';
+            el.style.right      = right  + 'px';
+            el.style.top        = 'auto';
+            el.style.left       = 'auto';
+            if (!isLegend) {
+                el.style.width      = COL_W  + 'px';
+                el.style.maxHeight  = (span * SLOT_H + (span - 1) * SLOT_GAP) + 'px';
+                el.style.overflowY  = 'auto';
+            } else {
+                el.style.width      = '';
+                el.style.maxHeight  = '';
+                el.style.overflowY  = 'hidden';
+            }
+            el.style.transition = `bottom ${EASE}, right ${EASE}`;
+        }
+
+        // Step 1 — pin active legend to slot 0 of col 1 (bottom-right)
+        if (activeLegendId) {
+            const el = document.getElementById(activeLegendId);
+            applyPos(el, slotBottom(0, 1), colRight(1), 1, true);
+            el.style.zIndex = 15;
+            occupySlots(slotMap, 1, 0, 1);   // reserve slot 0 in col 1
+        }
+
+        // Step 1.5 — Place lake-area-widget at slots 2 & 3 of Column 1 if visible (top of 1st column)
+        const isLakeAreaActive = isVisible('lake-area-widget');
+        if (isLakeAreaActive) {
+            const el = document.getElementById('lake-area-widget');
+            applyPos(el, slotBottom(2, 1), colRight(1), 2, false);
+            el.style.zIndex = 11;
+            occupySlots(slotMap, 1, 2, 2); // occupy slots 2 and 3 in Column 1
+            const regEntry = REGISTRY.find(r => r.id === 'lake-area-widget');
+            if (regEntry) regEntry.actualCol = 1;
+        }
+
+        // Step 2 — place all other visible containers (excluding lake-area-widget if already placed)
+        const others = REGISTRY.filter(r => !r.pinned && isVisible(r.id) && r.id !== 'lake-area-widget');
+
+        // Sort: right-column items first so col 1 fills before overflow
+        const colOrder = [1, 0, 2];
+        others.sort((a, b) => {
+            const colDiff = colOrder.indexOf(a.col) - colOrder.indexOf(b.col);
+            if (colDiff !== 0) return colDiff;
+            
+            const idxA = REGISTRY.findIndex(r => r.id === a.id);
+            const idxB = REGISTRY.findIndex(r => r.id === b.id);
+            
+            const lakeWidgetIds = ['lake-area-widget', 'lake-temp-widget', 'lake-video-widget', 'lake-map-preview'];
+            const isLakeA = lakeWidgetIds.includes(a.id);
+            const isLakeB = lakeWidgetIds.includes(b.id);
+            
+            if (isLakeA && isLakeB) {
+                // Ascending registry order for lake widgets (lake-temp/video stay in Column 1, lake-map-preview wraps)
+                return idxA - idxB;
+            } else {
+                // Descending registry order for standard containers (bottom-to-top stacking)
+                return idxB - idxA;
+            }
+        });
+
+        others.forEach(def => {
+            const el = document.getElementById(def.id);
+            if (!el) return;
+
+            // Try preferred col, then overflow order
+            const tryOrder = [def.col, ...colOrder.filter(c => c !== def.col)];
+            let placed = false;
+
+            for (const colIdx of tryOrder) {
+                // Slot 0 of col 1 is reserved for legend if legend is active
+                const minSlot = (colIdx === 1 && activeLegendId) ? 1 : 0;
+                // Allow up to 5 slots vertically, using top boundary check to fit
+                const slot = findFreeSlot(slotMap, colIdx, def.span, minSlot, 5, SLOT_H, SLOT_GAP, col1Offset, viewportHeight, activeLegendId);
+
+                if (slot !== -1) {
+                    applyPos(el, slotBottom(slot, colIdx), colRight(colIdx), def.span, false);
+                    el.style.zIndex = def.z;
+                    occupySlots(slotMap, colIdx, slot, def.span);
+                    def.actualCol = colIdx;
+                    placed = true;
+                    break;
+                }
+            }
+
+            if (!placed) {
+                // Overflow beyond grid — stack above slot 4 in col 2
+                const overflowBottom = slotBottom(4, 2);
+                applyPos(el, overflowBottom, colRight(2), def.span, false);
+                el.style.zIndex = def.z;
+                def.actualCol = 2;
+                console.warn('[ContainerManager] Grid full, overflowing:', def.id);
+            }
+        });
+
+        // Set the active legend height for stacking other widgets if needed.
+        if (mapEl) {
+            const maxCol = getRightContainersMaxColumn();
+            let rightWidgetOffset = '52px';
+            if (maxCol === 1) {
+                rightWidgetOffset = 'calc(22% + 68px)';
+            } else if (maxCol >= 2) {
+                rightWidgetOffset = 'calc(44% + 84px)';
+            }
+            mapEl.style.setProperty('--right-widget-offset', rightWidgetOffset);
+
+            const isWidgetInCol1 = rightWidgetOffset === '52px';
+            const activeLegendHeightVal = (activeLegendId && isWidgetInCol1) ? (legendHeight + 10) : 0;
+            mapEl.style.setProperty('--active-legend-height', `${activeLegendHeightVal}px`);
+            mapEl.style.setProperty('--lake-video-height', `${isVisible('lake-video-widget') ? (document.getElementById('lake-video-widget').offsetHeight + 10) : 0}px`);
+            mapEl.style.setProperty('--lake-temp-height', `${isVisible('lake-temp-widget') ? (document.getElementById('lake-temp-widget').offsetHeight + 10) : 0}px`);
+            mapEl.style.setProperty('--lake-area-height', `${isVisible('lake-area-widget') ? (document.getElementById('lake-area-widget').offsetHeight + 10) : 0}px`);
+            
+            // Adjust map preview margin
+            const tempWidget = document.getElementById('lake-temp-widget');
+            const videoWidget = document.getElementById('lake-video-widget');
+            const areaWidget = document.getElementById('lake-area-widget');
+            const previewWidget = document.getElementById('lake-map-preview');
+            const chartsRow = document.getElementById('charts-row');
+            const menu = document.getElementById('menu');
+
+            const isTempVisible = isVisible('lake-temp-widget');
+            const isVideoVisible = isVisible('lake-video-widget');
+            const isAreaVisible = isVisible('lake-area-widget');
+            const isPreviewVisible = isVisible('lake-map-preview');
+            const isChartsRowVisible = chartsRow && !chartsRow.classList.contains('hidden-charts') && window.getComputedStyle(chartsRow).display !== 'none';
+            const isMenuVisible = menu && window.getComputedStyle(menu).display !== 'none';
+
+            let leftOverlayRightEdge = 0;
+            if (isChartsRowVisible && chartsRow) {
+                leftOverlayRightEdge = chartsRow.offsetLeft + chartsRow.offsetWidth;
+            } else if (isMenuVisible && menu) {
+                leftOverlayRightEdge = menu.offsetLeft + menu.offsetWidth;
+            }
+
+            let rightOffsetWidth = 0;
+            if (!isWidgetInCol1) {
+                if (isTempVisible) rightOffsetWidth = tempWidget.offsetWidth;
+                else if (isVideoVisible) rightOffsetWidth = videoWidget.offsetWidth;
+                else if (isAreaVisible) rightOffsetWidth = areaWidget.offsetWidth;
+            } else {
+                if (activeLegendId) rightOffsetWidth = document.getElementById(activeLegendId).offsetWidth;
+                else if (isTempVisible) rightOffsetWidth = tempWidget.offsetWidth;
+                else if (isVideoVisible) rightOffsetWidth = videoWidget.offsetWidth;
+                else if (isAreaVisible) rightOffsetWidth = areaWidget.offsetWidth;
+            }
+
+            const mapWidth = mapEl.clientWidth;
+            const rightMargin = (rightWidgetOffset === 'calc(44% + 84px)') ? Math.round(mapWidth * 0.44 + 84) : 
+                                (rightWidgetOffset === 'calc(22% + 68px)') ? Math.round(mapWidth * 0.22 + 68) : 52;
+            const activeLegendWidthOffset = rightOffsetWidth > 0 ? (rightOffsetWidth + 12) : 0;
+            const previewWidth = previewWidget ? previewWidget.offsetWidth : 0;
+            const projectedPreviewLeftEdge = mapWidth - rightMargin - activeLegendWidthOffset - previewWidth - 20;
+
+            const shouldStackPreviewVertically = isPreviewVisible && (projectedPreviewLeftEdge < leftOverlayRightEdge);
+
+            if (shouldStackPreviewVertically) {
+                mapEl.classList.add('stack-preview-vertical');
+                mapEl.style.setProperty('--lake-preview-height', `${previewWidget.offsetHeight > 0 ? (previewWidget.offsetHeight + 10) : 0}px`);
+            } else {
+                mapEl.classList.remove('stack-preview-vertical');
+                mapEl.style.setProperty('--lake-preview-height', '0px');
+            }
+            mapEl.style.setProperty('--active-legend-width', `${activeLegendWidthOffset}px`);
+        }
+
+        if (typeof updateWidgetStacking === 'function') {
+            updateWidgetStacking();
+        }
+
+        setupObserver();
+    }
+
+    // ── Debounce via rAF ──────────────────────────────────────
+
+    let _raf = null;
+    function scheduleLayout() {
+        if (_raf) return;
+        _raf = requestAnimationFrame(() => { _raf = null; layout(); });
+    }
+
+    // ── MutationObserver ──────────────────────────────────────
+
+    let _obs = null;
+    function setupObserver() {
+        if (_obs) _obs.disconnect();
+        _obs = new MutationObserver(scheduleLayout);
+        const ids = REGISTRY.map(r => r.id).concat([
+            'risk-zonation-legend',
+            'station-forecast-widget',
+            'station-animation-panel',
+        ]);
+        ids.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) _obs.observe(el, { attributes: true, attributeFilter: ['style', 'class'] });
+        });
+    }
+
+    // ── Public API ────────────────────────────────────────────
+
+    window.ContainerManager = {
+        layout,
+        scheduleLayout,
+        register(def) {
+            const idx = REGISTRY.findIndex(r => r.id === def.id);
+            const entry = { col: 1, span: 1, pinned: false, z: 10, ...def };
+            if (idx !== -1) REGISTRY[idx] = entry; else REGISTRY.push(entry);
+            setupObserver();
+            scheduleLayout();
+        },
+        setSpan(id, span) {
+            const def = REGISTRY.find(r => r.id === id);
+            if (def) { def.span = Math.max(1, span); scheduleLayout(); }
+        },
+    };
+
+    window.repositionContainers   = layout;
+    window.scheduleContainerLayout = scheduleLayout;
+
+    // ── Bootstrap collapse events ─────────────────────────────
+
+    document.addEventListener('shown.bs.collapse',  scheduleLayout);
+    document.addEventListener('hidden.bs.collapse', scheduleLayout);
+
+    // ── Base CSS ──────────────────────────────────────────────
+
+    function injectCSS() {
+        if (document.getElementById('_csm_base')) return;
+        const s = document.createElement('style');
+        s.id = '_csm_base';
+        s.textContent = [
+            '#top_video',
+            '#top_video_warning_chart',
+            '#bot_video',
+            '#controlChart',
+            '#glaciersDataContainer',
+            '#active-layers-legend',
+            '#risk-zonation-legend',
+            '#lake-area-widget',
+            '#lake-temp-widget',
+            '#lake-video-widget',
+            '#lake-map-preview',
+        ].join(',\n') + ' { position: absolute; box-sizing: border-box; }';
+        document.head.appendChild(s);
+    }
+
+    // ── Init ──────────────────────────────────────────────────
+
+    function init() {
+        injectCSS();
+        setupObserver();
+
+        if (typeof ResizeObserver !== 'undefined') {
+            const mapEl = document.getElementById('map');
+            if (mapEl) new ResizeObserver(scheduleLayout).observe(mapEl);
+        }
+        window.addEventListener('resize', scheduleLayout);
+        scheduleLayout();
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+
+})();

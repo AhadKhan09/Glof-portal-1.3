@@ -96,20 +96,26 @@ h1 {
 #bot_video,
 #controlChart,
 #glaciersDataContainer {
-  transition: top 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), right 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  transition: top 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), bottom 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), right 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), max-height 0.28s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 #top_video{
   position: absolute;
+  top: 12px;
+  right: 52px;
   width:22%;
+  height: 12vw;
   border: #1d4ed8 solid 5px;
   border-radius: 4px;
+  color: #fff;
   display: none;
   animation: borderGlow 2.5s ease-in-out infinite;
   z-index: 10;
 }
 #top_video_warning_chart {
   position: absolute;
+  top: 12px;
+  right: 52px;
   width: 22%;
   height: 12vw;
   border: #1d4ed8 solid 5px;
@@ -139,24 +145,28 @@ h1 {
 }
 #bot_video{
   position: absolute;
+  top: calc(12px + 13.2vw);
+  right: 52px;
   width:22%;
   border: #1d4ed8 solid 5px;
   border-radius: 4px;
-  display: none;
   animation: borderGlow 2.5s ease-in-out infinite 0.5s;
   z-index: 10;
+  display: none;
 }
 #controlChart{
   position: absolute;
+  top: calc(12px + 26.4vw);
+  right: 52px;
   width: 22%;
   height: 12vw;
   border-radius: 4px;
   border: #1d4ed8 solid 5px;
   overflow: hidden;
   background: #0d1b2a;
-  display: none;
   animation: borderGlow 2.5s ease-in-out infinite 1s;
   z-index: 10;
+  display: none;
 }
 #controlChart,
 #glaciersDataContainer {
@@ -187,8 +197,8 @@ h1 {
   border: #1d4ed8 solid 5px;
   overflow: hidden;
   background: #0d1b2a;
-  display: none;
   animation: borderGlow 2.5s ease-in-out infinite 1.5s;
+  display: none;
   z-index: 10;
 }
 #glaciersDataImg{
@@ -329,16 +339,16 @@ h1 {
 /* Vertical Stacking for Map Preview Widget to Prevent Overlaps */
 #map.stack-preview-vertical #lake-map-preview {
   right: var(--right-widget-offset, 52px);
-  bottom: calc(0.6vw + var(--station-forecast-offset, 0px) + var(--active-legend-height, 0px) + var(--lake-temp-height, 0px));
+  bottom: calc(0.6vw + var(--station-forecast-offset, 0px) + var(--active-legend-height, 0px) + var(--lake-video-height, 0px) + var(--lake-temp-height, 0px));
   width: clamp(280px, 22vw, 380px);
 }
 
 #map.stack-preview-vertical #lake-video-widget {
-  bottom: calc(0.6vw + var(--station-forecast-offset, 0px) + var(--active-legend-height, 0px) + var(--lake-temp-height, 0px) + var(--lake-preview-height, 0px));
+  bottom: calc(0.6vw + var(--station-forecast-offset, 0px) + var(--active-legend-height, 0px));
 }
 
 #map.stack-preview-vertical #lake-area-widget.gp {
-  bottom: calc(0.6vw + var(--station-forecast-offset, 0px) + var(--active-legend-height, 0px) + var(--lake-temp-height, 0px) + var(--lake-preview-height, 0px) + var(--lake-video-height, 0px));
+  bottom: calc(0.6vw + var(--station-forecast-offset, 0px) + var(--active-legend-height, 0px) + var(--lake-video-height, 0px) + var(--lake-temp-height, 0px) + var(--lake-preview-height, 0px));
 }
 
 #lake-map-preview-img {
@@ -369,7 +379,7 @@ h1 {
 
 #risk-zonation-legend {
   position: absolute;
-  right: var(--right-widget-offset, 52px);
+  right: 52px;
   bottom: calc(0.6vw + var(--station-forecast-offset));
   min-width: clamp(180px, 15vw, 220px);
   max-width: clamp(220px, 18vw, 340px);
@@ -389,7 +399,7 @@ h1 {
 
 #active-layers-legend {
   position: absolute;
-  right: var(--right-widget-offset, 52px);
+  right: 52px;
   bottom: calc(0.6vw + var(--station-forecast-offset));
   width: clamp(280px, 22vw, 380px);
   max-height: min(33vh, 300px);
@@ -791,7 +801,7 @@ h1 {
 #lake-temp-widget {
   position: absolute;
   right: var(--right-widget-offset, 52px);
-  bottom: calc(0.6vw + var(--station-forecast-offset, 0px) + var(--active-legend-height, 0px));
+  bottom: calc(0.6vw + var(--station-forecast-offset, 0px) + var(--active-legend-height, 0px) + var(--lake-video-height, 0px));
   width: clamp(280px, 22vw, 380px);
   height: clamp(190px, 24vh, 260px);
   border: 3px solid #1d4ed8;
@@ -806,7 +816,7 @@ h1 {
   visibility: hidden;
   pointer-events: none;
   transform: translateY(14px);
-  transition: opacity 240ms ease, transform 240ms ease, bottom 220ms ease, right 220ms ease, visibility 0ms linear 240ms;
+  transition: opacity 240ms ease, transform 240ms ease, bottom 220ms ease, right 220ms ease, max-height 220ms ease, visibility 0ms linear 240ms;
   animation: borderGlow 2.5s ease-in-out infinite;
 }
 
@@ -815,7 +825,7 @@ h1 {
   visibility: visible;
   pointer-events: auto;
   transform: translateY(0);
-  transition: opacity 240ms ease, transform 240ms ease, bottom 220ms ease, right 220ms ease;
+  transition: opacity 240ms ease, transform 240ms ease, bottom 220ms ease, right 220ms ease, max-height 220ms ease;
 }
 
 #lake-temp-header {
@@ -899,7 +909,7 @@ h1 {
 #lake-area-widget.gp {
   position: absolute;
   right: var(--right-widget-offset, 52px);
-  bottom: calc(0.6vw + var(--station-forecast-offset, 0px) + var(--active-legend-height, 0px) + var(--lake-temp-height, 0px) + var(--lake-video-height, 0px));
+  bottom: calc(0.6vw + var(--station-forecast-offset, 0px) + var(--active-legend-height, 0px) + var(--lake-video-height, 0px) + var(--lake-temp-height, 0px));
   width: clamp(280px, 22vw, 380px);
   background: #06090f;
   border-radius: 20px;
@@ -914,7 +924,7 @@ h1 {
   visibility: hidden;
   pointer-events: none;
   transform: translateY(14px);
-  transition: opacity 240ms ease, transform 240ms ease, bottom 220ms ease, right 220ms ease, visibility 0ms linear 240ms;
+  transition: opacity 240ms ease, transform 240ms ease, bottom 220ms ease, right 220ms ease, max-height 220ms ease, visibility 0ms linear 240ms;
   outline: solid 5px #e74c3c;
   animation: redOutlineGlow 2.5s ease-in-out infinite 0.25s;
 }
@@ -924,7 +934,7 @@ h1 {
   visibility: visible;
   pointer-events: auto;
   transform: translateY(0);
-  transition: opacity 240ms ease, transform 240ms ease, bottom 220ms ease, right 220ms ease;
+  transition: opacity 240ms ease, transform 240ms ease, bottom 220ms ease, right 220ms ease, max-height 220ms ease;
 }
 
 #lake-area-widget .gp-header {
@@ -1328,7 +1338,7 @@ h1 {
 #lake-video-widget {
   position: absolute;
   right: var(--right-widget-offset, 52px);
-  bottom: calc(0.6vw + var(--station-forecast-offset, 0px) + var(--active-legend-height, 0px) + var(--lake-temp-height, 0px));
+  bottom: calc(0.6vw + var(--station-forecast-offset, 0px) + var(--active-legend-height, 0px));
   width: clamp(280px, 22vw, 380px);
   border: 3px solid #1d4ed8;
   border-radius: 8px;
@@ -3441,28 +3451,35 @@ body:has(#charts-row:not(.hidden-charts)) #menu {
     border: 2px solid #ffffff;
     text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
     cursor: pointer;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    transition: width 0.15s ease, height 0.15s ease, box-shadow 0.15s ease;
     z-index: 10;
 }
 
 .weather-circle-marker:hover {
-    transform: scale(1.15) !important;
+    width: 37px;
+    height: 37px;
     box-shadow: 0 0 14px rgba(255,255,255,0.6), 0 0 10px rgba(0,0,0,0.4);
 }
 
 @keyframes weatherBlink {
     0%, 100% {
-        transform: scale(1);
+        width: 32px;
+        height: 32px;
         box-shadow: 0 0 10px rgba(220, 38, 38, 0.8), inset 0 0 6px rgba(255,255,255,0.3);
     }
     50% {
-        transform: scale(1.15);
+        width: 37px;
+        height: 37px;
         box-shadow: 0 0 25px rgba(220, 38, 38, 1), 0 0 10px rgba(220, 38, 38, 0.5), inset 0 0 10px rgba(255,255,255,0.5);
     }
 }
 
 .weather-circle-marker.blink {
     animation: weatherBlink 1.2s infinite ease-in-out;
+}
+
+.weather-marker-popup {
+    pointer-events: none !important;
 }
 
 .weather-marker-popup .mapboxgl-popup-content {
