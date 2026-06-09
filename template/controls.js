@@ -445,13 +445,20 @@ function refreshActiveLayersLegend() {
         return;
     }
 
-    const checkedInputs = Array.from(menu.querySelectorAll('input.form-check-input[type="checkbox"]:checked'));
+    const checkedInputs = Array.from(menu.querySelectorAll('input[type="checkbox"]:checked'));
     let hasRiskZonationChecked = false;
     
     const enabledLayers = checkedInputs
         .map((inputElement, index) => {
-            const label = menu.querySelector(`label[for="${inputElement.id}"]`);
-            const layerName = label ? label.textContent.trim() : '';
+            let layerName = '';
+            const row = inputElement.closest('.toggle-row');
+            const labelSpan = row ? row.querySelector('.toggle-label') : null;
+            if (labelSpan) {
+                layerName = labelSpan.textContent.trim();
+            } else {
+                const label = menu.querySelector(`label[for="${inputElement.id}"]`);
+                layerName = label ? label.textContent.trim() : '';
+            }
             
             if (layerName === 'Risk Zonation') {
                 hasRiskZonationChecked = true;
@@ -750,9 +757,11 @@ function refreshActiveLayersLegend() {
         closeBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             if (layer.isVirtualRiskZonation) {
-                const checkedRiskInputs = Array.from(menu.querySelectorAll('input.form-check-input[type="checkbox"]:checked'))
+                const checkedRiskInputs = Array.from(menu.querySelectorAll('input[type="checkbox"]:checked'))
                     .filter(input => {
-                        const labelText = menu.querySelector(`label[for="${input.id}"]`)?.textContent.trim() || '';
+                        const row = input.closest('.toggle-row');
+                        const labelSpan = row ? row.querySelector('.toggle-label') : null;
+                        const labelText = labelSpan ? labelSpan.textContent.trim() : (menu.querySelector(`label[for="${input.id}"]`)?.textContent.trim() || '');
                         return labelText === 'Risk Zonation';
                     });
                 checkedRiskInputs.forEach(cb => cb.click());
@@ -2288,6 +2297,11 @@ function getLayerFriendlyName(layerId) {
             continue;
         }
 
+        const row = input.closest('.toggle-row');
+        const labelSpan = row ? row.querySelector('.toggle-label') : null;
+        if (labelSpan && labelSpan.textContent) {
+            return labelSpan.textContent.trim();
+        }
         const label = document.querySelector(`label[for="${input.id}"]`);
         if (label && label.textContent) {
             return label.textContent.trim();
@@ -5101,3 +5115,80 @@ let containerObserver = null;
     }
 
 })();
+
+// ── Sidebar Menu Toggles: Sync and Active Class Styling ───────────────────────
+(function () {
+    'use strict';
+
+    // Helper to update the .active class on a .toggle-row based on input checked status
+    function updateRowActiveState(input) {
+        const row = input.closest('.toggle-row');
+        if (row) {
+            if (input.checked) {
+                row.classList.add('active');
+            } else {
+                row.classList.remove('active');
+            }
+        }
+    }
+
+    // Intercept programmatic checkbox .checked modifications to fire change events
+    const originalCheckedDescriptor = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'checked');
+    if (originalCheckedDescriptor && originalCheckedDescriptor.set) {
+        Object.defineProperty(HTMLInputElement.prototype, 'checked', {
+            get: function() {
+                return originalCheckedDescriptor.get.call(this);
+            },
+            set: function(val) {
+                const oldVal = originalCheckedDescriptor.get.call(this);
+                originalCheckedDescriptor.set.call(this, val);
+                if (oldVal !== val && this.type === 'checkbox' && this.closest && this.closest('#menu')) {
+                    this.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            },
+            configurable: true,
+            enumerable: true
+        });
+    }
+
+    function initMenuToggles() {
+        const menu = document.getElementById('menu');
+        if (!menu) return;
+
+        const checkboxes = menu.querySelectorAll('input[type="checkbox"]');
+        checkboxes.forEach(cb => {
+            // Initial state sync on load
+            updateRowActiveState(cb);
+
+            // Update row active state on checkbox state change
+            cb.addEventListener('change', function() {
+                updateRowActiveState(cb);
+            });
+        });
+
+        // Synchronize state between quick-bri-ff-sensors-toggle and quick-bri-ff-sensors-toggle-base
+        const toggle1 = document.getElementById('quick-bri-ff-sensors-toggle');
+        const toggle2 = document.getElementById('quick-bri-ff-sensors-toggle-base');
+
+        if (toggle1 && toggle2) {
+            toggle1.addEventListener('change', function() {
+                if (toggle2.checked !== toggle1.checked) {
+                    toggle2.checked = toggle1.checked;
+                }
+            });
+
+            toggle2.addEventListener('change', function() {
+                if (toggle1.checked !== toggle2.checked) {
+                    toggle1.checked = toggle2.checked;
+                }
+            });
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initMenuToggles);
+    } else {
+        initMenuToggles();
+    }
+})();
+

@@ -362,763 +362,680 @@
 
     <!-- ======== CHARTS ROW MOVED INSIDE MAP VIEWPORT ======== -->
 
-    <!-- _____________________________________________________________________________________________________________________________________________________________ -->
-<div id="menu">
-    <div class="accordion" id="menu-accordion">
-        <div class="quick-toggle-sections">
-            <div class="quick-toggle-section">
-                <div class="form-check form-switch quick-toggle-item">
-                    <input class="form-check-input" type="checkbox" role="switch" id="inventory-toggle" data-legend-track="true" data-legend-icon="icon-cyan-dot" onchange="toggleGlacialLakesInventory(this.checked)">
-                    <label class="form-check-label" for="inventory-toggle">Glacial Lakes Inventory</label>
-                </div>
-                <div class="form-check form-switch quick-toggle-item">
-                    <input class="form-check-input" type="checkbox" role="switch" id="quick-akah-toggle" data-layer="akah-infrastructure-layer" data-legend-track="true" data-legend-icon="icon-circle-red-small" onchange="toggleQuickAkahLayer(this.checked)">
-                    <label class="form-check-label" for="quick-akah-toggle">AKAH Layer</label>
-                </div>
-                <div class="form-check form-switch quick-toggle-item">
-                    <input class="form-check-input" type="checkbox" role="switch" id="quick-populated-places-toggle" data-layer="populated-places-points-layer" data-legend-icon="icon-untracked" onchange="toggleQuickPopulatedPlaces(this.checked)">
-                    <label class="form-check-label" for="quick-populated-places-toggle">Populated Places</label>
-                </div>
-                <div class="form-check form-switch quick-toggle-item">
-                    <input class="form-check-input" type="checkbox" role="switch" id="quick-gmrc-wapda-toggle" data-layer="gmrc-wapda-points-layer" data-legend-track="true" data-legend-icon="icon-blue-destination" onchange="toggleQuickGmrcWapda(this.checked)">
-                    <label class="form-check-label" for="quick-gmrc-wapda-toggle">GMRC, WAPDA</label>
-                </div>
-                <div class="form-check form-switch quick-toggle-item">
-                    <input class="form-check-input" type="checkbox" role="switch" id="quick-pdma-kp-toggle" data-layer="pdma-kp-points-layer" data-legend-track="true" data-legend-icon="icon-blue-destination" onchange="toggleQuickPdmaKp(this.checked)">
-                    <label class="form-check-label" for="quick-pdma-kp-toggle">PDMA, KP</label>
-                </div>
-                <div class="form-check form-switch quick-toggle-item">
-                    <input class="form-check-input" type="checkbox" role="switch" id="quick-evk2cnr-toggle" data-layer="evk2cnr-points-layer" data-legend-track="true" data-legend-icon="icon-green-destination" onchange="toggleQuickEvK2CNR(this.checked)">
-                    <label class="form-check-label" for="quick-evk2cnr-toggle">EvK2CNR</label>
-                </div>
-                <div class="form-check form-switch quick-toggle-item">
-                    <input class="form-check-input" type="checkbox" role="switch" id="quick-glof-ii-toggle" data-layer="glof-ii-stations-layer" data-legend-track="true" data-legend-icon="icon-yellow-destination" onchange="toggleQuickGlofII(this.checked)">
-                    <label class="form-check-label" for="quick-glof-ii-toggle">GLOF II, PMD</label>
-                </div>
-                <div class="form-check form-switch quick-toggle-item">
-                    <input class="form-check-input" type="checkbox" role="switch" id="quick-glof-ii-damaged-toggle" data-layer="glof-ii-damaged-stations-layer" data-legend-track="true" data-legend-icon="icon-warning" onchange="toggleQuickGlofIIDamagedStations(this.checked)">
-                    <label class="form-check-label" for="quick-glof-ii-damaged-toggle">GLOF II Damaged Stations</label>
-                </div>
-                <div class="form-check form-switch quick-toggle-item">
-                    <input class="form-check-input" type="checkbox" role="switch" id="quick-akah-stations-toggle" data-layer="akah-stations-layer" data-legend-track="true" data-legend-icon="icon-green-destination" onchange="toggleQuickAkahStations(this.checked)">
-                    <label class="form-check-label" for="quick-akah-stations-toggle">AKAH Stations</label>
-                </div>
-                <div class="form-check form-switch quick-toggle-item">
-                    <input class="form-check-input" type="checkbox" role="switch" id="quick-undp-all-sensors-toggle" data-layer="undp-all-sensors-layer" data-legend-track="true" data-legend-icon="icon-orange-destination" onchange="toggleQuickUndpAllSensors(this.checked)">
-                    <label class="form-check-label" for="quick-undp-all-sensors-toggle">UNDP All sensors</label>
-                </div>
-                <div class="form-check form-switch quick-toggle-item">
-                    <input class="form-check-input" type="checkbox" role="switch" id="quick-bri-ff-sensors-toggle" data-layer="bri-ff-sensors-layer" data-legend-track="true" data-legend-icon="icon-red-destination" onchange="toggleQuickBriFfSensors(this.checked)">
-                    <label class="form-check-label" for="quick-bri-ff-sensors-toggle">BRI_FF Sensors</label>
-                </div>
-                <div class="form-check form-switch quick-toggle-item">
-                    <input class="form-check-input" type="checkbox" role="switch" id="quick-vulnerable-melting-glaciers-toggle" data-layer="vulnerable-melting-glaciers-layer" onchange="toggleQuickVulnerableMeltingGlaciers(this.checked)">
-                    <label class="form-check-label" for="quick-vulnerable-melting-glaciers-toggle">Vulnerable Melting Glaciers</label>
-                </div>
-                <div class="form-check form-switch quick-toggle-item">
-                    <input class="form-check-input" type="checkbox" role="switch" id="quick-vulnerable-melting-points-toggle" data-layer="vulnerable-melting-points-layer" onchange="toggleQuickVulnerableMeltingPoints(this.checked)">
-                    <label class="form-check-label" for="quick-vulnerable-melting-points-toggle">Vulnerable Melting Points</label>
-                </div>
-                <div class="form-check form-switch quick-toggle-item">
-                    <input class="form-check-input" type="checkbox" role="switch" id="quick-flood-susceptibility-toggle" data-layer="flood-susceptibility-layer" data-legend-icon="icon-untracked" onchange="toggleFloodSusceptibility(this.checked)">
-                    <label class="form-check-label" for="quick-flood-susceptibility-toggle">Flood Susceptibility</label>
-                </div>
-            </div>
+    <div id="menu">
+    <div class="sidebar-content">
 
-            <div class="quick-toggle-section">
-                <div class="quick-toggle-title">2025</div>
-                <div class="form-check form-switch quick-toggle-item">
-                    <input class="form-check-input" type="checkbox" role="switch" id="quick-vulsites-2025-toggle" data-legend-track="true" data-legend-icon="icon-red-destination" onchange="toggleQuickVulnerableSites2025(this.checked)">
-                    <label class="form-check-label" for="quick-vulsites-2025-toggle">Vulnerable Sites</label>
-                </div>
-                <div class="form-check form-switch quick-toggle-item">
-                    <input class="form-check-input" type="checkbox" role="switch" id="quick-vullakes-2025-toggle" data-legend-track="true" data-legend-icon="icon-red-ring" onchange="toggleQuickVulnerableLakes2025(this.checked)">
-                    <label class="form-check-label" for="quick-vullakes-2025-toggle">Vulnerable Lakes 2025</label>
-                </div>
-                <div class="form-check form-switch quick-toggle-item">
-                    <input class="form-check-input" type="checkbox" role="switch" id="quick-incident-2025-toggle" onchange="toggleQuickIncident2025(this.checked)">
-                    <label class="form-check-label" for="quick-incident-2025-toggle">Incident</label>
-                </div>
-            </div>
+      <!-- ══ 1. BOUNDARIES ══ -->
+      <div class="section" id="sec-boundaries">
+        <button class="section-header" onclick="toggleSection('sec-boundaries')">
+          <span class="section-icon">🗺️</span>
+          <span class="section-label">Boundaries</span>
+          <span class="section-chevron">▼</span>
+        </button>
+        <div class="section-body"><div class="section-inner">
+          <div class="toggle-row" onclick="toggleRow(event, this)">
+            <label class="toggle-switch">
+              <input type="checkbox" id="national-boundary-toggle" onclick="toggleLayersVisibility(map1, ['national-boundary-layer'])">
+              <span class="toggle-track"></span>
+            </label>
+            <span class="toggle-label">National Boundary</span>
+          </div>
+          <div class="toggle-row" onclick="toggleRow(event, this)">
+            <label class="toggle-switch">
+              <input type="checkbox" id="provincial-boundary-toggle" onclick="toggleLayersVisibility(map1, ['provincial-boundary-layer'])">
+              <span class="toggle-track"></span>
+            </label>
+            <span class="toggle-label">Provincial Boundary</span>
+          </div>
+          <div class="toggle-row" onclick="toggleRow(event, this)">
+            <label class="toggle-switch">
+              <input type="checkbox" id="district-boundary-toggle" onclick="toggleLayersVisibility(map1, ['district-boundary-layer', 'district-boundary-label-layer'])">
+              <span class="toggle-track"></span>
+            </label>
+            <span class="toggle-label">District Boundary</span>
+          </div>
+        </div></div>
+      </div>
 
-            <div class="quick-toggle-section">
-                <div class="quick-toggle-title">2026</div>
-                <div class="form-check form-switch quick-toggle-item">
-                    <input class="form-check-input" type="checkbox" role="switch" id="quick-vulsites-2026-toggle" data-legend-track="true" data-legend-icon="icon-red-pin" onchange="toggleQuickVulnerableSites2026(this.checked)">
-                    <label class="form-check-label" for="quick-vulsites-2026-toggle">Vulnerable Sites 2026</label>
-                </div>
-                <div class="form-check form-switch quick-toggle-item">
-                    <input class="form-check-input" type="checkbox" role="switch" id="quick-vullakes-2026-toggle" data-legend-track="true" data-legend-icon="icon-red-ring" onchange="toggleQuickVulnerableLakes2026(this.checked)">
-                    <label class="form-check-label" for="quick-vullakes-2026-toggle">Vulnerable Lakes 2026</label>
-                </div>
-                <div class="form-check form-switch quick-toggle-item">
-                    <input class="form-check-input" type="checkbox" role="switch" id="quick-station-points-toggle" onchange="toggleQuickStationPoints(this.checked)">
-                    <label class="form-check-label" for="quick-station-points-toggle">Station Points</label>
-                </div>
-                <div class="form-check form-switch quick-toggle-item">
-                    <input class="form-check-input" type="checkbox" role="switch" id="quick-hisper-incident-toggle" onchange="toggleHisperIncident(this.checked)">
-                    <label class="form-check-label" for="quick-hisper-incident-toggle">Hisper Incident</label>
-                </div>
-                <div class="form-check form-switch quick-toggle-item">
-                    <input class="form-check-input" type="checkbox" role="switch" id="quick-high-temp-2026-toggle" onchange="showHighTempWarning(this.checked)">
-                    <label class="form-check-label" for="quick-high-temp-2026-toggle">High Temp Warning</label>
-                </div>
-                <div class="quick-toggle-item d-flex align-items-center justify-content-between" style="padding-right: 8px;">
-                    <div class="form-check form-switch m-0">
-                        <input class="form-check-input" type="checkbox" role="switch" id="quick-temperature-toggle" onchange="toggleTemperatureLayer(this.checked)">
-                        <label class="form-check-label" for="quick-temperature-toggle">Temperature</label>
-                    </div>
-                    <button id="refresh-weather-btn" onclick="refreshWeatherData(event)" title="Refresh weather from OpenWeatherMap" style="background: none; border: none; color: #93c5fd; cursor: pointer; transition: transform 0.2s; padding: 0; outline: none; display: flex; align-items: center;">
-                        <i class="fas fa-sync-alt" id="refresh-weather-icon"></i>
-                    </button>
-                </div>
-                <div class="quick-toggle-item d-flex align-items-center justify-content-between" style="padding-right: 8px;">
-                    <div class="form-check form-switch m-0">
-                        <input class="form-check-input" type="checkbox" role="switch" id="quick-precipitation-toggle" onchange="togglePrecipitationLayer(this.checked)">
-                        <label class="form-check-label" for="quick-precipitation-toggle">Precipitation</label>
-                    </div>
-                    <button id="refresh-precipitation-btn" onclick="refreshPrecipitationData(event)" title="Refresh precipitation from OpenWeatherMap" style="background: none; border: none; color: #93c5fd; cursor: pointer; transition: transform 0.2s; padding: 0; outline: none; display: flex; align-items: center;">
-                        <i class="fas fa-sync-alt" id="refresh-precipitation-icon"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-        <!--________________________________________________________ -->
-        <!--______________________ PMD Sensors _____________________ -->
-        <div class="accordion-item">
-            <h2 class="accordion-header" id="pmd-sensors-heading">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#pmd-sensors-collapse" aria-expanded="false" aria-controls="pmd-sensors-collapse">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-broadcast-pin" viewBox="0 0 16 16">
-                  <path d="M2.75 10.5a.5.5 0 0 1 .854-.354l2.063 2.063c.222-.222.257-.591.077-.852l-2.072-3a.5.5 0 0 1 .828-.57l2.072 3c.36.52.36 1.258-.02 1.776l-2.126 2.126a.5.5 0 0 1-.854-.354v-3.835zm10.5 0v3.835a.5.5 0 0 1-.854.354l-2.126-2.126c-.38-.518-.38-1.256-.02-1.776l2.072-3a.5.5 0 1 1 .828.57l-2.072 3c-.18.261-.145.63.077.852l2.063-2.063a.5.5 0 0 1 .854.354z"/>
-                  <path d="M8 2a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zm0 4a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"/>
-                </svg>
-                <span class="ms-2"><u>PMD Sensors</u></span>
-            </button>
-            </h2>
-            <div id="pmd-sensors-collapse" class="accordion-collapse collapse" aria-labelledby="pmd-sensors-heading">
-                <div class="accordion-body">
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="pmd-sensors-arg-toggle" data-layer="pmd-sensors-ARG-layer" data-legend-track="true" onchange="toggleLayersVisibility(map1, ['pmd-sensors-ARG-layer'])">
-                        <label class="form-check-label" for="pmd-sensors-arg-toggle">ARG</label>
-                    </div>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="pmd-sensors-aws-toggle" data-layer="pmd-sensors-AWS-layer" data-legend-track="true" onchange="toggleLayersVisibility(map1, ['pmd-sensors-AWS-layer'])">
-                        <label class="form-check-label" for="pmd-sensors-aws-toggle">AWS</label>
-                    </div>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="pmd-sensors-wlr-toggle" data-layer="pmd-sensors-WL-R-layer" data-legend-track="true" onchange="toggleLayersVisibility(map1, ['pmd-sensors-WL-R-layer'])">
-                        <label class="form-check-label" for="pmd-sensors-wlr-toggle">WL-R</label>
-                    </div>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="pmd-sensors-wll-toggle" data-layer="pmd-sensors-WL-L-layer" data-legend-track="true" onchange="toggleLayersVisibility(map1, ['pmd-sensors-WL-L-layer'])">
-                        <label class="form-check-label" for="pmd-sensors-wll-toggle">WL-L</label>
-                    </div>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="pmd-sensors-wp-toggle" data-layer="pmd-sensors-WP-layer" data-legend-track="true" onchange="toggleLayersVisibility(map1, ['pmd-sensors-WP-layer'])">
-                        <label class="form-check-label" for="pmd-sensors-wp-toggle">WP</label>
-                    </div>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="pmd-sensors-dg-toggle" data-layer="pmd-sensors-DG-layer" data-legend-track="true" onchange="toggleLayersVisibility(map1, ['pmd-sensors-DG-layer'])">
-                        <label class="form-check-label" for="pmd-sensors-dg-toggle">DG</label>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!--________________________________________________________ -->
-        <!--______________________ Routes __________________________ -->
-        <div class="accordion-item">
-            <h2 class="accordion-header" id="routes-heading">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#routes-collapse" aria-expanded="false" aria-controls="routes-collapse">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-map" viewBox="0 0 16 16">
-                  <path fill-rule="evenodd" d="M15.817.113A.5.5 0 0 1 16 .5v14a.5.5 0 0 1-.402.49l-5 1a.5.5 0 0 1-.196 0L5.5 15.01l-4.902.98A.5.5 0 0 1 0 15.5v-14a.5.5 0 0 1 .402-.49l5-1a.5.5 0 0 1 .196 0L10.5.99l4.902-.98a.5.5 0 0 1 .415.103M10 1.91l-4-.8v12.98l4 .8zm1 12.98 4-.8V1.11l-4 .8zm-6-.8V1.11l-4 .8v12.98z"/>
-                </svg>
-                <span class="ms-2"><u>Routes</u></span>
-            </button>
-            </h2>
-            <div id="routes-collapse" class="accordion-collapse collapse" aria-labelledby="routes-heading">
-                <div class="accordion-body">
-                    <div class="form-check form-switch">
-                        <input class="form-check-input route-toggle" type="checkbox" role="switch" id="route-arandu-toggle" onchange="toggleRoute('arandu', this.checked)">
-                        <label class="form-check-label" for="route-arandu-toggle">Arandu Route</label>
-                    </div>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input route-toggle" type="checkbox" role="switch" id="route-bashu-valley-toggle" onchange="toggleRoute('bashu valley', this.checked)">
-                        <label class="form-check-label" for="route-bashu-valley-toggle">Bashu Valley Route</label>
-                    </div>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input route-toggle" type="checkbox" role="switch" id="route-ghulkin-toggle" onchange="toggleRoute('ghulkin', this.checked)">
-                        <label class="form-check-label" for="route-ghulkin-toggle">Ghulkin Route</label>
-                    </div>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input route-toggle" type="checkbox" role="switch" id="route-hopper-toggle" onchange="toggleRoute('hopper', this.checked)">
-                        <label class="form-check-label" for="route-hopper-toggle">Hopper Route</label>
-                    </div>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input route-toggle" type="checkbox" role="switch" id="route-khaplu-toggle" onchange="toggleRoute('Khaplu', this.checked)">
-                        <label class="form-check-label" for="route-khaplu-toggle">Khaplu Route</label>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!--________________________________________________________ -->
-        <!--______________________ Boundaries _______________________ -->
-        <div class="accordion-item">
-            <h2 class="accordion-header" id="boundaries-heading">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#boundaries-collapse" aria-expanded="false" aria-controls="boundaries-collapse">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-stack" viewBox="0 0 16 16">
-                    <path d="m14.12 10.163 1.715.858c.22.11.22.424 0 .534L8.267 15.34a.6.6 0 0 1-.534 0L.165 11.555a.299.299 0 0 1 0-.534l1.716-.858 5.317 2.659c.505.252 1.1.252 1.604 0l5.317-2.66zM7.733.063a.6.6 0 0 1 .534 0l7.568 3.784a.3.3 0 0 1 0 .535L8.267 8.165a.6.6 0 0 1-.534 0L.165 4.382a.299.299 0 0 1 0-.535z" />
-                    <path d="m14.12 6.576 1.715.858c.22.11.22.424 0 .534l-7.568 3.784a.6.6 0 0 1-.534 0L.165 7.968a.299.299 0 0 1 0-.534l1.716-.858 5.317 2.659c.505.252 1.1.252 1.604 0z" />
-                </svg>
-                <span class="ms-2"><u>Boundaries</u></span>
-            </button>
-            </h2>
-            <div id="boundaries-collapse" class="accordion-collapse collapse" aria-labelledby="boundaries-heading">
-                <div class="accordion-body">
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="national-boundary-toggle" onclick="toggleLayersVisibility(map1, ['national-boundary-layer'])">
-                        <label class="form-check-label" for="national-boundary-toggle">National Boundary</label>
-                    </div>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="provincial-boundary-toggle" onclick="toggleLayersVisibility(map1, ['provincial-boundary-layer'])">
-                        <label class="form-check-label" for="provincial-boundary-toggle">Provincial Boundary</label>
-                    </div>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="district-boundary-toggle" onclick="toggleLayersVisibility(map1, ['district-boundary-layer', 'district-boundary-label-layer'])">
-                        <label class="form-check-label" for="district-boundary-toggle">District Boundary</label>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!--________________________________________________________ -->
-        <!--___________________ Risk Zonation ______________________ -->
-        <div class="accordion-item">
-            <h2 class="accordion-header" id="risk-zonation-heading">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#risk-zonation-collapse" aria-expanded="false" aria-controls="risk-zonation-collapse">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-stack" viewBox="0 0 16 16">
-                    <path d="m14.12 10.163 1.715.858c.22.11.22.424 0 .534L8.267 15.34a.6.6 0 0 1-.534 0L.165 11.555a.299.299 0 0 1 0-.534l1.716-.858 5.317 2.659c.505.252 1.1.252 1.604 0l5.317-2.66zM7.733.063a.6.6 0 0 1 .534 0l7.568 3.784a.3.3 0 0 1 0 .535L8.267 8.165a.6.6 0 0 1-.534 0L.165 4.382a.299.299 0 0 1 0-.535z" />
-                    <path d="m14.12 6.576 1.715.858c.22.11.22.424 0 .534l-7.568 3.784a.6.6 0 0 1-.534 0L.165 7.968a.299.299 0 0 1 0-.534l1.716-.858 5.317 2.659c.505.252 1.1.252 1.604 0z" />
-                </svg>
-                <span class="ms-2"><u>Risk Zonation</u></span>
-            </button>
-            </h2>
-            <div id="risk-zonation-collapse" class="accordion-collapse collapse" aria-labelledby="risk-zonation-heading">
-                <div class="accordion-body">
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="risk-zonation-ava-toggle" onchange="toggleAkahHazardType('ava', this.checked)">
-                        <label class="form-check-label" for="risk-zonation-ava-toggle">Avalanche</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="risk-zonation-dbf-toggle" onchange="toggleAkahHazardType('dbf', this.checked)">
-                        <label class="form-check-label" for="risk-zonation-dbf-toggle">Debris Flow</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="risk-zonation-bnk-toggle" onchange="toggleAkahHazardType('bnk', this.checked)">
-                        <label class="form-check-label" for="risk-zonation-bnk-toggle">Bank Erosion</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="risk-zonation-fld-toggle" onchange="toggleAkahHazardType('fld', this.checked)">
-                        <label class="form-check-label" for="risk-zonation-fld-toggle">Flood</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="risk-zonation-lds-toggle" onchange="toggleAkahHazardType('lds', this.checked)">
-                        <label class="form-check-label" for="risk-zonation-lds-toggle">Landslide</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="risk-zonation-rkf-toggle" onchange="toggleAkahHazardType('rkf', this.checked)">
-                        <label class="form-check-label" for="risk-zonation-rkf-toggle">Rockfall</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="risk-zonation-ufl-toggle" onchange="toggleAkahHazardType('ufl', this.checked)">
-                        <label class="form-check-label" for="risk-zonation-ufl-toggle">Urban Flooding</label>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!--________________________________________________________ -->
-        <!--________________________ Badswat________________________ -->
-        <div class="accordion-item">
-            <h2 class="accordion-header" id="badswat-heading">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#badswat-collapse" aria-expanded="true" aria-controls="badswat-collapse " 
-                onclick="accordionZoom(map1, 'badswat-line', 8, 36.2923495548913, 73.2770059513156);">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-stack" viewBox="0 0 16 16">
-                    <path d="m14.12 10.163 1.715.858c.22.11.22.424 0 .534L8.267 15.34a.6.6 0 0 1-.534 0L.165 11.555a.299.299 0 0 1 0-.534l1.716-.858 5.317 2.659c.505.252 1.1.252 1.604 0l5.317-2.66zM7.733.063a.6.6 0 0 1 .534 0l7.568 3.784a.3.3 0 0 1 0 .535L8.267 8.165a.6.6 0 0 1-.534 0L.165 4.382a.299.299 0 0 1 0-.535z" />
-                    <path d="m14.12 6.576 1.715.858c.22.11.22.424 0 .534l-7.568 3.784a.6.6 0 0 1-.534 0L.165 7.968a.299.299 0 0 1 0-.534l1.716-.858 5.317 2.659c.505.252 1.1.252 1.604 0z" />
-                </svg>
-                <span class="ms-2"><u>Badswat</u></span>
-            </button>
-            
-            </h2>
-            <div id="badswat-collapse" class="accordion-collapse collapse" aria-labelledby="badswat-heading">
-                <div class="accordion-body">
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="badswat-glacier-toggle" data-popup="true" data-layer="badswat-glacier-layer" onclick="toggleLayersVisibility(map1, ['badswat-glacier-layer', 'badswat-glacier-line'])">
-                        <label class="form-check-label" for="badswat-glacier-toggle">Badswat Glacier</label>
-                    </div>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="badswat-lake-toggle" data-popup="true" data-layer="badswat-lake-layer" onclick="toggleLayersVisibility(map1, ['badswat-lake-layer'])">
-                        <label class="form-check-label" for="badswat-lake-toggle">Badswat Lake</label>
-                    </div>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="badswat-fault-toggle" data-popup="true" data-layer="badswat-fault-layer" onclick="toggleLayersVisibility(map1, ['badswat-faultline-layer'])">
-                        <label class="form-check-label" for="badswat-fault-toggle">Faultline</label>
-                    </div>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="ishkoman-river-toggle" data-popup="true" data-layer="ishkomen-river-layer" onclick="toggleLayersVisibility(map1, ['ishkoman-river-layer'])">
-                        <label class="form-check-label" for="ishkoman-river-toggle">Ishkomen River</label>
-                    </div>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="karambar-lake-toggle" data-popup="true" data-layer="karambar-lake-layer" onclick="toggleLayersVisibility(map1, ['karambar-lake-layer'])">
-                        <label class="form-check-label" for="karambar-lake-toggle">Karambar Lake</label>
-                    </div>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="badswat-risk-toggle" data-popup="true" data-layer="badswat-risk-layer" onclick="toggleLayersVisibility(map1, ['badswat-risk-layer'])">
-                        <label class="form-check-label" for="badswat-risk-toggle">Risk Zonation</label>
-                    </div>
-                </div>
-            </div>
-            
-        </div>
-        <!--________________________________________________________ -->
-        <!--________________________ Pindoru Chaat ________________ -->
-        <div class="accordion-item">
-            <h2 class="accordion-header" id="pindoru-heading">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#pindoru-collapse" aria-expanded="false" aria-controls="pindoru-collapse"
-                onclick="accordionZoom(map1, '', 12, 36.197, 71.799);">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-stack" viewBox="0 0 16 16">
-                    <path d="m14.12 10.163 1.715.858c.22.11.22.424 0 .534L8.267 15.34a.6.6 0 0 1-.534 0L.165 11.555a.299.299 0 0 1 0-.534l1.716-.858 5.317 2.659c.505.252 1.1.252 1.604 0l5.317-2.66zM7.733.063a.6.6 0 0 1 .534 0l7.568 3.784a.3.3 0 0 1 0 .535L8.267 8.165a.6.6 0 0 1-.534 0L.165 4.382a.299.299 0 0 1 0-.535z" />
-                    <path d="m14.12 6.576 1.715.858c.22.11.22.424 0 .534l-7.568 3.784a.6.6 0 0 1-.534 0L.165 7.968a.299.299 0 0 1 0-.534l1.716-.858 5.317 2.659c.505.252 1.1.252 1.604 0z" />
-                </svg>
-                <span class="ms-2"><u>Pindoru Chaat</u></span>
-                </button>
-            </h2>
-            <div id="pindoru-collapse" class="accordion-collapse collapse" aria-labelledby="pindoru-heading">
-                <div class="accordion-body">
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="pindoru-lake-toggle" onclick="toggleLayersVisibility(map1, ['pindoru-lake-fill', 'pindoru-lake-outline'])">
-                        <label class="form-check-label" for="pindoru-lake-toggle">Pindoru Chaat Lake</label>
-                    </div>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="pindoru-rz-toggle" onclick="toggleLayersVisibility(map1, ['pindoru-rz-high', 'pindoru-rz-medium', 'pindoru-rz-low'])">
-                        <label class="form-check-label" for="pindoru-rz-toggle">Risk Zonation</label>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!--________________________________________________________ -->
-        <!--________________________Hiranchi________________________-->
-        <div class="accordion-item">
-            <h2 class="accordion-header" id="hiranchi-heading">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#hiranchi-collapse" aria-expanded="true" aria-controls="hiranchi-collapse" 
-                onclick="accordionZoom(map1, 'hiranchi-line', 8, 36.20703091552801, 74.32939869041434)">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-stack" viewBox="0 0 16 16">
-                    <path d="m14.12 10.163 1.715.858c.22.11.22.424 0 .534L8.267 15.34a.6.6 0 0 1-.534 0L.165 11.555a.299.299 0 0 1 0-.534l1.716-.858 5.317 2.659c.505.252 1.1.252 1.604 0l5.317-2.66zM7.733.063a.6.6 0 0 1 .534 0l7.568 3.784a.3.3 0 0 1 0 .535L8.267 8.165a.6.6 0 0 1-.534 0L.165 4.382a.299.299 0 0 1 0-.535z" />
-                    <path d="m14.12 6.576 1.715.858c.22.11.22.424 0 .534l-7.568 3.784a.6.6 0 0 1-.534 0L.165 7.968a.299.299 0 0 1 0-.534l1.716-.858 5.317 2.659c.505.252 1.1.252 1.604 0z" />
-                </svg>
-                <span class="ms-2"><u>Hinarchi</u></span>
-            </button>
-            </h2>
-            <div id="hiranchi-collapse" class="accordion-collapse collapse" aria-labelledby="hiranchi-heading">
-                <div class="accordion-body">
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="hiranchi-glacier-toggle" data-popup="true" data-layer="hiranchi-glacier-layer" onclick="toggleLayersVisibility(map1, ['hiranchi-glacier-layer', 'hiranchi-glacier-line'])">
-                        <label class="form-check-label" for="hiranchi-glacier-toggle">Hinarchi Glacier</label>
-                    </div>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="hiranchi-lake-toggle" data-popup="true" data-layer="hiranchi-lake-layer" onclick="toggleLayersVisibility(map1, ['hiranchi-lake-layer'])">
-                        <label class="form-check-label" for="hiranchi-lake-toggle">Hinarchi Lake</label>
-                    </div>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="hiranchi-risk-toggle" data-popup="true" data-layer="hiranchi-risk-layer" onclick="toggleLayersVisibility(map1, ['hiranchi-risk-layer'])">
-                        <label class="form-check-label" for="hiranchi-risk-toggle">Risk Zonation</label>
-                    </div>
-                </div>
-            </div>
-            
-        </div>
-        <!--______________________________________________________ -->
-        <!-- ________________________Reshun_______________________ -->
-        <div class="accordion-item">
-            <h2 class="accordion-header" id="reshun-heading">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#reshun-collapse" aria-expanded="true" aria-controls="reshun-collapse" onclick="accordionZoom(map1, 'reshun-line', 10, 36.079986225225596, 71.86063709100745)">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-stack" viewBox="0 0 16 16">
-                    <path d="m14.12 10.163 1.715.858c.22.11.22.424 0 .534L8.267 15.34a.6.6 0 0 1-.534 0L.165 11.555a.299.299 0 0 1 0-.534l1.716-.858 5.317 2.659c.505.252 1.1.252 1.604 0l5.317-2.66zM7.733.063a.6.6 0 0 1 .534 0l7.568 3.784a.3.3 0 0 1 0 .535L8.267 8.165a.6.6 0 0 1-.534 0L.165 4.382a.299.299 0 0 1 0-.535z" />
-                    <path d="m14.12 6.576 1.715.858c.22.11.22.424 0 .534l-7.568 3.784a.6.6 0 0 1-.534 0L.165 7.968a.299.299 0 0 1 0-.534l1.716-.858 5.317 2.659c.505.252 1.1.252 1.604 0z" />
-                </svg>
-                <span class="ms-2"><u>Reshun</u></span>
-            </button>
-            </h2>
-            <div id="reshun-collapse" class="accordion-collapse collapse" aria-labelledby="reshun-heading">
-                <div class="accordion-body">
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="chitral-river-toggle" data-popup="true" data-layer="chitral-river-layer" onclick="toggleLayersVisibility(map1, ['chitral-river-layer'])">
-                        <label class="form-check-label" for="chitral-river-toggle">Chitral River</label>
-                    </div>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="reshun-faultline-toggle" data-popup="true" data-layer="reshun-faultline-layer" onclick="toggleLayersVisibility(map1, ['reshun-faultline-layer'])">
-                        <label class="form-check-label" for="reshun-faultline-toggle">Faultline</label>
-                    </div>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="reshun-glacier-toggle" data-popup="true" data-layer="reshun-glacier-layer" onclick="toggleLayersVisibility(map1, ['reshun-glacier-layer', 'reshun-glacier-line'])">
-                        <label class="form-check-label" for="reshun-glacier-toggle">Reshun Glacier</label>
-                    </div>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="reshun-nullah-toggle" data-popup="true" data-layer="reshun-nullah-layer" onclick="toggleLayersVisibility(map1, ['reshun-nullah-layer'])">
-                        <label class="form-check-label" for="reshun-nullah-toggle">Reshun Nullah</label>
-                    </div>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="reshun-rz-toggle" data-popup="true" data-layer="reshun-rz-layer" onclick="toggleLayersVisibility(map1, ['reshun-risk-layer'])">
-                        <label class="form-check-label" for="reshun-rz-toggle">Risk Zonation</label>
-                    </div>
+      <!-- ══ 2. SENSORS INVENTORY ══ -->
+      <div class="section" id="sec-sensors">
+        <button class="section-header" onclick="toggleSection('sec-sensors')">
+          <span class="section-icon">📡</span>
+          <span class="section-label">Sensors Inventory</span>
+          <span class="section-badge">8</span>
+          <span class="section-chevron">▼</span>
+        </button>
+        <div class="section-body"><div class="section-inner">
+          <div class="toggle-row" onclick="toggleRow(event, this)">
+            <label class="toggle-switch">
+              <input type="checkbox" id="quick-glof-ii-toggle" data-layer="glof-ii-stations-layer" data-legend-track="true" data-legend-icon="icon-yellow-destination" onchange="toggleQuickGlofII(this.checked)">
+              <span class="toggle-track"></span>
+            </label>
+            <span class="toggle-label">GLOF II, PMD</span>
+          </div>
+          <div class="toggle-row" onclick="toggleRow(event, this)">
+            <label class="toggle-switch">
+              <input type="checkbox" id="quick-akah-stations-toggle" data-layer="akah-stations-layer" data-legend-track="true" data-legend-icon="icon-green-destination" onchange="toggleQuickAkahStations(this.checked)">
+              <span class="toggle-track"></span>
+            </label>
+            <span class="toggle-label">AKAH Stations</span>
+          </div>
+          <div class="toggle-row" onclick="toggleRow(event, this)">
+            <label class="toggle-switch">
+              <input type="checkbox" id="quick-gmrc-wapda-toggle" data-layer="gmrc-wapda-points-layer" data-legend-track="true" data-legend-icon="icon-blue-destination" onchange="toggleQuickGmrcWapda(this.checked)">
+              <span class="toggle-track"></span>
+            </label>
+            <span class="toggle-label">GMRC, WAPDA</span>
+          </div>
+          <div class="toggle-row" onclick="toggleRow(event, this)">
+            <label class="toggle-switch">
+              <input type="checkbox" id="quick-bri-ff-sensors-toggle" data-layer="bri-ff-sensors-layer" data-legend-track="true" data-legend-icon="icon-red-destination" onchange="toggleQuickBriFfSensors(this.checked)">
+              <span class="toggle-track"></span>
+            </label>
+            <span class="toggle-label">BRI Sensors</span>
+          </div>
+          <div class="toggle-row" onclick="toggleRow(event, this)">
+            <label class="toggle-switch">
+              <input type="checkbox" id="quick-undp-all-sensors-toggle" data-layer="undp-all-sensors-layer" data-legend-track="true" data-legend-icon="icon-orange-destination" onchange="toggleQuickUndpAllSensors(this.checked)">
+              <span class="toggle-track"></span>
+            </label>
+            <span class="toggle-label">UNDP All Sensors</span>
+          </div>
+          <div class="toggle-row" onclick="toggleRow(event, this)">
+            <label class="toggle-switch">
+              <input type="checkbox" id="quick-pdma-kp-toggle" data-layer="pdma-kp-points-layer" data-legend-track="true" data-legend-icon="icon-blue-destination" onchange="toggleQuickPdmaKp(this.checked)">
+              <span class="toggle-track"></span>
+            </label>
+            <span class="toggle-label">PDMA, KP</span>
+          </div>
+          <div class="toggle-row" onclick="toggleRow(event, this)">
+            <label class="toggle-switch">
+              <input type="checkbox" id="quick-evk2cnr-toggle" data-layer="evk2cnr-points-layer" data-legend-track="true" data-legend-icon="icon-green-destination" onchange="toggleQuickEvK2CNR(this.checked)">
+              <span class="toggle-track"></span>
+            </label>
+            <span class="toggle-label">EvK2CNR</span>
+          </div>
+          <div class="toggle-row" onclick="toggleRow(event, this)">
+            <label class="toggle-switch">
+              <input type="checkbox" id="quick-glof-ii-damaged-toggle" data-layer="glof-ii-damaged-stations-layer" data-legend-track="true" data-legend-icon="icon-warning" onchange="toggleQuickGlofIIDamagedStations(this.checked)">
+              <span class="toggle-track"></span>
+            </label>
+            <span class="toggle-label">GLOF II Damaged Stations</span>
+          </div>
+        </div></div>
+      </div>
 
-                </div>
-            </div>
-            
-        </div>
-        <!--______________________________________________________ -->
-        <!-- ________________________Terset Hundur_______________ -->
-        <div class="accordion-item">
-            <h2 class="accordion-header" id="terset-hundur-heading">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#terset-hundur-collapse" aria-expanded="true" aria-controls="terset-hundur-collapse" onclick="setMapCenter(map1,73.703828554,36.035699054,12);">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-stack" viewBox="0 0 16 16">
-                    <path d="m14.12 10.163 1.715.858c.22.11.22.424 0 .534L8.267 15.34a.6.6 0 0 1-.534 0L.165 11.555a.299.299 0 0 1 0-.534l1.716-.858 5.317 2.659c.505.252 1.1.252 1.604 0l5.317-2.66zM7.733.063a.6.6 0 0 1 .534 0l7.568 3.784a.3.3 0 0 1 0 .535L8.267 8.165a.6.6 0 0 1-.534 0L.165 4.382a.299.299 0 0 1 0-.535z" />
-                    <path d="m14.12 6.576 1.715.858c.22.11.22.424 0 .534l-7.568 3.784a.6.6 0 0 1-.534 0L.165 7.968a.299.299 0 0 1 0-.534l1.716-.858 5.317 2.659c.505.252 1.1.252 1.604 0z" />
-                </svg>
-                <span class="ms-2"><u>Terset Hundur</u></span>
-            </button>
-            </h2>
-            <div id="terset-hundur-collapse" class="accordion-collapse collapse" aria-labelledby="terset-hundur-heading">
-                <div class="accordion-body">
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="terset-hundur-lake-toggle" data-popup="true" data-layer="terset-hundur-lake-layer" onclick="toggleLayersVisibility(map1, ['terset-hundur-lake-layer'])">
-                        <label class="form-check-label" for="terset-hundur-lake-toggle">Terset Hundur Lake</label>
-                    </div>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="terset-hundur-river-toggle" data-popup="true" data-layer="terset-hundur-river-layer" onclick="toggleLayersVisibility(map1, ['terset-hundur-river-layer'])">
-                        <label class="form-check-label" for="terset-hundur-river-toggle">Terset Hundur River</label>
-                    </div>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="terset-hundur-rz-toggle" data-popup="true" data-layer="terset-hundur-risk-high-layer" onclick="toggleLayersVisibility(map1, ['terset-hundur-risk-high-layer', 'terset-hundur-risk-medium-layer', 'terset-hundur-risk-low-layer'])">
-                        <label class="form-check-label" for="terset-hundur-rz-toggle">Risk Zonation</label>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- ________________________Ishokoman__________________ -->
-        <div class="accordion-item">
-            <h2 class="accordion-header" id="ishokoman-heading">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#ishokoman-collapse" aria-expanded="true" aria-controls="ishokoman-collapse" onclick="setMapCenter(map1,73.8379,36.5933,12);">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-stack" viewBox="0 0 16 16">
-                    <path d="m14.12 10.163 1.715.858c.22.11.22.424 0 .534L8.267 15.34a.6.6 0 0 1-.534 0L.165 11.555a.299.299 0 0 1 0-.534l1.716-.858 5.317 2.659c.505.252 1.1.252 1.604 0l5.317-2.66zM7.733.063a.6.6 0 0 1 .534 0l7.568 3.784a.3.3 0 0 1 0 .535L8.267 8.165a.6.6 0 0 1-.534 0L.165 4.382a.299.299 0 0 1 0-.535z" />
-                    <path d="m14.12 6.576 1.715.858c.22.11.22.424 0 .534l-7.568 3.784a.6.6 0 0 1-.534 0L.165 7.968a.299.299 0 0 1 0-.534l1.716-.858 5.317 2.659c.505.252 1.1.252 1.604 0z" />
-                </svg>
-                <span class="ms-2"><u>Ishokoman</u></span>
-            </button>
-            </h2>
-            <div id="ishokoman-collapse" class="accordion-collapse collapse" aria-labelledby="ishokoman-heading">
-                <div class="accordion-body">
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="ishokoman-rz-toggle" data-popup="true" data-layer="ishokoman-risk-high-layer" onclick="toggleLayersVisibility(map1, ['ishokoman-risk-high-layer', 'ishokoman-risk-medium-layer', 'ishokoman-risk-low-layer'])">
-                        <label class="form-check-label" for="ishokoman-rz-toggle">Risk Zonation</label>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- ________________________Lusht______________________ -->
-        <div class="accordion-item">
-            <h2 class="accordion-header" id="lusht-heading">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#lusht-collapse" aria-expanded="true" aria-controls="lusht-collapse" onclick="setMapCenter(map1,73.0039,36.7767,12);">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-stack" viewBox="0 0 16 16">
-                    <path d="m14.12 10.163 1.715.858c.22.11.22.424 0 .534L8.267 15.34a.6.6 0 0 1-.534 0L.165 11.555a.299.299 0 0 1 0-.534l1.716-.858 5.317 2.659c.505.252 1.1.252 1.604 0l5.317-2.66zM7.733.063a.6.6 0 0 1 .534 0l7.568 3.784a.3.3 0 0 1 0 .535L8.267 8.165a.6.6 0 0 1-.534 0L.165 4.382a.299.299 0 0 1 0-.535z" />
-                    <path d="m14.12 6.576 1.715.858c.22.11.22.424 0 .534l-7.568 3.784a.6.6 0 0 1-.534 0L.165 7.968a.299.299 0 0 1 0-.534l1.716-.858 5.317 2.659c.505.252 1.1.252 1.604 0z" />
-                </svg>
-                <span class="ms-2"><u>Lusht</u></span>
-            </button>
-            </h2>
-            <div id="lusht-collapse" class="accordion-collapse collapse" aria-labelledby="lusht-heading">
-                <div class="accordion-body">
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="lusht-rz-toggle" data-popup="true" data-layer="lusht-risk-high-layer" onclick="toggleLayersVisibility(map1, ['lusht-risk-high-layer', 'lusht-risk-medium-layer', 'lusht-risk-low-layer'])">
-                        <label class="form-check-label" for="lusht-rz-toggle">Risk Zonation</label>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- ________________________Ulter______________________ -->
-        <div class="accordion-item">
-            <h2 class="accordion-header" id="ulter-heading">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#ulter-collapse" aria-expanded="true" aria-controls="ulter-collapse" onclick="setMapCenter(map1,74.74202,36.33731,12);">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-stack" viewBox="0 0 16 16">
-                    <path d="m14.12 10.163 1.715.858c.22.11.22.424 0 .534L8.267 15.34a.6.6 0 0 1-.534 0L.165 11.555a.299.299 0 0 1 0-.534l1.716-.858 5.317 2.659c.505.252 1.1.252 1.604 0l5.317-2.66zM7.733.063a.6.6 0 0 1 .534 0l7.568 3.784a.3.3 0 0 1 0 .535L8.267 8.165a.6.6 0 0 1-.534 0L.165 4.382a.299.299 0 0 1 0-.535z" />
-                    <path d="m14.12 6.576 1.715.858c.22.11.22.424 0 .534l-7.568 3.784a.6.6 0 0 1-.534 0L.165 7.968a.299.299 0 0 1 0-.534l1.716-.858 5.317 2.659c.505.252 1.1.252 1.604 0z" />
-                </svg>
-                <span class="ms-2"><u>Ulter</u></span>
-            </button>
-            </h2>
-            <div id="ulter-collapse" class="accordion-collapse collapse" aria-labelledby="ulter-heading">
-                <div class="accordion-body">
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="ulter-rz-toggle" data-popup="true" data-layer="ulter-risk-high-layer" onchange="toggleUlterRiskZonation(this.checked)">
-                        <label class="form-check-label" for="ulter-rz-toggle">Risk Zonation</label>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- ________________________Shisper_____________________ -->
-        <div class="accordion-item">
-            <h2 class="accordion-header" id="shisper-heading">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#shisper-collapse" aria-expanded="true" aria-controls="shisper-collapse" onclick="setMapCenter(map1,74.6057,36.29265,12);">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-stack" viewBox="0 0 16 16">
-                    <path d="m14.12 10.163 1.715.858c.22.11.22.424 0 .534L8.267 15.34a.6.6 0 0 1-.534 0L.165 11.555a.299.299 0 0 1 0-.534l1.716-.858 5.317 2.659c.505.252 1.1.252 1.604 0l5.317-2.66zM7.733.063a.6.6 0 0 1 .534 0l7.568 3.784a.3.3 0 0 1 0 .535L8.267 8.165a.6.6 0 0 1-.534 0L.165 4.382a.299.299 0 0 1 0-.535z" />
-                    <path d="m14.12 6.576 1.715.858c.22.11.22.424 0 .534l-7.568 3.784a.6.6 0 0 1-.534 0L.165 7.968a.299.299 0 0 1 0-.534l1.716-.858 5.317 2.659c.505.252 1.1.252 1.604 0z" />
-                </svg>
-                <span class="ms-2"><u>Shisper</u></span>
-            </button>
-            </h2>
-            <div id="shisper-collapse" class="accordion-collapse collapse" aria-labelledby="shisper-heading">
-                <div class="accordion-body">
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="shisper-lake-toggle" data-popup="true" data-layer="shisper-lake-layer" onclick="toggleLayersVisibility(map1, ['shisper-lake-layer'])">
-                        <label class="form-check-label" for="shisper-lake-toggle">Shisper Lake</label>
-                    </div>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="shisper-risk-high-toggle" data-popup="true" data-layer="shisper-risk-high-layer" onclick="toggleLayersVisibility(map1, ['shisper-risk-high-layer'])">
-                        <label class="form-check-label" for="shisper-risk-high-toggle">High Risk</label>
-                    </div>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="shisper-risk-medium-toggle" data-popup="true" data-layer="shisper-risk-medium-layer" onclick="toggleLayersVisibility(map1, ['shisper-risk-medium-layer'])">
-                        <label class="form-check-label" for="shisper-risk-medium-toggle">Medium Risk</label>
-                    </div>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="shisper-risk-low-toggle" data-popup="true" data-layer="shisper-risk-low-layer" onclick="toggleLayersVisibility(map1, ['shisper-risk-low-layer'])">
-                        <label class="form-check-label" for="shisper-risk-low-toggle">Low Risk</label>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!--______________________________________________________ -->
-        <!-- ________________________Brep_________________________ -->
-        <div class="accordion-item">
-            <h2 class="accordion-header" id="brep-heading">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#brep-collapse" aria-expanded="true" aria-controls="brep-collapse" onclick="setMapCenter(map1,72.72565,36.48251,12);" >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-stack" viewBox="0 0 16 16">
-                    <path d="m14.12 10.163 1.715.858c.22.11.22.424 0 .534L8.267 15.34a.6.6 0 0 1-.534 0L.165 11.555a.299.299 0 0 1 0-.534l1.716-.858 5.317 2.659c.505.252 1.1.252 1.604 0l5.317-2.66zM7.733.063a.6.6 0 0 1 .534 0l7.568 3.784a.3.3 0 0 1 0 .535L8.267 8.165a.6.6 0 0 1-.534 0L.165 4.382a.299.299 0 0 1 0-.535z" />
-                    <path d="m14.12 6.576 1.715.858c.22.11.22.424 0 .534l-7.568 3.784a.6.6 0 0 1-.534 0L.165 7.968a.299.299 0 0 1 0-.534l1.716-.858 5.317 2.659c.505.252 1.1.252 1.604 0z" />
-                </svg>
-                <span class="ms-2"><u>Brep</u></span>
-            </button>
-            </h2>
-            <div id="brep-collapse" class="accordion-collapse collapse" aria-labelledby="brep-heading">
-                <div class="accordion-body">
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="brep-rz-toggle" data-popup="true" data-layer="brep-zonation-layer" onclick="toggleLayersVisibility(map1, ['brep-zonation-layer'])">
-                        <label class="form-check-label" for="brep-rz-toggle">Risk Zonation</label>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!--______________________________________________________ -->
-        <!-- ________________________Thalu_________________________ -->
-        <div class="accordion-item">
-            <h2 class="accordion-header" id="thalu-heading">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#thalu-collapse" aria-expanded="true" aria-controls="thalu-collapse" onclick="setMapCenter(map1,72.17453,35.76674,12);" >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-stack" viewBox="0 0 16 16">
-                    <path d="m14.12 10.163 1.715.858c.22.11.22.424 0 .534L8.267 15.34a.6.6 0 0 1-.534 0L.165 11.555a.299.299 0 0 1 0-.534l1.716-.858 5.317 2.659c.505.252 1.1.252 1.604 0l5.317-2.66zM7.733.063a.6.6 0 0 1 .534 0l7.568 3.784a.3.3 0 0 1 0 .535L8.267 8.165a.6.6 0 0 1-.534 0L.165 4.382a.299.299 0 0 1 0-.535z" />
-                    <path d="m14.12 6.576 1.715.858c.22.11.22.424 0 .534l-7.568 3.784a.6.6 0 0 1-.534 0L.165 7.968a.299.299 0 0 1 0-.534l1.716-.858 5.317 2.659c.505.252 1.1.252 1.604 0z" />
-                </svg>
-                <span class="ms-2"><u>Thalu 1&2</u></span>
-            </button>
-            </h2>
-            <div id="thalu-collapse" class="accordion-collapse collapse" aria-labelledby="thalu-heading">
-                <div class="accordion-body">
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="thalu-rz-toggle" data-popup="true" data-layer="thalu-zonation-layer" onclick="toggleLayersVisibility(map1, ['thalu-zonation-layer'])">
-                        <label class="form-check-label" for="thalu-rz-toggle">Risk Zonation</label>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!--______________________________________________________ -->
-        <!-- ________________________Gulmit_________________________ -->
-        <div class="accordion-item">
-            <h2 class="accordion-header" id="gulmit-heading">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#gulmit-collapse" aria-expanded="true" aria-controls="gulmit-collapse" onclick="accordionZoom(map1, 'gulmit-line-layer', 10, 36.309836704386754, 74.73883211874661)">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-stack" viewBox="0 0 16 16">
-                    <path d="m14.12 10.163 1.715.858c.22.11.22.424 0 .534L8.267 15.34a.6.6 0 0 1-.534 0L.165 11.555a.299.299 0 0 1 0-.534l1.716-.858 5.317 2.659c.505.252 1.1.252 1.604 0l5.317-2.66zM7.733.063a.6.6 0 0 1 .534 0l7.568 3.784a.3.3 0 0 1 0 .535L8.267 8.165a.6.6 0 0 1-.534 0L.165 4.382a.299.299 0 0 1 0-.535z" />
-                    <path d="m14.12 6.576 1.715.858c.22.11.22.424 0 .534l-7.568 3.784a.6.6 0 0 1-.534 0L.165 7.968a.299.299 0 0 1 0-.534l1.716-.858 5.317 2.659c.505.252 1.1.252 1.604 0z" />
-                </svg>
-                <span class="ms-2"><u>Gulmit</u></span>
-            </button>
-            </h2>
-            <div id="gulmit-collapse" class="accordion-collapse collapse" aria-labelledby="gulmit-heading">
-                <div class="accordion-body">
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="gulmit-buildings-toggle" data-popup="true" data-layer="gulmit-buildings-layer" onclick="toggleLayersVisibility(map1, ['gulmit-buildings-layer'])">
-                        <label class="form-check-label" for="gulmit-buildings-toggle">Buildings</label>
-                    </div>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="gulmit-rivers-toggle" data-popup="true" data-layer="gulmit-Rivers-layer" onclick="toggleLayersVisibility(map1, ['gulmit-rivers-layer'])">
-                        <label class="form-check-label" for="gulmit-rivers-toggle">Rivers</label>
-                    </div>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="gulmit-roads-toggle" data-popup="true" data-layer="gulmit-roads-layer" onclick="toggleLayersVisibility(map1, ['gulmit-roads-layer'])">
-                        <label class="form-check-label" for="gulmit-Roads-toggle">Roads</label>
-                    </div>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="gulmit-schools-toggle" data-popup="true" data-layer="gulmit-schools-layer" onclick="toggleLayersVisibility(map1, ['gulmit-schools-layer'])">
-                        <label class="form-check-label" for="gulmit-schools-toggle">Schools</label>
-                    </div>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="gulmit-rz-toggle" data-popup="true" data-layer="gulmit-zonation-layer" onclick="toggleLayersVisibility(map1, ['gulmit-zonation-layer'])">
-                        <label class="form-check-label" for="gulmit-rz-toggle">Risk Zonation</label>
-                    </div>
+      <!-- ══ 3. BASE LAYERS ══ -->
+      <div class="section" id="sec-base">
+        <button class="section-header" onclick="toggleSection('sec-base')">
+          <span class="section-icon">🗂️</span>
+          <span class="section-label">Base Layers</span>
+          <span class="section-badge">7</span>
+          <span class="section-chevron">▼</span>
+        </button>
+        <div class="section-body"><div class="section-inner">
+          <div class="toggle-row" onclick="toggleRow(event, this)">
+            <label class="toggle-switch">
+              <input type="checkbox" id="inventory-toggle" data-legend-track="true" data-legend-icon="icon-cyan-dot" onchange="toggleGlacialLakesInventory(this.checked)">
+              <span class="toggle-track"></span>
+            </label>
+            <span class="toggle-label">Glacial Lakes Inventory</span>
+          </div>
+          <div class="toggle-row" onclick="toggleRow(event, this)">
+            <label class="toggle-switch">
+              <input type="checkbox" id="quick-akah-toggle" data-layer="akah-infrastructure-layer" data-legend-track="true" data-legend-icon="icon-circle-red-small" onchange="toggleQuickAkahLayer(this.checked)">
+              <span class="toggle-track"></span>
+            </label>
+            <span class="toggle-label">AKAH Layer</span>
+          </div>
+          <div class="toggle-row" onclick="toggleRow(event, this)">
+            <label class="toggle-switch">
+              <input type="checkbox" id="quick-populated-places-toggle" data-layer="populated-places-points-layer" data-legend-icon="icon-untracked" onchange="toggleQuickPopulatedPlaces(this.checked)">
+              <span class="toggle-track"></span>
+            </label>
+            <span class="toggle-label">Populated Places</span>
+          </div>
+          <div class="toggle-row" onclick="toggleRow(event, this)">
+            <label class="toggle-switch">
+              <input type="checkbox" id="quick-vulnerable-melting-glaciers-toggle" data-layer="vulnerable-melting-glaciers-layer" onchange="toggleQuickVulnerableMeltingGlaciers(this.checked)">
+              <span class="toggle-track"></span>
+            </label>
+            <span class="toggle-label">Vulnerable Melting Glaciers</span>
+          </div>
+          <div class="toggle-row" onclick="toggleRow(event, this)">
+            <label class="toggle-switch">
+              <input type="checkbox" id="quick-vulnerable-melting-points-toggle" data-layer="vulnerable-melting-points-layer" onchange="toggleQuickVulnerableMeltingPoints(this.checked)">
+              <span class="toggle-track"></span>
+            </label>
+            <span class="toggle-label">Vulnerable Melting Points</span>
+          </div>
+          <div class="toggle-row" onclick="toggleRow(event, this)">
+            <label class="toggle-switch">
+              <input type="checkbox" id="quick-flood-susceptibility-toggle" data-layer="flood-susceptibility-layer" data-legend-icon="icon-untracked" onchange="toggleFloodSusceptibility(this.checked)">
+              <span class="toggle-track"></span>
+            </label>
+            <span class="toggle-label">Flood Susceptibility</span>
+          </div>
+          <div class="toggle-row" onclick="toggleRow(event, this)">
+            <label class="toggle-switch">
+              <input type="checkbox" id="quick-bri-ff-sensors-toggle-base" data-layer="bri-ff-sensors-layer" data-legend-track="true" data-legend-icon="icon-red-destination" onchange="toggleQuickBriFfSensors(this.checked)">
+              <span class="toggle-track"></span>
+            </label>
+            <span class="toggle-label">BRI_FF Sensors</span>
+          </div>
+        </div></div>
+      </div>
 
-                </div>
-            </div>
-        </div>
-        <!--______________________________________________________ -->
-        <!-- ________________________Darkot_________________________ -->
-        <div class="accordion-item">
-            <h2 class="accordion-header" id="darkot-heading">
-                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#darkot-collapse" aria-expanded="true" aria-controls="darkot-collapse" onclick="accordionZoom(map1, '', 9, 36.63656139828247, 73.42122173956244);">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-stack" viewBox="0 0 16 16">
-                    <path d="m14.12 10.163 1.715.858c.22.11.22.424 0 .534L8.267 15.34a.6.6 0 0 1-.534 0L.165 11.555a.299.299 0 0 1 0-.534l1.716-.858 5.317 2.659c.505.252 1.1.252 1.604 0l5.317-2.66zM7.733.063a.6.6 0 0 1 .534 0l7.568 3.784a.3.3 0 0 1 0 .535L8.267 8.165a.6.6 0 0 1-.534 0L.165 4.382a.299.299 0 0 1 0-.535z" />
-                    <path d="m14.12 6.576 1.715.858c.22.11.22.424 0 .534l-7.568 3.784a.6.6 0 0 1-.534 0L.165 7.968a.299.299 0 0 1 0-.534l1.716-.858 5.317 2.659c.505.252 1.1.252 1.604 0z" />
-                </svg>
-                <span class="ms-2"><u>Darkot</u></span>
-            </button>
-            </h2>
-            <div id="darkot-collapse" class="accordion-collapse collapse" aria-labelledby="darkot-heading">
-                <div class="accordion-body">
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="darkot-buildings-toggle" data-popup="true" data-layer="darkot-buildings-layer" onclick="toggleLayersVisibility(map1, ['darkot-buildings-layer'])">
-                        <label class="form-check-label" for="darkot-buildings-toggle">Buildings</label>
-                    </div>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="darkot-glaciers-toggle" data-popup="true" data-layer="darkot-glacier-layer" onclick="toggleLayersVisibility(map1, ['darkot-glacier-layer'])">
-                        <label class="form-check-label" for="darkot-glaciers-toggle">Glaciers</label>
-                    </div>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="darkot-rz-toggle" data-popup="true" data-layer="darkot-zonation-layer" onclick="toggleLayersVisibility(map1, ['darkot-zonation-layer'])">
-                        <label class="form-check-label" for="darkot-rz-toggle">Risk Zonation</label>
-                    </div>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="darkot-river-toggle" data-popup="true" data-layer="darkot-rivers-layer" onclick="toggleLayersVisibility(map1, ['darkot-rivers-layer'])">
-                        <label class="form-check-label" for="darkot-river-toggle">River</label>
-                    </div>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="darkot-schools-toggle" data-popup="true" data-layer="darkot-schools-layer" onclick="toggleLayersVisibility(map1, ['darkot-schools-layer'])">
-                        <label class="form-check-label" for="darkot-schools-toggle">Schools</label> 
-                    </div>
+      <!-- ══ 4. 2025 SEASON LAYERS ══ -->
+      <div class="year-divider">2025</div>
+      <div class="section" id="sec-2025">
+        <button class="section-header" onclick="toggleSection('sec-2025')">
+          <span class="section-icon">📅</span>
+          <span class="section-label">Season Layers</span>
+          <span class="section-badge">3</span>
+          <span class="section-chevron">▼</span>
+        </button>
+        <div class="section-body"><div class="section-inner">
+          <div class="toggle-row" onclick="toggleRow(event, this)">
+            <label class="toggle-switch">
+              <input type="checkbox" id="quick-vulsites-2025-toggle" data-legend-track="true" data-legend-icon="icon-red-destination" onchange="toggleQuickVulnerableSites2025(this.checked)">
+              <span class="toggle-track"></span>
+            </label>
+            <span class="toggle-label">Vulnerable Sites</span>
+          </div>
+          <div class="toggle-row" onclick="toggleRow(event, this)">
+            <label class="toggle-switch">
+              <input type="checkbox" id="quick-vullakes-2025-toggle" data-legend-track="true" data-legend-icon="icon-red-ring" onchange="toggleQuickVulnerableLakes2025(this.checked)">
+              <span class="toggle-track"></span>
+            </label>
+            <span class="toggle-label">Vulnerable Lakes 2025</span>
+          </div>
+          <div class="toggle-row" onclick="toggleRow(event, this)">
+            <label class="toggle-switch">
+              <input type="checkbox" id="quick-incident-2025-toggle" onchange="toggleQuickIncident2025(this.checked)">
+              <span class="toggle-track"></span>
+            </label>
+            <span class="toggle-label">Incident</span>
+          </div>
+        </div></div>
+      </div>
 
-                </div>
-            </div>
-        </div>                           
-        <!--________________________________________________________ -->
-        <!-- ________________________Chatiboi________________________ -->
-        <div class="accordion-item">
-            <h2 class="accordion-header" id="chatiboi-heading">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#chatiboi-collapse" aria-expanded="false" aria-controls="chatiboi-collapse" onclick="accordionZoom(map1, '', 11, 36.813, 73.290);">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-stack" viewBox="0 0 16 16">
-                    <path d="m14.12 10.163 1.715.858c.22.11.22.424 0 .534L8.267 15.34a.6.6 0 0 1-.534 0L.165 11.555a.299.299 0 0 1 0-.534l1.716-.858 5.317 2.659c.505.252 1.1.252 1.604 0l5.317-2.66zM7.733.063a.6.6 0 0 1 .534 0l7.568 3.784a.3.3 0 0 1 0 .535L8.267 8.165a.6.6 0 0 1-.534 0L.165 4.382a.299.299 0 0 1 0-.535z" />
-                    <path d="m14.12 6.576 1.715.858c.22.11.22.424 0 .534l-7.568 3.784a.6.6 0 0 1-.534 0L.165 7.968a.299.299 0 0 1 0-.534l1.716-.858 5.317 2.659c.505.252 1.1.252 1.604 0z" />
-                </svg>
-                <span class="ms-2"><u>Chatiboi</u></span>
-                </button>
-            </h2>
-            <div id="chatiboi-collapse" class="accordion-collapse collapse" aria-labelledby="chatiboi-heading">
-                <div class="accordion-body">
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="chatiboi-lake-toggle" onclick="toggleLayersVisibility(map1, ['chatiboi-lake-fill', 'chatiboi-lake-outline'])">
-                        <label class="form-check-label" for="chatiboi-lake-toggle">Chatiboi Lake</label>
-                    </div>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="chatiboi-runoff-toggle" data-popup="true" data-layer="chatiboi-runoff-layer" onclick="toggleLayersVisibility(map1, ['chatiboi-runoff-layer'])">
-                        <label class="form-check-label" for="chatiboi-runoff-toggle">Chatiboi Run off</label>
-                    </div>
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="chatiboi-rz-toggle" data-popup="true" data-layer="chatiboi-risk-high-layer" onclick="toggleLayersVisibility(map1, ['chatiboi-risk-high-layer', 'chatiboi-risk-medium-layer', 'chatiboi-risk-low-layer'])">
-                        <label class="form-check-label" for="chatiboi-rz-toggle">Risk Zonation</label>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!--________________________________________________________ -->
-        <!-- ___________________Land Surface Temperature___________ -->
-        <div class="accordion-item">
-            <h2 class="accordion-header" id="lst-heading">
-                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#lst-collapse" aria-expanded="false" aria-controls="lst-collapse">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-thermometer-half" viewBox="0 0 16 16">
-                    <path d="M9.5 12.5a1.5 1.5 0 1 1-2-1.415V6.5a.5.5 0 0 1 1 0v4.585a1.5 1.5 0 0 1 1 1.415"/>
-                    <path d="M5.5 2.5a2.5 2.5 0 0 1 5 0v7.55a3.5 3.5 0 1 1-5 0zm2.5-1.5a1.5 1.5 0 0 0-1.5 1.5v7.987l-.167.15a2.5 2.5 0 1 0 3.333 0L9.5 10.537V2.5A1.5 1.5 0 0 0 8 1"/>
-                </svg>
-                <span class="ms-2"><u>Land Surface Temp</u></span>
-                </button>
-            </h2>
-            <div id="lst-collapse" class="accordion-collapse collapse" aria-labelledby="lst-heading">
-                <div class="accordion-body">
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="lst-layer-toggle" onclick="toggleLST(this.checked)">
-                        <label class="form-check-label" for="lst-layer-toggle">Show LST Layer</label>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!--________________________________________________________ -->
-        <!-- ___________________Sattelite Imagery___________________ -->
-        <div id="satellite-imagery-div">
-            <a id="satellite-imagery-link" href="https://ee-waqarsha1994.projects.earthengine.app/view/web-imagery-s2" target="_blank" rel="noopener noreferrer">Sattelite Imagery</a>
-        </div>
-        <!--________________________________________________________ -->
-        <!-- _______________________Play All________________________ -->
-        <div id="play-all-div">
-            <span id="tour-lake-label"></span>
-            <button id="play-all-btn" onclick="playAllTour()" title="Play All Lakes Tour">
-                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" viewBox="0 0 16 16">
-                    <path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/>
-                </svg>
+      <!-- ══ 5. 2026 LIVE LAYERS ══ -->
+      <div class="year-divider">2026</div>
+      <div class="section" id="sec-2026">
+        <button class="section-header" onclick="toggleSection('sec-2026')">
+          <span class="section-icon">🔴</span>
+          <span class="section-label">Live Layers</span>
+          <span class="section-badge">7</span>
+          <span class="section-chevron">▼</span>
+        </button>
+        <div class="section-body"><div class="section-inner">
+          <div class="toggle-row" onclick="toggleRow(event, this)">
+            <label class="toggle-switch">
+              <input type="checkbox" id="quick-vulsites-2026-toggle" data-legend-track="true" data-legend-icon="icon-red-pin" onchange="toggleQuickVulnerableSites2026(this.checked)">
+              <span class="toggle-track"></span>
+            </label>
+            <span class="toggle-label">Vulnerable Sites 2026</span>
+          </div>
+          <div class="toggle-row" onclick="toggleRow(event, this)">
+            <label class="toggle-switch">
+              <input type="checkbox" id="quick-vullakes-2026-toggle" data-legend-track="true" data-legend-icon="icon-red-ring" onchange="toggleQuickVulnerableLakes2026(this.checked)">
+              <span class="toggle-track"></span>
+            </label>
+            <span class="toggle-label">Vulnerable Lakes 2026</span>
+          </div>
+          <div class="toggle-row" onclick="toggleRow(event, this)">
+            <label class="toggle-switch">
+              <input type="checkbox" id="quick-station-points-toggle" onchange="toggleQuickStationPoints(this.checked)">
+              <span class="toggle-track"></span>
+            </label>
+            <span class="toggle-label">Station Points</span>
+          </div>
+          <div class="toggle-row" onclick="toggleRow(event, this)">
+            <label class="toggle-switch">
+              <input type="checkbox" id="quick-hisper-incident-toggle" onchange="toggleHisperIncident(this.checked)">
+              <span class="toggle-track"></span>
+            </label>
+            <span class="toggle-label">Hisper Incident</span>
+          </div>
+          <div class="toggle-row" onclick="toggleRow(event, this)">
+            <label class="toggle-switch">
+              <input type="checkbox" id="quick-high-temp-2026-toggle" onchange="showHighTempWarning(this.checked)">
+              <span class="toggle-track"></span>
+            </label>
+            <span class="toggle-label">High Temp Warning</span>
+          </div>
+          <div class="toggle-row" onclick="toggleRow(event, this)">
+            <label class="toggle-switch">
+              <input type="checkbox" id="quick-temperature-toggle" onchange="toggleTemperatureLayer(this.checked)">
+              <span class="toggle-track"></span>
+            </label>
+            <span class="toggle-label">Temperature</span>
+            <button id="refresh-weather-btn" onclick="event.stopPropagation(); refreshWeatherData(event)" title="Refresh weather from OpenWeatherMap" style="background: none; border: none; color: var(--blue-accent); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; outline: none; transition: transform 0.2s;">
+              <i class="fas fa-sync-alt" id="refresh-weather-icon" style="font-size: 11px;"></i>
             </button>
+          </div>
+          <div class="toggle-row" onclick="toggleRow(event, this)">
+            <label class="toggle-switch">
+              <input type="checkbox" id="quick-precipitation-toggle" onchange="togglePrecipitationLayer(this.checked)">
+              <span class="toggle-track"></span>
+            </label>
+            <span class="toggle-label">Precipitation</span>
+            <button id="refresh-precipitation-btn" onclick="event.stopPropagation(); refreshPrecipitationData(event)" title="Refresh precipitation from OpenWeatherMap" style="background: none; border: none; color: var(--blue-accent); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; outline: none; transition: transform 0.2s;">
+              <i class="fas fa-sync-alt" id="refresh-precipitation-icon" style="font-size: 11px;"></i>
+            </button>
+          </div>
+        </div></div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- ══ 6. PMD SENSORS ══ -->
+      <div class="section" id="sec-pmd">
+        <button class="section-header" onclick="toggleSection('sec-pmd')">
+          <span class="section-icon">🌡️</span>
+          <span class="section-label">PMD Sensors</span>
+          <span class="section-chevron">▼</span>
+        </button>
+        <div class="section-body"><div class="section-inner">
+          <div class="toggle-row" onclick="toggleRow(event, this)">
+            <label class="toggle-switch">
+              <input type="checkbox" id="pmd-sensors-arg-toggle" data-layer="pmd-sensors-ARG-layer" data-legend-track="true" onchange="toggleLayersVisibility(map1, ['pmd-sensors-ARG-layer'])">
+              <span class="toggle-track"></span>
+            </label>
+            <span class="toggle-label">ARG</span>
+          </div>
+          <div class="toggle-row" onclick="toggleRow(event, this)">
+            <label class="toggle-switch">
+              <input type="checkbox" id="pmd-sensors-aws-toggle" data-layer="pmd-sensors-AWS-layer" data-legend-track="true" onchange="toggleLayersVisibility(map1, ['pmd-sensors-AWS-layer'])">
+              <span class="toggle-track"></span>
+            </label>
+            <span class="toggle-label">AWS</span>
+          </div>
+          <div class="toggle-row" onclick="toggleRow(event, this)">
+            <label class="toggle-switch">
+              <input type="checkbox" id="pmd-sensors-wlr-toggle" data-layer="pmd-sensors-WL-R-layer" data-legend-track="true" onchange="toggleLayersVisibility(map1, ['pmd-sensors-WL-R-layer'])">
+              <span class="toggle-track"></span>
+            </label>
+            <span class="toggle-label">WL-R</span>
+          </div>
+          <div class="toggle-row" onclick="toggleRow(event, this)">
+            <label class="toggle-switch">
+              <input type="checkbox" id="pmd-sensors-wll-toggle" data-layer="pmd-sensors-WL-L-layer" data-legend-track="true" onchange="toggleLayersVisibility(map1, ['pmd-sensors-WL-L-layer'])">
+              <span class="toggle-track"></span>
+            </label>
+            <span class="toggle-label">WL-L</span>
+          </div>
+          <div class="toggle-row" onclick="toggleRow(event, this)">
+            <label class="toggle-switch">
+              <input type="checkbox" id="pmd-sensors-wp-toggle" data-layer="pmd-sensors-WP-layer" data-legend-track="true" onchange="toggleLayersVisibility(map1, ['pmd-sensors-WP-layer'])">
+              <span class="toggle-track"></span>
+            </label>
+            <span class="toggle-label">WP</span>
+          </div>
+          <div class="toggle-row" onclick="toggleRow(event, this)">
+            <label class="toggle-switch">
+              <input type="checkbox" id="pmd-sensors-dg-toggle" data-layer="pmd-sensors-DG-layer" data-legend-track="true" onchange="toggleLayersVisibility(map1, ['pmd-sensors-DG-layer'])">
+              <span class="toggle-track"></span>
+            </label>
+            <span class="toggle-label">DG</span>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- ══ 7. ROUTES ══ -->
+      <div class="section" id="sec-routes">
+        <button class="section-header" onclick="toggleSection('sec-routes')">
+          <span class="section-icon">🛣️</span>
+          <span class="section-label">Routes</span>
+          <span class="section-chevron">▼</span>
+        </button>
+        <div class="section-body"><div class="section-inner">
+          <div class="toggle-row" onclick="toggleRow(event, this)">
+            <label class="toggle-switch">
+              <input type="checkbox" class="route-toggle" id="route-arandu-toggle" onchange="toggleRoute('arandu', this.checked)">
+              <span class="toggle-track"></span>
+            </label>
+            <span class="toggle-label">Arandu Route</span>
+          </div>
+          <div class="toggle-row" onclick="toggleRow(event, this)">
+            <label class="toggle-switch">
+              <input type="checkbox" class="route-toggle" id="route-bashu-valley-toggle" onchange="toggleRoute('bashu valley', this.checked)">
+              <span class="toggle-track"></span>
+            </label>
+            <span class="toggle-label">Bashu Valley Route</span>
+          </div>
+          <div class="toggle-row" onclick="toggleRow(event, this)">
+            <label class="toggle-switch">
+              <input type="checkbox" class="route-toggle" id="route-ghulkin-toggle" onchange="toggleRoute('ghulkin', this.checked)">
+              <span class="toggle-track"></span>
+            </label>
+            <span class="toggle-label">Ghulkin Route</span>
+          </div>
+          <div class="toggle-row" onclick="toggleRow(event, this)">
+            <label class="toggle-switch">
+              <input type="checkbox" class="route-toggle" id="route-hopper-toggle" onchange="toggleRoute('hopper', this.checked)">
+              <span class="toggle-track"></span>
+            </label>
+            <span class="toggle-label">Hopper Route</span>
+          </div>
+          <div class="toggle-row" onclick="toggleRow(event, this)">
+            <label class="toggle-switch">
+              <input type="checkbox" class="route-toggle" id="route-khaplu-toggle" onchange="toggleRoute('Khaplu', this.checked)">
+              <span class="toggle-track"></span>
+            </label>
+            <span class="toggle-label">Khaplu Route</span>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- ══ 8. RISK ZONATION ══ -->
+      <div class="section" id="sec-risk">
+        <button class="section-header" onclick="toggleSection('sec-risk')">
+          <span class="section-icon">⚠️</span>
+          <span class="section-label">Risk Zonation</span>
+          <span class="section-badge" style="background:rgba(255,60,60,0.2);color:#ff8080;border-color:rgba(255,60,60,0.3)">HIGH</span>
+          <span class="section-chevron">▼</span>
+        </button>
+        <div class="section-body"><div class="section-inner">
+          <div class="toggle-row" onclick="toggleRow(event, this)">
+            <label class="toggle-switch">
+              <input type="checkbox" id="risk-zonation-ava-toggle" onchange="toggleAkahHazardType('ava', this.checked)">
+              <span class="toggle-track"></span>
+            </label>
+            <span class="toggle-label">Avalanche</span>
+          </div>
+          <div class="toggle-row" onclick="toggleRow(event, this)">
+            <label class="toggle-switch">
+              <input type="checkbox" id="risk-zonation-dbf-toggle" onchange="toggleAkahHazardType('dbf', this.checked)">
+              <span class="toggle-track"></span>
+            </label>
+            <span class="toggle-label">Debris Flow</span>
+          </div>
+          <div class="toggle-row" onclick="toggleRow(event, this)">
+            <label class="toggle-switch">
+              <input type="checkbox" id="risk-zonation-bnk-toggle" onchange="toggleAkahHazardType('bnk', this.checked)">
+              <span class="toggle-track"></span>
+            </label>
+            <span class="toggle-label">Bank Erosion</span>
+          </div>
+          <div class="toggle-row" onclick="toggleRow(event, this)">
+            <label class="toggle-switch">
+              <input type="checkbox" id="risk-zonation-fld-toggle" onchange="toggleAkahHazardType('fld', this.checked)">
+              <span class="toggle-track"></span>
+            </label>
+            <span class="toggle-label">Flood</span>
+          </div>
+          <div class="toggle-row" onclick="toggleRow(event, this)">
+            <label class="toggle-switch">
+              <input type="checkbox" id="risk-zonation-lds-toggle" onchange="toggleAkahHazardType('lds', this.checked)">
+              <span class="toggle-track"></span>
+            </label>
+            <span class="toggle-label">Landslide</span>
+          </div>
+          <div class="toggle-row" onclick="toggleRow(event, this)">
+            <label class="toggle-switch">
+              <input type="checkbox" id="risk-zonation-rkf-toggle" onchange="toggleAkahHazardType('rkf', this.checked)">
+              <span class="toggle-track"></span>
+            </label>
+            <span class="toggle-label">Rockfall</span>
+          </div>
+          <div class="toggle-row" onclick="toggleRow(event, this)">
+            <label class="toggle-switch">
+              <input type="checkbox" id="risk-zonation-ufl-toggle" onchange="toggleAkahHazardType('ufl', this.checked)">
+              <span class="toggle-track"></span>
+            </label>
+            <span class="toggle-label">Urban Flooding</span>
+          </div>
+        </div></div>
+      </div>
+
+      <!-- ══ 9. VULNERABLE LAKES ══ -->
+      <div class="section" id="sec-vlakes">
+        <button class="section-header" onclick="toggleSection('sec-vlakes')">
+          <span class="section-icon">💧</span>
+          <span class="section-label">Vulnerable Lakes</span>
+          <span class="section-badge">14</span>
+          <span class="section-chevron">▼</span>
+        </button>
+        <div class="section-body"><div class="section-inner">
+
+          <!-- Badswat -->
+          <div class="sub-section" id="sub-badswat">
+            <button class="sub-header" onclick="event.stopPropagation(); toggleSub('sub-badswat'); accordionZoom(map1, 'badswat-line', 8, 36.2923495548913, 73.2770059513156);">
+              <span class="sub-icon">🏔️</span><span class="sub-name">Badswat</span><span class="sub-chevron">▼</span>
+            </button>
+            <div class="sub-body"><div class="sub-inner">
+              <div class="toggle-row" onclick="toggleRow(event, this)"><label class="toggle-switch"><input type="checkbox" id="badswat-glacier-toggle" data-popup="true" data-layer="badswat-glacier-layer" onclick="toggleLayersVisibility(map1, ['badswat-glacier-layer', 'badswat-glacier-line'])"><span class="toggle-track"></span></label><span class="toggle-label">Badswat Glacier</span></div>
+              <div class="toggle-row" onclick="toggleRow(event, this)"><label class="toggle-switch"><input type="checkbox" id="badswat-lake-toggle" data-popup="true" data-layer="badswat-lake-layer" onclick="toggleLayersVisibility(map1, ['badswat-lake-layer'])"><span class="toggle-track"></span></label><span class="toggle-label">Badswat Lake</span></div>
+              <div class="toggle-row" onclick="toggleRow(event, this)"><label class="toggle-switch"><input type="checkbox" id="badswat-fault-toggle" data-popup="true" data-layer="badswat-fault-layer" onclick="toggleLayersVisibility(map1, ['badswat-faultline-layer'])"><span class="toggle-track"></span></label><span class="toggle-label">Faultline</span></div>
+              <div class="toggle-row" onclick="toggleRow(event, this)"><label class="toggle-switch"><input type="checkbox" id="ishkoman-river-toggle" data-popup="true" data-layer="ishkomen-river-layer" onclick="toggleLayersVisibility(map1, ['ishkoman-river-layer'])"><span class="toggle-track"></span></label><span class="toggle-label">Ishkomen River</span></div>
+              <div class="toggle-row" onclick="toggleRow(event, this)"><label class="toggle-switch"><input type="checkbox" id="karambar-lake-toggle" data-popup="true" data-layer="karambar-lake-layer" onclick="toggleLayersVisibility(map1, ['karambar-lake-layer'])"><span class="toggle-track"></span></label><span class="toggle-label">Karambar Lake</span></div>
+              <div class="toggle-row" onclick="toggleRow(event, this)"><label class="toggle-switch"><input type="checkbox" id="badswat-risk-toggle" data-popup="true" data-layer="badswat-risk-layer" onclick="toggleLayersVisibility(map1, ['badswat-risk-layer'])"><span class="toggle-track"></span></label><span class="toggle-label">Risk Zonation</span></div>
+            </div></div>
+          </div>
+
+          <!-- Pindoru Chaat -->
+          <div class="sub-section" id="sub-pindoru">
+            <button class="sub-header" onclick="event.stopPropagation(); toggleSub('sub-pindoru'); accordionZoom(map1, '', 12, 36.197, 71.799);">
+              <span class="sub-icon">🏔️</span><span class="sub-name">Pindoru Chaat</span><span class="sub-chevron">▼</span>
+            </button>
+            <div class="sub-body"><div class="sub-inner">
+              <div class="toggle-row" onclick="toggleRow(event, this)"><label class="toggle-switch"><input type="checkbox" id="pindoru-lake-toggle" onclick="toggleLayersVisibility(map1, ['pindoru-lake-fill', 'pindoru-lake-outline'])"><span class="toggle-track"></span></label><span class="toggle-label">Pindoru Chaat Lake</span></div>
+              <div class="toggle-row" onclick="toggleRow(event, this)"><label class="toggle-switch"><input type="checkbox" id="pindoru-rz-toggle" onclick="toggleLayersVisibility(map1, ['pindoru-rz-high', 'pindoru-rz-medium', 'pindoru-rz-low'])"><span class="toggle-track"></span></label><span class="toggle-label">Risk Zonation</span></div>
+            </div></div>
+          </div>
+
+          <!-- Hinarchi -->
+          <div class="sub-section" id="sub-hinarchi">
+            <button class="sub-header" onclick="event.stopPropagation(); toggleSub('sub-hinarchi'); accordionZoom(map1, 'hiranchi-line', 8, 36.20703091552801, 74.32939869041434);">
+              <span class="sub-icon">💎</span><span class="sub-name">Hinarchi</span><span class="sub-chevron">▼</span>
+            </button>
+            <div class="sub-body"><div class="sub-inner">
+              <div class="toggle-row" onclick="toggleRow(event, this)"><label class="toggle-switch"><input type="checkbox" id="hiranchi-glacier-toggle" data-popup="true" data-layer="hiranchi-glacier-layer" onclick="toggleLayersVisibility(map1, ['hiranchi-glacier-layer', 'hiranchi-glacier-line'])"><span class="toggle-track"></span></label><span class="toggle-label">Hinarchi Glacier</span></div>
+              <div class="toggle-row" onclick="toggleRow(event, this)"><label class="toggle-switch"><input type="checkbox" id="hiranchi-lake-toggle" data-popup="true" data-layer="hiranchi-lake-layer" onclick="toggleLayersVisibility(map1, ['hiranchi-lake-layer'])"><span class="toggle-track"></span></label><span class="toggle-label">Hinarchi Lake</span></div>
+              <div class="toggle-row" onclick="toggleRow(event, this)"><label class="toggle-switch"><input type="checkbox" id="hiranchi-risk-toggle" data-popup="true" data-layer="hiranchi-risk-layer" onclick="toggleLayersVisibility(map1, ['hiranchi-risk-layer'])"><span class="toggle-track"></span></label><span class="toggle-label">Risk Zonation</span></div>
+            </div></div>
+          </div>
+
+          <!-- Reshun -->
+          <div class="sub-section" id="sub-reshun">
+            <button class="sub-header" onclick="event.stopPropagation(); toggleSub('sub-reshun'); accordionZoom(map1, 'reshun-line', 10, 36.079986225225596, 71.86063709100745);">
+              <span class="sub-icon">🏔️</span><span class="sub-name">Reshun</span><span class="sub-chevron">▼</span>
+            </button>
+            <div class="sub-body"><div class="sub-inner">
+              <div class="toggle-row" onclick="toggleRow(event, this)"><label class="toggle-switch"><input type="checkbox" id="chitral-river-toggle" data-popup="true" data-layer="chitral-river-layer" onclick="toggleLayersVisibility(map1, ['chitral-river-layer'])"><span class="toggle-track"></span></label><span class="toggle-label">Chitral River</span></div>
+              <div class="toggle-row" onclick="toggleRow(event, this)"><label class="toggle-switch"><input type="checkbox" id="reshun-faultline-toggle" data-popup="true" data-layer="reshun-faultline-layer" onclick="toggleLayersVisibility(map1, ['reshun-faultline-layer'])"><span class="toggle-track"></span></label><span class="toggle-label">Faultline</span></div>
+              <div class="toggle-row" onclick="toggleRow(event, this)"><label class="toggle-switch"><input type="checkbox" id="reshun-glacier-toggle" data-popup="true" data-layer="reshun-glacier-layer" onclick="toggleLayersVisibility(map1, ['reshun-glacier-layer', 'reshun-glacier-line'])"><span class="toggle-track"></span></label><span class="toggle-label">Reshun Glacier</span></div>
+              <div class="toggle-row" onclick="toggleRow(event, this)"><label class="toggle-switch"><input type="checkbox" id="reshun-nullah-toggle" data-popup="true" data-layer="reshun-nullah-layer" onclick="toggleLayersVisibility(map1, ['reshun-nullah-layer'])"><span class="toggle-track"></span></label><span class="toggle-label">Reshun Nullah</span></div>
+              <div class="toggle-row" onclick="toggleRow(event, this)"><label class="toggle-switch"><input type="checkbox" id="reshun-rz-toggle" data-popup="true" data-layer="reshun-rz-layer" onclick="toggleLayersVisibility(map1, ['reshun-risk-layer'])"><span class="toggle-track"></span></label><span class="toggle-label">Risk Zonation</span></div>
+            </div></div>
+          </div>
+
+          <!-- Terset Hundur -->
+          <div class="sub-section" id="sub-terset">
+            <button class="sub-header" onclick="event.stopPropagation(); toggleSub('sub-terset'); setMapCenter(map1,73.703828554,36.035699054,12);">
+              <span class="sub-icon">🏔️</span><span class="sub-name">Terset Hundur</span><span class="sub-chevron">▼</span>
+            </button>
+            <div class="sub-body"><div class="sub-inner">
+              <div class="toggle-row" onclick="toggleRow(event, this)"><label class="toggle-switch"><input type="checkbox" id="terset-hundur-lake-toggle" data-popup="true" data-layer="terset-hundur-lake-layer" onclick="toggleLayersVisibility(map1, ['terset-hundur-lake-layer'])"><span class="toggle-track"></span></label><span class="toggle-label">Terset Hundur Lake</span></div>
+              <div class="toggle-row" onclick="toggleRow(event, this)"><label class="toggle-switch"><input type="checkbox" id="terset-hundur-river-toggle" data-popup="true" data-layer="terset-hundur-river-layer" onclick="toggleLayersVisibility(map1, ['terset-hundur-river-layer'])"><span class="toggle-track"></span></label><span class="toggle-label">Terset Hundur River</span></div>
+              <div class="toggle-row" onclick="toggleRow(event, this)"><label class="toggle-switch"><input type="checkbox" id="terset-hundur-rz-toggle" data-popup="true" data-layer="terset-hundur-risk-high-layer" onclick="toggleLayersVisibility(map1, ['terset-hundur-risk-high-layer', 'terset-hundur-risk-medium-layer', 'terset-hundur-risk-low-layer'])"><span class="toggle-track"></span></label><span class="toggle-label">Risk Zonation</span></div>
+            </div></div>
+          </div>
+
+          <!-- Ishokoman -->
+          <div class="sub-section" id="sub-ishokoman">
+            <button class="sub-header" onclick="event.stopPropagation(); toggleSub('sub-ishokoman'); setMapCenter(map1,73.8379,36.5933,12);">
+              <span class="sub-icon">🏔️</span><span class="sub-name">Ishokoman</span><span class="sub-chevron">▼</span>
+            </button>
+            <div class="sub-body"><div class="sub-inner">
+              <div class="toggle-row" onclick="toggleRow(event, this)"><label class="toggle-switch"><input type="checkbox" id="ishokoman-rz-toggle" data-popup="true" data-layer="ishokoman-risk-high-layer" onclick="toggleLayersVisibility(map1, ['ishokoman-risk-high-layer', 'ishokoman-risk-medium-layer', 'ishokoman-risk-low-layer'])"><span class="toggle-track"></span></label><span class="toggle-label">Risk Zonation</span></div>
+            </div></div>
+          </div>
+
+          <!-- Lusht -->
+          <div class="sub-section" id="sub-lusht">
+            <button class="sub-header" onclick="event.stopPropagation(); toggleSub('sub-lusht'); setMapCenter(map1,73.0039,36.7767,12);">
+              <span class="sub-icon">🏔️</span><span class="sub-name">Lusht</span><span class="sub-chevron">▼</span>
+            </button>
+            <div class="sub-body"><div class="sub-inner">
+              <div class="toggle-row" onclick="toggleRow(event, this)"><label class="toggle-switch"><input type="checkbox" id="lusht-rz-toggle" data-popup="true" data-layer="lusht-risk-high-layer" onclick="toggleLayersVisibility(map1, ['lusht-risk-high-layer', 'lusht-risk-medium-layer', 'lusht-risk-low-layer'])"><span class="toggle-track"></span></label><span class="toggle-label">Risk Zonation</span></div>
+            </div></div>
+          </div>
+
+          <!-- Ulter -->
+          <div class="sub-section" id="sub-ulter">
+            <button class="sub-header" onclick="event.stopPropagation(); toggleSub('sub-ulter'); setMapCenter(map1,74.74202,36.33731,12);">
+              <span class="sub-icon">🏔️</span><span class="sub-name">Ulter</span><span class="sub-chevron">▼</span>
+            </button>
+            <div class="sub-body"><div class="sub-inner">
+              <div class="toggle-row" onclick="toggleRow(event, this)"><label class="toggle-switch"><input type="checkbox" id="ulter-rz-toggle" data-popup="true" data-layer="ulter-risk-high-layer" onchange="toggleUlterRiskZonation(this.checked)"><span class="toggle-track"></span></label><span class="toggle-label">Risk Zonation</span></div>
+            </div></div>
+          </div>
+
+          <!-- Shisper -->
+          <div class="sub-section" id="sub-shisper">
+            <button class="sub-header" onclick="event.stopPropagation(); toggleSub('sub-shisper'); setMapCenter(map1,74.6057,36.29265,12);">
+              <span class="sub-icon">💧</span><span class="sub-name">Shisper</span><span class="sub-chevron">▼</span>
+            </button>
+            <div class="sub-body"><div class="sub-inner">
+              <div class="toggle-row" onclick="toggleRow(event, this)"><label class="toggle-switch"><input type="checkbox" id="shisper-lake-toggle" data-popup="true" data-layer="shisper-lake-layer" onclick="toggleLayersVisibility(map1, ['shisper-lake-layer'])"><span class="toggle-track"></span></label><span class="toggle-label">Shisper Lake</span></div>
+              <div class="toggle-row" onclick="toggleRow(event, this)"><label class="toggle-switch"><input type="checkbox" id="shisper-risk-high-toggle" data-popup="true" data-layer="shisper-risk-high-layer" onclick="toggleLayersVisibility(map1, ['shisper-risk-high-layer'])"><span class="toggle-track"></span></label><span class="toggle-label">High Risk</span></div>
+              <div class="toggle-row" onclick="toggleRow(event, this)"><label class="toggle-switch"><input type="checkbox" id="shisper-risk-medium-toggle" data-popup="true" data-layer="shisper-risk-medium-layer" onclick="toggleLayersVisibility(map1, ['shisper-risk-medium-layer'])"><span class="toggle-track"></span></label><span class="toggle-label">Medium Risk</span></div>
+              <div class="toggle-row" onclick="toggleRow(event, this)"><label class="toggle-switch"><input type="checkbox" id="shisper-risk-low-toggle" data-popup="true" data-layer="shisper-risk-low-layer" onclick="toggleLayersVisibility(map1, ['shisper-risk-low-layer'])"><span class="toggle-track"></span></label><span class="toggle-label">Low Risk</span></div>
+            </div></div>
+          </div>
+
+          <!-- Brep -->
+          <div class="sub-section" id="sub-brep">
+            <button class="sub-header" onclick="event.stopPropagation(); toggleSub('sub-brep'); setMapCenter(map1,72.72565,36.48251,12);">
+              <span class="sub-icon">🏔️</span><span class="sub-name">Brep</span><span class="sub-chevron">▼</span>
+            </button>
+            <div class="sub-body"><div class="sub-inner">
+              <div class="toggle-row" onclick="toggleRow(event, this)"><label class="toggle-switch"><input type="checkbox" id="brep-rz-toggle" data-popup="true" data-layer="brep-zonation-layer" onclick="toggleLayersVisibility(map1, ['brep-zonation-layer'])"><span class="toggle-track"></span></label><span class="toggle-label">Risk Zonation</span></div>
+            </div></div>
+          </div>
+
+          <!-- Thalu -->
+          <div class="sub-section" id="sub-thalu">
+            <button class="sub-header" onclick="event.stopPropagation(); toggleSub('sub-thalu'); setMapCenter(map1,72.17453,35.76674,12);">
+              <span class="sub-icon">🏔️</span><span class="sub-name">Thalu 1 &amp; 2</span><span class="sub-chevron">▼</span>
+            </button>
+            <div class="sub-body"><div class="sub-inner">
+              <div class="toggle-row" onclick="toggleRow(event, this)"><label class="toggle-switch"><input type="checkbox" id="thalu-rz-toggle" data-popup="true" data-layer="thalu-zonation-layer" onclick="toggleLayersVisibility(map1, ['thalu-zonation-layer'])"><span class="toggle-track"></span></label><span class="toggle-label">Risk Zonation</span></div>
+            </div></div>
+          </div>
+
+          <!-- Gulmit -->
+          <div class="sub-section" id="sub-gulmit">
+            <button class="sub-header" onclick="event.stopPropagation(); toggleSub('sub-gulmit'); accordionZoom(map1, 'gulmit-line-layer', 10, 36.309836704386754, 74.73883211874661);">
+              <span class="sub-icon">🏔️</span><span class="sub-name">Gulmit</span><span class="sub-chevron">▼</span>
+            </button>
+            <div class="sub-body"><div class="sub-inner">
+              <div class="toggle-row" onclick="toggleRow(event, this)"><label class="toggle-switch"><input type="checkbox" id="gulmit-buildings-toggle" data-popup="true" data-layer="gulmit-buildings-layer" onclick="toggleLayersVisibility(map1, ['gulmit-buildings-layer'])"><span class="toggle-track"></span></label><span class="toggle-label">Buildings</span></div>
+              <div class="toggle-row" onclick="toggleRow(event, this)"><label class="toggle-switch"><input type="checkbox" id="gulmit-rivers-toggle" data-popup="true" data-layer="gulmit-Rivers-layer" onclick="toggleLayersVisibility(map1, ['gulmit-rivers-layer'])"><span class="toggle-track"></span></label><span class="toggle-label">Rivers</span></div>
+              <div class="toggle-row" onclick="toggleRow(event, this)"><label class="toggle-switch"><input type="checkbox" id="gulmit-roads-toggle" data-popup="true" data-layer="gulmit-roads-layer" onclick="toggleLayersVisibility(map1, ['gulmit-roads-layer'])"><span class="toggle-track"></span></label><span class="toggle-label">Roads</span></div>
+              <div class="toggle-row" onclick="toggleRow(event, this)"><label class="toggle-switch"><input type="checkbox" id="gulmit-schools-toggle" data-popup="true" data-layer="gulmit-schools-layer" onclick="toggleLayersVisibility(map1, ['gulmit-schools-layer'])"><span class="toggle-track"></span></label><span class="toggle-label">Schools</span></div>
+              <div class="toggle-row" onclick="toggleRow(event, this)"><label class="toggle-switch"><input type="checkbox" id="gulmit-rz-toggle" data-popup="true" data-layer="gulmit-zonation-layer" onclick="toggleLayersVisibility(map1, ['gulmit-zonation-layer'])"><span class="toggle-track"></span></label><span class="toggle-label">Risk Zonation</span></div>
+            </div></div>
+          </div>
+
+          <!-- Darkot -->
+          <div class="sub-section" id="sub-darkot">
+            <button class="sub-header" onclick="event.stopPropagation(); toggleSub('sub-darkot'); accordionZoom(map1, '', 9, 36.63656139828247, 73.42122173956244);">
+              <span class="sub-icon">🏔️</span><span class="sub-name">Darkot</span><span class="sub-chevron">▼</span>
+            </button>
+            <div class="sub-body"><div class="sub-inner">
+              <div class="toggle-row" onclick="toggleRow(event, this)"><label class="toggle-switch"><input type="checkbox" id="darkot-buildings-toggle" data-popup="true" data-layer="darkot-buildings-layer" onclick="toggleLayersVisibility(map1, ['darkot-buildings-layer'])"><span class="toggle-track"></span></label><span class="toggle-label">Buildings</span></div>
+              <div class="toggle-row" onclick="toggleRow(event, this)"><label class="toggle-switch"><input type="checkbox" id="darkot-glaciers-toggle" data-popup="true" data-layer="darkot-glacier-layer" onclick="toggleLayersVisibility(map1, ['darkot-glacier-layer'])"><span class="toggle-track"></span></label><span class="toggle-label">Glaciers</span></div>
+              <div class="toggle-row" onclick="toggleRow(event, this)"><label class="toggle-switch"><input type="checkbox" id="darkot-rz-toggle" data-popup="true" data-layer="darkot-zonation-layer" onclick="toggleLayersVisibility(map1, ['darkot-zonation-layer'])"><span class="toggle-track"></span></label><span class="toggle-label">Risk Zonation</span></div>
+              <div class="toggle-row" onclick="toggleRow(event, this)"><label class="toggle-switch"><input type="checkbox" id="darkot-river-toggle" data-popup="true" data-layer="darkot-rivers-layer" onclick="toggleLayersVisibility(map1, ['darkot-rivers-layer'])"><span class="toggle-track"></span></label><span class="toggle-label">River</span></div>
+              <div class="toggle-row" onclick="toggleRow(event, this)"><label class="toggle-switch"><input type="checkbox" id="darkot-schools-toggle" data-popup="true" data-layer="darkot-schools-layer" onclick="toggleLayersVisibility(map1, ['darkot-schools-layer'])"><span class="toggle-track"></span></label><span class="toggle-label">Schools</span></div>
+            </div></div>
+          </div>
+
+          <!-- Chatiboi -->
+          <div class="sub-section" id="sub-chatiboi">
+            <button class="sub-header" onclick="event.stopPropagation(); toggleSub('sub-chatiboi'); accordionZoom(map1, '', 11, 36.813, 73.290);">
+              <span class="sub-icon">🏔️</span><span class="sub-name">Chatiboi</span><span class="sub-chevron">▼</span>
+            </button>
+            <div class="sub-body"><div class="sub-inner">
+              <div class="toggle-row" onclick="toggleRow(event, this)"><label class="toggle-switch"><input type="checkbox" id="chatiboi-lake-toggle" onclick="toggleLayersVisibility(map1, ['chatiboi-lake-fill', 'chatiboi-lake-outline'])"><span class="toggle-track"></span></label><span class="toggle-label">Chatiboi Lake</span></div>
+              <div class="toggle-row" onclick="toggleRow(event, this)"><label class="toggle-switch"><input type="checkbox" id="chatiboi-runoff-toggle" data-popup="true" data-layer="chatiboi-runoff-layer" onclick="toggleLayersVisibility(map1, ['chatiboi-runoff-layer'])"><span class="toggle-track"></span></label><span class="toggle-label">Chatiboi Run off</span></div>
+              <div class="toggle-row" onclick="toggleRow(event, this)"><label class="toggle-switch"><input type="checkbox" id="chatiboi-rz-toggle" data-popup="true" data-layer="chatiboi-risk-high-layer" onclick="toggleLayersVisibility(map1, ['chatiboi-risk-high-layer', 'chatiboi-risk-medium-layer', 'chatiboi-risk-low-layer'])"><span class="toggle-track"></span></label><span class="toggle-label">Risk Zonation</span></div>
+            </div></div>
+          </div>
+
+        </div></div>
+      </div>
+
+      <!-- ══ 10. LAND SURFACE TEMP ══ -->
+      <div class="section" id="sec-lst">
+        <button class="section-header" onclick="toggleSection('sec-lst')">
+          <span class="section-icon">🌡️</span>
+          <span class="section-label">Land Surface Temp</span>
+          <span class="section-chevron">▼</span>
+        </button>
+        <div class="section-body"><div class="section-inner">
+          <div class="toggle-row" onclick="toggleRow(event, this)"><label class="toggle-switch"><input type="checkbox" id="lst-layer-toggle" onclick="toggleLST(this.checked)"><span class="toggle-track"></span></label><span class="toggle-label">Show LST Layer</span></div>
+        </div></div>
+      </div>
+
+      <!-- Satellite Imagery -->
+      <button class="action-btn" onclick="window.open('https://ee-waqarsha1994.projects.earthengine.app/view/web-imagery-s2', '_blank')">🛰️&nbsp; Satellite Imagery</button>
+
+      <!-- Play -->
+      <div class="play-wrap">
+        <span id="tour-lake-label" style="font-size: 11px; color: var(--cyan); margin-right: 12px; align-self: center; font-weight: 600;"></span>
+        <button class="play-btn" id="play-all-btn" onclick="playAllTour()" title="Play All Lakes Tour">▶</button>
+      </div>
+
+      <!-- Layer Tour -->
+      <div class="tour-section">
+        <div class="tour-title">
+          🎬 Layer Tour
+          <span style="margin-left:auto;cursor:pointer;font-size:13px;opacity:0.7" id="layer-tour-refresh-btn" onclick="refreshLayerTourOptions()" title="Refresh opened layers">↻</span>
         </div>
-        <!--________________________________________________________ -->
-        <!-- _______________________Layer Tour______________________ -->
-        <div id="layer-tour-div">
-            <div id="layer-tour-top">
-                <span id="layer-tour-heading">Layer Tour</span>
-                <button id="layer-tour-refresh-btn" type="button" onclick="refreshLayerTourOptions()" title="Refresh opened layers">
-                    <i class="fas fa-rotate"></i>
-                </button>
-            </div>
-            <select id="layer-tour-select" onchange="stopLayerTourIfRunning()">
-                <option value="">Select opened layer</option>
-            </select>
-            <div id="layer-tour-speed-wrap">
-                <label for="layer-tour-speed-slider">Speed</label>
-                <input
-                    id="layer-tour-speed-slider"
-                    type="range"
-                    min="1"
-                    max="5"
-                    value="3"
-                    step="1"
-                    oninput="updateLayerTourSpeed(this.value)"
-                >
-                <span id="layer-tour-speed-value">Normal</span>
-            </div>
-            <div id="layer-tour-actions">
-                <button id="layer-tour-btn" type="button" onclick="toggleLayerTour()">Start Tour</button>
-                <span id="layer-tour-status">Idle</span>
-            </div>
+        <select class="tour-select" id="layer-tour-select" onchange="stopLayerTourIfRunning()">
+          <option value="">Select opened layer</option>
+        </select>
+        <div class="speed-row">
+          <span class="speed-label">Speed</span>
+          <input type="range" class="speed-slider" id="layer-tour-speed-slider" min="1" max="5" value="3" step="1" oninput="updateLayerTourSpeed(this.value)">
+          <span class="speed-label" id="layer-tour-speed-value">Normal</span>
         </div>
-        <!--________________________________________________________ -->
-        <!-- _____________________Alerts Archive____________________ -->
-        <div id="alerts-archive-div">
-            <div class="form-check form-switch">
-                <input class="form-check-input" type="checkbox" role="switch" id="alerts-archive-toggle" onchange="toggleAlertsArchive(this.checked)">
-                <label class="form-check-label" for="alerts-archive-toggle">Alerts Archive</label>
-            </div>
+        <div class="tour-btns">
+          <button class="tour-btn primary" id="layer-tour-btn" type="button" onclick="toggleLayerTour()">Start Tour</button>
+          <button class="tour-btn secondary" id="layer-tour-status" disabled>IDLE</button>
         </div>
+      </div>
+
+      <!-- Alerts Archive -->
+      <div class="alerts-row toggle-row" onclick="toggleRow(event, this)">
+        <label class="toggle-switch"><input type="checkbox" id="alerts-archive-toggle" onchange="toggleAlertsArchive(this.checked)"><span class="toggle-track"></span></label>
+        <div class="alerts-dot"></div>
+        <span class="toggle-label">Alerts Archive</span>
+      </div>
+
     </div>
 
-
+    <script>
+      function toggleSection(id) {
+        document.getElementById(id).classList.toggle('open');
+      }
+      function toggleSub(id) {
+        document.getElementById(id).classList.toggle('open');
+      }
+      function toggleRow(e, row) {
+        if (e.target.closest('.toggle-switch') || e.target.closest('button') || e.target.closest('a') || e.target.closest('.toggle-sync')) return;
+        const cb = row.querySelector('input[type="checkbox"]');
+        if (cb) {
+          cb.click();
+        }
+      }
+    </script>
+</div>
     <!-- _______________________________________________________________________________________________________________________________________________________ -->
     <script src="template/buttons.js"></script>
     <script src="template/controls.js"></script>
