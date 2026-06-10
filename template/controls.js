@@ -626,7 +626,11 @@ function refreshActiveLayersLegend() {
             count = null;
         }
 
-        if (Number.isFinite(count)) {
+        // Do not display count numbers for any layers in the Vulnerable Lakes section
+        const checkbox = document.getElementById(layer.id);
+        const isVulnerableLake = checkbox && checkbox.closest('#sec-vlakes');
+
+        if (Number.isFinite(count) && !isVulnerableLake) {
             const countSpan = document.createElement('span');
             countSpan.textContent = String(count);
             countSpan.className = 'active-layers-legend-count';
@@ -5166,23 +5170,7 @@ let containerObserver = null;
             });
         });
 
-        // Synchronize state between quick-bri-ff-sensors-toggle and quick-bri-ff-sensors-toggle-base
-        const toggle1 = document.getElementById('quick-bri-ff-sensors-toggle');
-        const toggle2 = document.getElementById('quick-bri-ff-sensors-toggle-base');
 
-        if (toggle1 && toggle2) {
-            toggle1.addEventListener('change', function() {
-                if (toggle2.checked !== toggle1.checked) {
-                    toggle2.checked = toggle1.checked;
-                }
-            });
-
-            toggle2.addEventListener('change', function() {
-                if (toggle1.checked !== toggle2.checked) {
-                    toggle1.checked = toggle2.checked;
-                }
-            });
-        }
     }
 
     if (document.readyState === 'loading') {
