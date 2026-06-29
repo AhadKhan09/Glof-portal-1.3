@@ -1,0 +1,10 @@
+﻿<USER_REQUEST>
+Snapshot. Please alter the menu bar items like the image attached. Like Golden Icons. and animations
+Please implement it cleanly.
+
+Animation code is also attached in the previous chat
+
+</USER_REQUEST>
+<ADDITIONAL_METADATA>
+The current local time is: 2026-06-12T11:20:05+05:00.
+</ADDITIONAL_METADATA>

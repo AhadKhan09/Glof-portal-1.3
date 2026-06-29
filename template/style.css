@@ -150,6 +150,7 @@ h1 {
   top: calc(12px + 12.9vw);
   right: 52px;
   width:22%;
+  height: 12.5vw;
   border: #1d4ed8 solid 5px;
   border-radius: 4px;
   animation: borderGlow 2.5s ease-in-out infinite 0.5s;
@@ -195,6 +196,7 @@ h1 {
   top: calc(12px + 38.7vw);
   right: 52px;
   width: 22%;
+  height: 12.5vw;
   border-radius: 4px;
   border: #1d4ed8 solid 5px;
   overflow: hidden;
@@ -668,6 +670,30 @@ h1 {
 }
 
 .active-layers-legend-icon.icon-red-pin::after {
+  content: "";
+  width: 4px;
+  height: 4px;
+  background: white;
+  position: absolute;
+  border-radius: 50%;
+  top: 3px;
+  left: 3px;
+}
+
+.active-layers-legend-icon.icon-purple-pin {
+  width: 12px;
+  height: 12px;
+  background: #aa00ff;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  margin: 3px;
+  position: relative;
+  border: 1px solid #4a0070;
+  display: inline-block;
+  box-sizing: border-box;
+}
+
+.active-layers-legend-icon.icon-purple-pin::after {
   content: "";
   width: 4px;
   height: 4px;
@@ -1421,7 +1447,8 @@ h1 {
 #lake-video-wrap {
   position: relative;
   width: 100%;
-  aspect-ratio: 16 / 9;
+  flex: 1;
+  min-height: 0;
   background: rgba(3, 8, 18, 0.4);
   display: flex;
   align-items: center;
@@ -1903,6 +1930,7 @@ h1 {
     background: linear-gradient(90deg,rgba(96,165,250,0.07),transparent);
     opacity: 0; border-radius: 8px;
     transition: opacity var(--transition);
+    pointer-events: none;
   }
   .toggle-row:hover::before { opacity: 1; }
   .toggle-row:hover { transform: translateX(3px); }
@@ -1921,6 +1949,25 @@ h1 {
   }
   .toggle-sync:hover {
     color: var(--cyan);
+  }
+
+  /* Style for OWM refresh weather / precipitation buttons to override global styling and position correctly */
+  #refresh-weather-btn,
+  #refresh-precipitation-btn {
+    position: relative;
+    z-index: 10;
+    color: var(--blue-accent) !important;
+    opacity: 0.7;
+    transition: opacity 0.2s, transform 0.2s;
+  }
+  #refresh-weather-btn:hover,
+  #refresh-precipitation-btn:hover {
+    opacity: 1;
+    color: var(--cyan) !important;
+  }
+  #refresh-weather-btn:active,
+  #refresh-precipitation-btn:active {
+    transform: scale(0.9);
   }
 
   /* ── TOGGLE SWITCH ── */
@@ -3945,7 +3992,7 @@ h1 {
     background: transparent !important;
 }
 
-/* Force Bahnschrift Condensed font and white color on all menu text */
+/* Force font matching the Navbar and white color on all menu text */
 #menu,
 #menu button,
 #menu select,
@@ -3953,7 +4000,7 @@ h1 {
 #menu label,
 #menu span,
 #menu div {
-    font-family: 'Bahnschrift Condensed', 'Bahnschrift', 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif !important;
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif !important;
     color: #ffffff !important;
 }
 
@@ -3962,23 +4009,70 @@ h1 {
     background: transparent !important;
 }
 
+/* Disable uppercase transform globally inside menu to display original camel/title case text */
+#menu,
+#menu * {
+    text-transform: none !important;
+}
+
 /* Increase font sizes for the menu bar text elements to improve readability */
 #menu .section-label {
-    font-size: 15px !important;
+    font-size: 18px !important;
     letter-spacing: 0.9px !important;
+}
+#menu .section-icon {
+    font-size: 18px !important;
+}
+#menu .section-chevron {
+    font-size: 12px !important;
 }
 #menu .toggle-label,
 #menu .sub-name,
 #menu .speed-label,
 #menu #layer-tour-select,
 #menu .tour-btn,
-#menu .action-btn {
-    font-size: 13.5px !important;
+#menu .action-btn,
+#menu .alerts-row {
+    font-size: 16px !important;
+}
+#menu .sub-icon {
+    font-size: 16px !important;
+}
+#menu .sub-chevron {
+    font-size: 12px !important;
 }
 #menu .year-divider {
-    font-size: 13px !important;
+    font-size: 16px !important;
 }
-#menu .group-label {
-    font-size: 11px !important;
+#menu .group-label,
+#menu .tour-title,
+#menu #tour-lake-label {
+    font-size: 14px !important;
 }
+
+/* Ensure videos and images fill their containers completely with no gaps in normal view */
+#top_video,
+#bot_video,
+#glaciersDataImg,
+#lakeAreaVideoPlayer,
+#lakeAreaGifPlayer,
+#lake-map-preview-img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: fill !important; /* Stretch to container width and height */
+}
+
+/* Restore original resolution and aspect ratio in fullscreen mode */
+#top_video:fullscreen,
+#bot_video:fullscreen,
+#top_video:-webkit-full-screen,
+#bot_video:-webkit-full-screen,
+#top_video:-moz-full-screen,
+#bot_video:-moz-full-screen,
+#top_video:-ms-fullscreen,
+#bot_video:-ms-fullscreen {
+  object-fit: contain !important;
+}
+
+
 

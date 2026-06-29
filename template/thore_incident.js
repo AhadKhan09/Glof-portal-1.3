@@ -1,21 +1,21 @@
 /**
- * Khyber Incident Layer and Marker Logic
- * Coordinates: [74.78597477331795, 36.58484445652914] (Khyber, Gojal Hunza)
+ * Thore Incident Layer and Marker Logic
+ * Coordinates: [73.85572994889226, 35.480535509722905] (Thore Valley)
  */
 
-// State tracking for the Khyber Incident marker and popup
-let khyberMarker = null;
-let khyberPopup = null;
+// State tracking for the Thore Incident marker and popup
+let thoreMarker = null;
+let thorePopup = null;
 
 // Dynamically inject custom styles for the blinking marker and theme-matching popup
-(function injectKhyberStyles() {
-    const styleId = 'khyber-incident-styles';
+(function injectThoreStyles() {
+    const styleId = 'thore-incident-styles';
     if (!document.getElementById(styleId)) {
         const style = document.createElement('style');
         style.id = styleId;
         style.innerHTML = `
-            /* Custom pulsing/blinking marker for Khyber */
-            .khyber-blink-marker {
+            /* Custom pulsing/blinking marker for Thore */
+            .thore-blink-marker {
                 position: relative;
                 width: 32px;
                 height: 32px;
@@ -25,7 +25,7 @@ let khyberPopup = null;
                 justify-content: center;
                 z-index: 99;
             }
-            .khyber-blink-dot {
+            .thore-blink-dot {
                 width: 14px;
                 height: 14px;
                 background-color: #ef4444;
@@ -35,21 +35,21 @@ let khyberPopup = null;
                 z-index: 2;
                 transition: transform 0.2s ease;
             }
-            .khyber-blink-marker:hover .khyber-blink-dot {
+            .thore-blink-marker:hover .thore-blink-dot {
                 transform: scale(1.25);
                 background-color: #f87171;
             }
-            .khyber-blink-ring {
+            .thore-blink-ring {
                 position: absolute;
                 width: 100%;
                 height: 100%;
                 border: 3px solid #ef4444;
                 border-radius: 50%;
-                animation: khyber-pulsate 1.5s ease-out infinite;
+                animation: thore-pulsate 1.5s ease-out infinite;
                 opacity: 0;
                 z-index: 1;
             }
-            @keyframes khyber-pulsate {
+            @keyframes thore-pulsate {
                 0% {
                     transform: scale(0.3);
                     opacity: 1;
@@ -64,25 +64,25 @@ let khyberPopup = null;
             }
             
             /* Premium theme-matching popup */
-            .khyber-incident-popup .mapboxgl-popup-content {
+            .thore-incident-popup .mapboxgl-popup-content {
                 background: rgba(6, 11, 25, 0.92) !important;
                 border: 1.5px solid rgba(239, 68, 68, 0.6) !important;
                 border-radius: 12px !important;
                 color: #f1f5f9 !important;
                 box-shadow: 0 20px 30px -5px rgba(0, 0, 0, 0.6), 0 0 20px rgba(239, 68, 68, 0.3) !important;
                 padding: 12px !important;
-                width: 200px !important;
+                width: 280px !important;
                 max-width: 90vw !important;
                 backdrop-filter: blur(12px) !important;
                 font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
             }
-            .khyber-incident-popup .mapboxgl-popup-tip {
+            .thore-incident-popup .mapboxgl-popup-tip {
                 border-top-color: rgba(6, 11, 25, 0.92) !important;
                 border-bottom-color: rgba(6, 11, 25, 0.92) !important;
                 border-left-color: rgba(6, 11, 25, 0.92) !important;
                 border-right-color: rgba(6, 11, 25, 0.92) !important;
             }
-            .khyber-incident-popup .mapboxgl-popup-close-button {
+            .thore-incident-popup .mapboxgl-popup-close-button {
                 color: #94a3b8 !important;
                 font-size: 16px !important;
                 padding: 4px 8px !important;
@@ -92,11 +92,11 @@ let khyberPopup = null;
                 transition: color 0.2s, background-color 0.2s !important;
                 outline: none !important;
             }
-            .khyber-incident-popup .mapboxgl-popup-close-button:hover {
+            .thore-incident-popup .mapboxgl-popup-close-button:hover {
                 color: #ffffff !important;
                 background-color: rgba(255, 255, 255, 0.1) !important;
             }
-            .khyber-popup-content {
+            .thore-popup-content {
                 display: flex;
                 flex-direction: column;
                 gap: 8px;
@@ -107,73 +107,77 @@ let khyberPopup = null;
 })();
 
 /**
- * Toggles the visibility of the Khyber Incident marker and flies the map camera to its coordinate.
+ * Toggles the visibility of the Thore Incident marker and flies the map camera to its coordinate.
  * @param {boolean} isChecked - The new state of the checkbox switch
  */
-function toggleKhyberIncident(isChecked) {
+function toggleThoreIncident(isChecked) {
     if (typeof map1 === 'undefined' || !map1) {
         console.error("Mapbox GL map instance (map1) is not defined.");
         return;
     }
 
-    const coordinates = [74.78597477331795, 36.58484445652914];
+    const coordinates = [73.85572994889226, 35.480535509722905];
 
     if (isChecked) {
         // Remove existing marker and popup to prevent duplication
-        if (khyberMarker) {
-            khyberMarker.remove();
+        if (thoreMarker) {
+            thoreMarker.remove();
         }
-        if (khyberPopup) {
-            khyberPopup.remove();
+        if (thorePopup) {
+            thorePopup.remove();
         }
 
         // Create the custom HTML elements for the blinking/pulsing marker
         const el = document.createElement('div');
-        el.className = 'khyber-blink-marker';
-        el.title = "Khyber Incident Location - Click to toggle details popup";
+        el.className = 'thore-blink-marker';
+        el.title = "Thore Incident Location - Click to toggle details popup";
 
         const ring = document.createElement('div');
-        ring.className = 'khyber-blink-ring';
+        ring.className = 'thore-blink-ring';
 
         const dot = document.createElement('div');
-        dot.className = 'khyber-blink-dot';
+        dot.className = 'thore-blink-dot';
 
         el.appendChild(ring);
         el.appendChild(dot);
 
         // Build the HTML details popup
-        khyberPopup = new mapboxgl.Popup({
+        thorePopup = new mapboxgl.Popup({
             offset: [0, -15],
             closeButton: true,
             closeOnClick: false,
-            className: 'khyber-incident-popup'
+            className: 'thore-incident-popup'
         }).setHTML(`
-            <div class="khyber-popup-content">
-                <div class="khyber-popup-header" style="border-bottom: 1px solid rgba(255, 255, 255, 0.15); padding-bottom: 4px; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between;">
-                    <h4 style="margin: 0; font-size: 13px; font-weight: 700; color: #f87171; text-shadow: 0 0 8px rgba(239, 68, 68, 0.4);">Khyber Incident</h4>
+            <div class="thore-popup-content">
+                <div class="thore-popup-header" style="border-bottom: 1px solid rgba(255, 255, 255, 0.15); padding-bottom: 4px; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between;">
+                    <h4 style="margin: 0; font-size: 13px; font-weight: 700; color: #f87171; text-shadow: 0 0 8px rgba(239, 68, 68, 0.4);">Thore Incident</h4>
+                    <span style="font-size: 10px; color: #94a3b8; font-weight: 600;">26 June, 2026</span>
                 </div>
-                <div class="khyber-popup-body" style="font-size: 11px; color: #cbd5e1; line-height: 1.4;">
-                    <div style="padding: 8px; background: rgba(239, 68, 68, 0.1); border: 1px dashed rgba(239, 68, 68, 0.4); border-radius: 6px; margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
-                        <i class="fas fa-exclamation-triangle" style="color: #ef4444; font-size: 14px;"></i>
-                        <span style="font-weight: 600; color: #fecaca;">Active Monitoring Alert</span>
+                <div class="thore-popup-body">
+                    <img src="data/Incidents/Thore Incident.jpeg" alt="Thore Incident" style="width: 100%; height: auto; max-height: 180px; object-fit: cover; border-radius: 6px; border: 1px solid rgba(239, 68, 68, 0.3); box-shadow: 0 0 12px rgba(0,0,0,0.6); margin-bottom: 8px;">
+                    <div style="font-size: 11px; color: #cbd5e1; line-height: 1.4;">
+                        <p style="margin: 4px 0; color: #cbd5e1;">
+                            Flash flood hit Habroom Nallah, Anger Nallah & Shitan Nallah areas of Thore valley. Which caused widespread destruction to houses along with belongings, agricultural land other livihood and a car swet into nallah.
+                        </p>
+                        <div style="border-top: 1px solid rgba(255, 255, 255, 0.08); padding-top: 6px; margin-top: 6px; font-size: 10px; color: #94a3b8;">
+                            <p style="margin: 2px 0;"><strong>Coordinates:</strong> 35.48054° N, 73.85573° E</p>
+                        </div>
                     </div>
-                    <p style="margin: 4px 0;"><strong>Location:</strong> Khyber Valley, Gojal Hunza</p>
-                    <p style="margin: 4px 0;"><strong>Coordinates:</strong> 36.58484° N, 74.78597° E</p>
                 </div>
             </div>
         `);
 
         // Create the Mapbox marker and attach the popup
-        khyberMarker = new mapboxgl.Marker({
+        thoreMarker = new mapboxgl.Marker({
             element: el,
             anchor: 'center'
         })
         .setLngLat(coordinates)
-        .setPopup(khyberPopup)
+        .setPopup(thorePopup)
         .addTo(map1);
 
         // Open the popup immediately
-        khyberPopup.setLngLat(coordinates).addTo(map1);
+        thorePopup.setLngLat(coordinates).addTo(map1);
 
         // Zoom/Fly camera to the incident area
         map1.flyTo({
@@ -186,13 +190,13 @@ function toggleKhyberIncident(isChecked) {
         });
     } else {
         // Clean up marker and popup
-        if (khyberMarker) {
-            khyberMarker.remove();
-            khyberMarker = null;
+        if (thoreMarker) {
+            thoreMarker.remove();
+            thoreMarker = null;
         }
-        if (khyberPopup) {
-            khyberPopup.remove();
-            khyberPopup = null;
+        if (thorePopup) {
+            thorePopup.remove();
+            thorePopup = null;
         }
     }
 }

@@ -626,11 +626,12 @@ function refreshActiveLayersLegend() {
             count = null;
         }
 
-        // Do not display count numbers for any layers in the Vulnerable Lakes section
+        // Do not display count numbers for any layers in the Vulnerable Lakes section or Vulnerable Sites 2025
         const checkbox = document.getElementById(layer.id);
         const isVulnerableLake = checkbox && checkbox.closest('#sec-vlakes');
+        const isVulSites2025 = layer.id === 'quick-vulsites-2025-toggle';
 
-        if (Number.isFinite(count) && !isVulnerableLake) {
+        if (Number.isFinite(count) && !isVulnerableLake && !isVulSites2025) {
             const countSpan = document.createElement('span');
             countSpan.textContent = String(count);
             countSpan.className = 'active-layers-legend-count';
@@ -837,6 +838,10 @@ function getLegendIconClass(layer) {
 
     if (inputId === 'quick-akah-toggle') {
         return 'icon-circle-red-small';
+    }
+
+    if (inputId === 'quick-vulsites-2025-toggle') {
+        return 'icon-purple-pin';
     }
 
     if (inputId === 'quick-vulsites-2026-toggle') {
@@ -2029,6 +2034,34 @@ async function renderAlertsArchive() {
             href: url.href,
             fileName: decodeURIComponent(url.pathname.split('/').pop() || 'Alert Image')
         }));
+
+        // Helper to extract date from filename (supporting formats like DD-MM-YYYY or DD-MM-YY)
+        const extractDateFromFilename = (fileName) => {
+            const match = fileName.match(/\((\d{1,2})[-/](\d{1,2})[-/](\d{2,4})\)/) || 
+                          fileName.match(/\b(\d{1,2})[-/](\d{1,2})[-/](\d{2,4})\b/);
+            if (match) {
+                const day = parseInt(match[1], 10);
+                const month = parseInt(match[2], 10) - 1; // 0-based index
+                let year = parseInt(match[3], 10);
+                if (year < 100) {
+                    year += 2000; // handle 2-digit years
+                }
+                return new Date(year, month, day);
+            }
+            return new Date(0); // Epoch fallback for files without valid dates
+        };
+
+        // Sort items by date descending (newest first), falling back to alphabetical sorting
+        alertsArchiveImageItems.sort((a, b) => {
+            const dateA = extractDateFromFilename(a.fileName);
+            const dateB = extractDateFromFilename(b.fileName);
+            
+            if (dateB.getTime() !== dateA.getTime()) {
+                return dateB.getTime() - dateA.getTime();
+            }
+            return a.fileName.localeCompare(b.fileName);
+        });
+
         alertsArchiveViewerIndex = -1;
 
         if (!alertsArchiveImageItems.length) {
@@ -2915,9 +2948,12 @@ function initLakeMapPreviewAspectObserver() {
     if (!preview || !previewImg) return;
 
     function adjustAspect() {
+        // Disabled dynamic aspect ratio to allow image to stretch to grid container dimensions
+        /*
         if (previewImg.naturalWidth && previewImg.naturalHeight) {
             preview.style.aspectRatio = `${previewImg.naturalWidth} / ${previewImg.naturalHeight}`;
         }
+        */
     }
 
     previewImg.addEventListener('load', adjustAspect);
@@ -4356,26 +4392,28 @@ async function showLakeTempChart(accordionId) {
     currentActiveLakeData = chartData;
     drawLakeTempChart('lakeTempChartCanvas', LAKE_TEMP_DATES, chartData, false);
 
-    const sheetCsvUrl = `https://docs.google.com/spreadsheets/d/e/2PACX-1vTaQYCw9Jd6PgaRjuYOlk8aG0u59lV7iS0I62R5grvMVaIOEeK7dXZpGT1_nOGeiehaOLj-nzHhPxpO/pub?output=csv&gid=${config.gid}`;
+    const sheetHtmlUrl = `https://docs.google.com/spreadsheets/d/e/2PACX-1vTaQYCw9Jd6PgaRjuYOlk8aG0u59lV7iS0I62R5grvMVaIOEeK7dXZpGT1_nOGeiehaOLj-nzHhPxpO/pubhtml/sheet?headers=false&gid=${config.gid}`;
 
     try {
-        const response = await fetch(sheetCsvUrl, { cache: 'no-store' });
+        const response = await fetch(sheetHtmlUrl, { cache: 'no-store' });
         if (!response.ok) throw new Error("Network response not ok");
         
-        const csvText = await response.text();
-        const lines = csvText.split(/\r?\n/).filter(line => line.trim().length > 0);
+        const htmlText = await response.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(htmlText, 'text/html');
+        const rows = doc.querySelectorAll('.ritz table.waffle tbody tr');
         
-        if (lines.length < 2) throw new Error("Empty CSV dataset");
+        if (rows.length < 2) throw new Error("Empty HTML dataset");
 
         const parsedLabels = [];
         const parsedData = [];
 
-        // Parse CSV lines: skips header (Name, Temperature)
-        for (let i = 1; i < lines.length; i++) {
-            const cells = lines[i].split(',');
-            if (cells.length >= 2) {
-                const dateLabel = parseCSVDate(cells[0]);
-                const tempVal = parseFloat(cells[1]);
+        // Parse HTML rows: skips header row (Name, Temperature) at index 0
+        for (let i = 1; i < rows.length; i++) {
+            const cols = rows[i].querySelectorAll('td');
+            if (cols.length >= 2) {
+                const dateLabel = cols[0].textContent.trim();
+                const tempVal = parseFloat(cols[1].textContent.trim());
                 if (dateLabel && !isNaN(tempVal)) {
                     parsedLabels.push(dateLabel);
                     parsedData.push(tempVal);
@@ -4859,6 +4897,7 @@ let containerObserver = null;
             el.style.left       = 'auto';
             if (!isLegend) {
                 el.style.width      = COL_W  + 'px';
+                el.style.height     = (span * SLOT_H + (span - 1) * SLOT_GAP) + 'px';
                 el.style.maxHeight  = (span * SLOT_H + (span - 1) * SLOT_GAP) + 'px';
                 el.style.overflowY  = 'auto';
             } else {

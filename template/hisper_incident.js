@@ -297,7 +297,10 @@ function toggleHisperIncident(isChecked) {
         // Show the bottom-center images telemetry widget
         const imagesWidget = document.getElementById('hisper-images-widget');
         if (imagesWidget) {
-            imagesWidget.classList.add('is-visible');
+            imagesWidget.style.display = 'flex';
+            requestAnimationFrame(() => {
+                imagesWidget.classList.add('is-visible');
+            });
         }
     } else {
         // Clean up marker and popup
@@ -329,6 +332,11 @@ function closeHisperImagesWidget() {
     const widget = document.getElementById('hisper-images-widget');
     if (widget) {
         widget.classList.remove('is-visible');
+        setTimeout(() => {
+            if (!widget.classList.contains('is-visible')) {
+                widget.style.display = 'none';
+            }
+        }, 300);
     }
 }
 

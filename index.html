@@ -300,7 +300,7 @@
         </div>
 
         <!-- Hisper Images Telemetry Widget -->
-        <div id="hisper-images-widget" aria-live="polite" aria-label="Hisper automatic weather station telemetry charts">
+        <div id="hisper-images-widget" style="display: none;" aria-live="polite" aria-label="Hisper automatic weather station telemetry charts">
             <div id="hisper-images-header">
                 <span id="hisper-images-title">Hisper-Hopper Telemetry Charts</span>
                 <button id="hisper-images-close" type="button" onclick="closeHisperImagesWidget()" aria-label="Close telemetry images">&times;</button>
@@ -532,10 +532,10 @@
         <div class="section-body"><div class="section-inner">
           <div class="toggle-row" onclick="toggleRow(event, this)">
             <label class="toggle-switch">
-              <input type="checkbox" id="quick-vulsites-2025-toggle" data-legend-track="true" data-legend-icon="icon-red-destination" onchange="toggleQuickVulnerableSites2025(this.checked)">
+              <input type="checkbox" id="quick-vulsites-2025-toggle" data-legend-track="true" data-legend-icon="icon-purple-pin" onchange="toggleQuickVulnerableSites2025(this.checked)">
               <span class="toggle-track"></span>
             </label>
-            <span class="toggle-label">Vulnerable Sites</span>
+            <span class="toggle-label">Vulnerable Sites 2025</span>
           </div>
           <div class="toggle-row" onclick="toggleRow(event, this)">
             <label class="toggle-switch">
@@ -559,7 +559,7 @@
       <div class="section" id="sec-2026">
         <button class="section-header" onclick="toggleSection('sec-2026')">
           <span class="section-icon">🔴</span>
-          <span class="section-label">Live Layers</span>
+          <span class="section-label">Season Layers</span>
           <span class="section-badge">6</span>
           <span class="section-chevron">▼</span>
         </button>
@@ -638,6 +638,13 @@
               <span class="toggle-track"></span>
             </label>
             <span class="toggle-label">Khyber Incident</span>
+          </div>
+          <div class="toggle-row" onclick="toggleRow(event, this)">
+            <label class="toggle-switch">
+              <input type="checkbox" id="quick-thore-incident-toggle" onchange="toggleThoreIncident(this.checked)">
+              <span class="toggle-track"></span>
+            </label>
+            <span class="toggle-label">Thore Incident</span>
           </div>
         </div></div>
       </div>
@@ -815,8 +822,8 @@
         <div class="section-body"><div class="section-inner">
 
           <!-- Badswat -->
-          <div class="sub-section" id="sub-badswat">
-            <button class="sub-header" onclick="event.stopPropagation(); toggleSub('sub-badswat'); accordionZoom(map1, 'badswat-line', 8, 36.2923495548913, 73.2770059513156);">
+          <div class="sub-section" id="badswat-collapse">
+            <button class="sub-header" onclick="event.stopPropagation(); toggleSub('badswat-collapse'); accordionZoom(map1, 'badswat-line', 8, 36.2923495548913, 73.2770059513156);">
               <span class="sub-icon">🏔️</span><span class="sub-name">Badswat</span><span class="sub-chevron">▼</span>
             </button>
             <div class="sub-body"><div class="sub-inner">
@@ -830,8 +837,8 @@
           </div>
 
           <!-- Pindoru Chaat -->
-          <div class="sub-section" id="sub-pindoru">
-            <button class="sub-header" onclick="event.stopPropagation(); toggleSub('sub-pindoru'); accordionZoom(map1, '', 12, 36.197, 71.799);">
+          <div class="sub-section" id="pindoru-collapse">
+            <button class="sub-header" onclick="event.stopPropagation(); toggleSub('pindoru-collapse'); accordionZoom(map1, '', 12, 36.197, 71.799);">
               <span class="sub-icon">🏔️</span><span class="sub-name">Pindoru Chaat</span><span class="sub-chevron">▼</span>
             </button>
             <div class="sub-body"><div class="sub-inner">
@@ -841,8 +848,8 @@
           </div>
 
           <!-- Hinarchi -->
-          <div class="sub-section" id="sub-hinarchi">
-            <button class="sub-header" onclick="event.stopPropagation(); toggleSub('sub-hinarchi'); accordionZoom(map1, 'hiranchi-line', 8, 36.20703091552801, 74.32939869041434);">
+          <div class="sub-section" id="hiranchi-collapse">
+            <button class="sub-header" onclick="event.stopPropagation(); toggleSub('hiranchi-collapse'); accordionZoom(map1, 'hiranchi-line', 8, 36.20703091552801, 74.32939869041434);">
               <span class="sub-icon">💎</span><span class="sub-name">Hinarchi</span><span class="sub-chevron">▼</span>
             </button>
             <div class="sub-body"><div class="sub-inner">
@@ -853,8 +860,8 @@
           </div>
 
           <!-- Reshun -->
-          <div class="sub-section" id="sub-reshun">
-            <button class="sub-header" onclick="event.stopPropagation(); toggleSub('sub-reshun'); accordionZoom(map1, 'reshun-line', 10, 36.079986225225596, 71.86063709100745);">
+          <div class="sub-section" id="reshun-collapse">
+            <button class="sub-header" onclick="event.stopPropagation(); toggleSub('reshun-collapse'); accordionZoom(map1, 'reshun-line', 10, 36.079986225225596, 71.86063709100745);">
               <span class="sub-icon">🏔️</span><span class="sub-name">Reshun</span><span class="sub-chevron">▼</span>
             </button>
             <div class="sub-body"><div class="sub-inner">
@@ -867,8 +874,8 @@
           </div>
 
           <!-- Terset Hundur -->
-          <div class="sub-section" id="sub-terset">
-            <button class="sub-header" onclick="event.stopPropagation(); toggleSub('sub-terset'); setMapCenter(map1,73.703828554,36.035699054,12);">
+          <div class="sub-section" id="terset-hundur-collapse">
+            <button class="sub-header" onclick="event.stopPropagation(); toggleSub('terset-hundur-collapse'); setMapCenter(map1,73.703828554,36.035699054,12);">
               <span class="sub-icon">🏔️</span><span class="sub-name">Terset Hundur</span><span class="sub-chevron">▼</span>
             </button>
             <div class="sub-body"><div class="sub-inner">
@@ -879,8 +886,8 @@
           </div>
 
           <!-- Ishokoman -->
-          <div class="sub-section" id="sub-ishokoman">
-            <button class="sub-header" onclick="event.stopPropagation(); toggleSub('sub-ishokoman'); setMapCenter(map1,73.8379,36.5933,12);">
+          <div class="sub-section" id="ishokoman-collapse">
+            <button class="sub-header" onclick="event.stopPropagation(); toggleSub('ishokoman-collapse'); setMapCenter(map1,73.8379,36.5933,12);">
               <span class="sub-icon">🏔️</span><span class="sub-name">Ishokoman</span><span class="sub-chevron">▼</span>
             </button>
             <div class="sub-body"><div class="sub-inner">
@@ -889,8 +896,8 @@
           </div>
 
           <!-- Lusht -->
-          <div class="sub-section" id="sub-lusht">
-            <button class="sub-header" onclick="event.stopPropagation(); toggleSub('sub-lusht'); setMapCenter(map1,73.0039,36.7767,12);">
+          <div class="sub-section" id="lusht-collapse">
+            <button class="sub-header" onclick="event.stopPropagation(); toggleSub('lusht-collapse'); setMapCenter(map1,73.0039,36.7767,12);">
               <span class="sub-icon">🏔️</span><span class="sub-name">Lusht</span><span class="sub-chevron">▼</span>
             </button>
             <div class="sub-body"><div class="sub-inner">
@@ -899,8 +906,8 @@
           </div>
 
           <!-- Ulter -->
-          <div class="sub-section" id="sub-ulter">
-            <button class="sub-header" onclick="event.stopPropagation(); toggleSub('sub-ulter'); setMapCenter(map1,74.74202,36.33731,12);">
+          <div class="sub-section" id="ulter-collapse">
+            <button class="sub-header" onclick="event.stopPropagation(); toggleSub('ulter-collapse'); setMapCenter(map1,74.74202,36.33731,12);">
               <span class="sub-icon">🏔️</span><span class="sub-name">Ulter</span><span class="sub-chevron">▼</span>
             </button>
             <div class="sub-body"><div class="sub-inner">
@@ -909,8 +916,8 @@
           </div>
 
           <!-- Shisper -->
-          <div class="sub-section" id="sub-shisper">
-            <button class="sub-header" onclick="event.stopPropagation(); toggleSub('sub-shisper'); setMapCenter(map1,74.6057,36.29265,12);">
+          <div class="sub-section" id="shisper-collapse">
+            <button class="sub-header" onclick="event.stopPropagation(); toggleSub('shisper-collapse'); setMapCenter(map1,74.6057,36.29265,12);">
               <span class="sub-icon">💧</span><span class="sub-name">Shisper</span><span class="sub-chevron">▼</span>
             </button>
             <div class="sub-body"><div class="sub-inner">
@@ -922,8 +929,8 @@
           </div>
 
           <!-- Brep -->
-          <div class="sub-section" id="sub-brep">
-            <button class="sub-header" onclick="event.stopPropagation(); toggleSub('sub-brep'); setMapCenter(map1,72.72565,36.48251,12);">
+          <div class="sub-section" id="brep-collapse">
+            <button class="sub-header" onclick="event.stopPropagation(); toggleSub('brep-collapse'); setMapCenter(map1,72.72565,36.48251,12);">
               <span class="sub-icon">🏔️</span><span class="sub-name">Brep</span><span class="sub-chevron">▼</span>
             </button>
             <div class="sub-body"><div class="sub-inner">
@@ -932,8 +939,8 @@
           </div>
 
           <!-- Thalu -->
-          <div class="sub-section" id="sub-thalu">
-            <button class="sub-header" onclick="event.stopPropagation(); toggleSub('sub-thalu'); setMapCenter(map1,72.17453,35.76674,12);">
+          <div class="sub-section" id="thalu-collapse">
+            <button class="sub-header" onclick="event.stopPropagation(); toggleSub('thalu-collapse'); setMapCenter(map1,72.17453,35.76674,12);">
               <span class="sub-icon">🏔️</span><span class="sub-name">Thalu 1 &amp; 2</span><span class="sub-chevron">▼</span>
             </button>
             <div class="sub-body"><div class="sub-inner">
@@ -942,8 +949,8 @@
           </div>
 
           <!-- Gulmit -->
-          <div class="sub-section" id="sub-gulmit">
-            <button class="sub-header" onclick="event.stopPropagation(); toggleSub('sub-gulmit'); accordionZoom(map1, 'gulmit-line-layer', 10, 36.309836704386754, 74.73883211874661);">
+          <div class="sub-section" id="gulmit-collapse">
+            <button class="sub-header" onclick="event.stopPropagation(); toggleSub('gulmit-collapse'); accordionZoom(map1, 'gulmit-line-layer', 10, 36.309836704386754, 74.73883211874661);">
               <span class="sub-icon">🏔️</span><span class="sub-name">Gulmit</span><span class="sub-chevron">▼</span>
             </button>
             <div class="sub-body"><div class="sub-inner">
@@ -956,8 +963,8 @@
           </div>
 
           <!-- Darkot -->
-          <div class="sub-section" id="sub-darkot">
-            <button class="sub-header" onclick="event.stopPropagation(); toggleSub('sub-darkot'); accordionZoom(map1, '', 9, 36.63656139828247, 73.42122173956244);">
+          <div class="sub-section" id="darkot-collapse">
+            <button class="sub-header" onclick="event.stopPropagation(); toggleSub('darkot-collapse'); accordionZoom(map1, '', 9, 36.63656139828247, 73.42122173956244);">
               <span class="sub-icon">🏔️</span><span class="sub-name">Darkot</span><span class="sub-chevron">▼</span>
             </button>
             <div class="sub-body"><div class="sub-inner">
@@ -970,8 +977,8 @@
           </div>
 
           <!-- Chatiboi -->
-          <div class="sub-section" id="sub-chatiboi">
-            <button class="sub-header" onclick="event.stopPropagation(); toggleSub('sub-chatiboi'); accordionZoom(map1, '', 11, 36.813, 73.290);">
+          <div class="sub-section" id="chatiboi-collapse">
+            <button class="sub-header" onclick="event.stopPropagation(); toggleSub('chatiboi-collapse'); accordionZoom(map1, '', 11, 36.813, 73.290);">
               <span class="sub-icon">🏔️</span><span class="sub-name">Chatiboi</span><span class="sub-chevron">▼</span>
             </button>
             <div class="sub-body"><div class="sub-inner">
@@ -993,6 +1000,74 @@
         </button>
         <div class="section-body"><div class="section-inner">
           <div class="toggle-row" onclick="toggleRow(event, this)"><label class="toggle-switch"><input type="checkbox" id="lst-layer-toggle" onclick="toggleLST(this.checked)"><span class="toggle-track"></span></label><span class="toggle-label">Show LST Layer</span></div>
+        </div></div>
+      </div>
+
+      <!-- ══ 9.5 GLOFAS LAYERS ══ -->
+      <div class="section" id="sec-glofas">
+        <button class="section-header" onclick="toggleSection('sec-glofas')">
+          <span class="section-icon">🌊</span>
+          <span class="section-label">GloFAS Layers</span>
+          <span class="section-badge">8</span>
+          <span class="section-chevron">▼</span>
+        </button>
+        <div class="section-body"><div class="section-inner">
+          <div class="toggle-row" onclick="toggleRow(event, this)">
+            <label class="toggle-switch">
+              <input type="checkbox" id="accumulatedPrecip" data-layer="AccRainEGE">
+              <span class="toggle-track"></span>
+            </label>
+            <span class="toggle-label">Accumulated Precipitation</span>
+          </div>
+          <div class="toggle-row" onclick="toggleRow(event, this)">
+            <label class="toggle-switch">
+              <input type="checkbox" id="prob50" data-layer="EGE_probRgt50">
+              <span class="toggle-track"></span>
+            </label>
+            <span class="toggle-label">Precip Prob &gt; 50mm</span>
+          </div>
+          <div class="toggle-row" onclick="toggleRow(event, this)">
+            <label class="toggle-switch">
+              <input type="checkbox" id="prob150" data-layer="EGE_probRgt150">
+              <span class="toggle-track"></span>
+            </label>
+            <span class="toggle-label">Precip Prob &gt; 150mm</span>
+          </div>
+          <div class="toggle-row" onclick="toggleRow(event, this)">
+            <label class="toggle-switch">
+              <input type="checkbox" id="prob300" data-layer="EGE_probRgt300">
+              <span class="toggle-track"></span>
+            </label>
+            <span class="toggle-label">Precip Prob &gt; 300mm</span>
+          </div>
+          <div class="toggle-row" onclick="toggleRow(event, this)">
+            <label class="toggle-switch">
+              <input type="checkbox" id="sum1_30" data-layer="FloodSummary1_30">
+              <span class="toggle-track"></span>
+            </label>
+            <span class="toggle-label">Flood Summary (1-30 Days)</span>
+          </div>
+          <div class="toggle-row" onclick="toggleRow(event, this)">
+            <label class="toggle-switch">
+              <input type="checkbox" id="sum1_3" data-layer="FloodSummary1_3">
+              <span class="toggle-track"></span>
+            </label>
+            <span class="toggle-label">Flood Summary (1-3 Days)</span>
+          </div>
+          <div class="toggle-row" onclick="toggleRow(event, this)">
+            <label class="toggle-switch">
+              <input type="checkbox" id="sum4_10" data-layer="sumAL42EGE">
+              <span class="toggle-track"></span>
+            </label>
+            <span class="toggle-label">Flood Summary (4-10 Days)</span>
+          </div>
+          <div class="toggle-row" onclick="toggleRow(event, this)">
+            <label class="toggle-switch">
+              <input type="checkbox" id="sum11_30" data-layer="sumAL43EGE">
+              <span class="toggle-track"></span>
+            </label>
+            <span class="toggle-label">Flood Summary (11-30 Days)</span>
+          </div>
         </div></div>
       </div>
 
@@ -1039,7 +1114,26 @@
         document.getElementById(id).classList.toggle('open');
       }
       function toggleSub(id) {
-        document.getElementById(id).classList.toggle('open');
+        const el = document.getElementById(id);
+        if (!el) return;
+        const isOpen = el.classList.contains('open');
+
+        if (isOpen) {
+          el.classList.remove('open');
+          el.dispatchEvent(new Event('hide.bs.collapse'));
+        } else {
+          // Close other open sub-sections to match accordion behavior
+          const openSubs = document.querySelectorAll('.sub-section.open');
+          openSubs.forEach(sub => {
+            if (sub.id !== id) {
+              sub.classList.remove('open');
+              sub.dispatchEvent(new Event('hide.bs.collapse'));
+            }
+          });
+
+          el.classList.add('open');
+          el.dispatchEvent(new Event('show.bs.collapse'));
+        }
       }
       function toggleRow(e, row) {
         if (e.target.closest('.toggle-switch') || e.target.closest('button') || e.target.closest('a') || e.target.closest('.toggle-sync')) return;
@@ -1085,10 +1179,12 @@
     <script src="data/vulnerable_lakes.js"></script>
     <script src="data/incident.js"></script>
     <script src="template/map_layers.js"></script>
+    <script src="template/glofas_layers.js"></script>
     <script src="template/map_layer_legends.js"></script>
     <script src="template/routes.js"></script>
     <script src="template/hisper_incident.js"></script>
     <script src="template/khyber_incident.js"></script>
+    <script src="template/thore_incident.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>

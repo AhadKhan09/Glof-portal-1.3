@@ -1049,9 +1049,15 @@ map1.on('style.load', () => {
         'source': 'vulSites',
         'layout': {
             'visibility': 'none',
-            'icon-image': 'glofIcon', // Use the loaded image
-            'icon-size': 1, // Adjust the size as needed
-            'icon-allow-overlap': true // Prevent icons from hiding each other
+            'icon-image': 'lake-pin-purple',
+            'icon-size': [
+                'interpolate', ['linear'], ['zoom'],
+                4, 0.24,
+                8, 0.42,
+                12, 0.58
+            ],
+            'icon-allow-overlap': true,
+            'icon-anchor': 'bottom'
         }
     });
     // Add a click event to show a popup
@@ -3504,8 +3510,44 @@ map1.on('style.load', () => {
             data: new Uint8Array(ringCtx.getImageData(0, 0, size, size).data)
         };
 
+        // Purple pin canvas icon for Vulnerable Sites 2025
+        const purplePinCanvas = document.createElement('canvas');
+        purplePinCanvas.width = size;
+        purplePinCanvas.height = size;
+        const purplePinCtx = purplePinCanvas.getContext('2d');
+        purplePinCtx.shadowColor = 'rgba(0,0,0,0.45)';
+        purplePinCtx.shadowBlur = 6;
+        purplePinCtx.shadowOffsetY = 3;
+        purplePinCtx.beginPath();
+        purplePinCtx.arc(cx, topY + r, r, Math.PI, 0);
+        purplePinCtx.bezierCurveTo(cx + r, topY + r * 2.1, cx + r * 0.5, pinBottom * 0.75, cx, pinBottom);
+        purplePinCtx.bezierCurveTo(cx - r * 0.5, pinBottom * 0.75, cx - r, topY + r * 2.1, cx - r, topY + r);
+        purplePinCtx.closePath();
+
+        const purplePinGradient = purplePinCtx.createRadialGradient(cx - r * 0.25, topY + r * 0.6, 1, cx, topY + r, r);
+        purplePinGradient.addColorStop(0, '#d279ff');
+        purplePinGradient.addColorStop(1, '#aa00ff');
+        purplePinCtx.fillStyle = purplePinGradient;
+        purplePinCtx.fill();
+        purplePinCtx.shadowBlur = 0;
+        purplePinCtx.shadowOffsetY = 0;
+        purplePinCtx.strokeStyle = '#4a0070';
+        purplePinCtx.lineWidth = 2;
+        purplePinCtx.stroke();
+        purplePinCtx.beginPath();
+        purplePinCtx.arc(cx, topY + r, r * 0.42, 0, Math.PI * 2);
+        purplePinCtx.fillStyle = 'white';
+        purplePinCtx.fill();
+
+        const purplePinImage = {
+            width: size,
+            height: size,
+            data: new Uint8Array(purplePinCtx.getImageData(0, 0, size, size).data)
+        };
+
         if (!map1.hasImage('lake-pin')) map1.addImage('lake-pin', pinImage);
         if (!map1.hasImage('lake-ring')) map1.addImage('lake-ring', ringImage);
+        if (!map1.hasImage('lake-pin-purple')) map1.addImage('lake-pin-purple', purplePinImage);
     };
 
     ensureLakeSymbologyIcons();
